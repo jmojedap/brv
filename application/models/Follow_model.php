@@ -170,43 +170,14 @@ class Follow_model extends CI_Model{
 //-----------------------------------------------------------------------------
 
     /**
-     * Calcular y actualizar el campo users.qty_followers de forma masiva
-     * 2021-05-25
-     */
-    function calculate_qty_followers()
-    {
-        //Datos iniciales
-        $data = array('status' => 0, 'message' => 'No se actualizaron los usuarios');
-        $affected_rows = 0;
-
-        //Consulta acumulada
-        $this->db->select('user_id, COUNT(id) AS qty_followers');
-        $this->db->group_by('user_id');
-        $this->db->where('type_id', 1011);
-        $users = $this->db->get('users_meta');
-
-        foreach ( $users->result() as $user )
-        {
-            $arr_row['qty_followers'] = $user->qty_followers;
-            $this->db->where('id', $user->user_id)->update('users', $arr_row);
-
-            $affected_rows += $this->db->affected_rows();
-        }
-
-        //Actualizar resultado
-        if ( $affected_rows > 0 ) {
-            $data = array('status' => 1, 'message' => 'Usuarios actualizados: ' . $affected_rows);
-        }
-
-        return $data;
-    }
-
-    /**
      * Calcular y actualizar el campo users.qty_following de forma masiva
      * 2021-05-25
      */
     function calculate_qty_following()
     {
+        //Reiniciar
+        $this->db->query('UPDATE users SET qty_following = 0 WHERE id > 0');
+
         //Datos iniciales
         $data = array('status' => 0, 'message' => 'No se actualizaron los usuarios');
         $affected_rows = 0;
@@ -221,6 +192,41 @@ class Follow_model extends CI_Model{
         {
             $arr_row['qty_following'] = $user->qty_following;
             $this->db->where('id', $user->follower_id)->update('users', $arr_row);
+
+            $affected_rows += $this->db->affected_rows();
+        }
+
+        //Actualizar resultado
+        if ( $affected_rows > 0 ) {
+            $data = array('status' => 1, 'message' => 'Usuarios actualizados: ' . $affected_rows);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Calcular y actualizar el campo users.qty_followers de forma masiva
+     * 2021-06-02
+     */
+    function calculate_qty_followers()
+    {
+        //Reiniciar
+        $this->db->query('UPDATE users SET qty_followers = 0 WHERE id > 0');
+
+        //Datos iniciales
+        $data = array('status' => 0, 'message' => 'No se actualizaron los usuarios');
+        $affected_rows = 0;
+
+        //Consulta acumulada
+        $this->db->select('user_id, COUNT(id) AS qty_followers');
+        $this->db->group_by('user_id');
+        $this->db->where('type_id', 1011);
+        $users = $this->db->get('users_meta');
+
+        foreach ( $users->result() as $user )
+        {
+            $arr_row['qty_followers'] = $user->qty_followers;
+            $this->db->where('id', $user->user_id)->update('users', $arr_row);
 
             $affected_rows += $this->db->affected_rows();
         }

@@ -53,19 +53,8 @@ class Info extends CI_Controller {
 
     function loading()
     {
-        $data['head_title'] = 'VeBonit :: Cargando...';
+        $data['head_title'] = 'Brave :: Cargando...';
         $data['view_a'] = 'info/loading_v';
         $this->App_model->view('templates/magnews/main_v', $data);
-    }
-
-    function ayuda($section = 'como-comprar')
-    {
-        $titles['como-comprar'] = '¿Cómo comprar?';
-        $titles['que-es-bonitas-vbn'] = '¿Qué es Bonitas VBN?';
-
-        $data['head_title'] = $titles[$section];
-        $data['view_a'] = $this->views_folder . 'ayuda/' . str_replace('-','_',$section) . '_v';
-
-        $this->App_model->view('templates/admin_pml/main', $data);
     }
 }

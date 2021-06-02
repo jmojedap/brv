@@ -1,7 +1,7 @@
 <div class="center_box_750">
     <div class="card mb-2">
         <div class="card-body">
-            <form action="<?= $destination_form ?>" enctype="multipart/form-data" method="post" accept-charset="utf-8">
+            <form action="<?= base_url($destination_form) ?>" enctype="multipart/form-data" method="post" accept-charset="utf-8">
                 <div class="form-group row">
                     <label for="file" class="col-md-3 col-form-label text-right">Archivo</label>
                     <div class="col-md-9">
@@ -52,7 +52,6 @@
                 <i class="fa fa-download"></i>
                 <?= $template_file_name ?>
             </a>
-
         </div>
     </div>
 </div>

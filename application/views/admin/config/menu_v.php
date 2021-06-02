@@ -37,7 +37,7 @@
     
     //Secciones para cada rol
     sections_role[1] = ['options', 'processes', 'colors'];
-    sections_role[2] = ['options', 'processes', 'colors'];
+    sections_role[2] = ['options', 'processes'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

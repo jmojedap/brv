@@ -223,7 +223,7 @@ class Db_model extends CI_Model{
 
     /**
      * Array from Post, adding edition data
-     * 2021-03-18
+     * 2021-06-02
      */
     function arr_row($data_from_post = TRUE)
     {
@@ -238,7 +238,6 @@ class Db_model extends CI_Model{
         
         if ( isset($arr_row['id']) )
         {
-            unset($arr_row['id']);
             unset($arr_row['creator_id']);
             unset($arr_row['created_at']);
         }

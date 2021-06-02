@@ -3,7 +3,7 @@
     $cl_nav_3['image'] = '';
     $cl_nav_3['password'] = '';
 
-    $app_cf_index = $this->uri->segment(4);
+    $app_cf_index = $this->uri->segment(5);
     if ( strlen($app_cf_index) == 0 ) { $app_cf_index = 'basic'; }
     
     $cl_nav_3[$app_cf_index] = 'active';
@@ -14,7 +14,7 @@
     var sections = [];
     var nav_3 = [];
     var sections_role = [];
-    var element_id = '<?= $this->uri->segment(3) ?>';
+    var element_id = '<?= $this->uri->segment(4) ?>';
     
     sections.basic = {
         icon: '',
@@ -32,9 +32,7 @@
     
     //Secciones para cada rol
     sections_role[1] = ['basic', 'image'];
-    sections_role[2] = ['basic'];
-    sections_role[13] = ['basic', 'image'];
-    sections_role[21] = ['basic', 'image'];
+    sections_role[2] = ['basic', 'image'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

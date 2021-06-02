@@ -47,7 +47,7 @@ class Pcc {
         if ( $this->CI->session->userdata('logged') == TRUE )
         {
             //Es administrador, todos los permisos
-            if ( $role <= 1 ) $allow_cf = TRUE;
+            if ( in_array($role, array(1,2)) ) $allow_cf = TRUE;
             //Funciones para todos los usuarios con sesión iniciada
             if ( in_array($cf, $acl['logged_functions']) ) $allow_cf = TRUE;
         }

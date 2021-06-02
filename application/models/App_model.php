@@ -2,7 +2,7 @@
 class App_model extends CI_Model{
     
     /* Application model,
-     * Functions to Legalink Admin Application
+     * Functions to Brave Admin Application
      * 
      */
     
@@ -62,10 +62,10 @@ class App_model extends CI_Model{
      */
     function app_session_data($row_user)
     {
-        $this->load->model('Order_model');
-        $data['credit'] = $this->Order_model->credit($row_user->id);
+        //$this->load->model('Order_model');
+        //$data['credit'] = $this->Order_model->credit($row_user->id);
         //$data['credit'] = 38000;
-        //$data = array();
+        $data = array();
 
         return $data;
     }
@@ -123,7 +123,6 @@ class App_model extends CI_Model{
                 $place_name = $row->place_name . ' - ' . $row->region . ' - ' . $row->country;
             }
         }
-        
         
         return $place_name;
     }
@@ -201,82 +200,15 @@ class App_model extends CI_Model{
                 'description' => 'Calcula y actualiza el número de seguidores de un usuario',
             ),
             array(
-                'process_name' => 'Calcular siguidos', 'process_link' => 'users/calculate_qty_following',
+                'process_name' => 'Calcular seguidos', 'process_link' => 'follow/calculate_qty_following',
                 'description' => 'Calcula y actualiza el número de seguidos por cada usuario',
+            ),
+            array(
+                'process_name' => 'Calcular seguidores', 'process_link' => 'follow/calculate_qty_followers',
+                'description' => 'Calcula y actualiza el número de seguidores de cada usuario',
             ),
         );
 
         return $processes;
     }
-
-// IMÁGENES
-//-----------------------------------------------------------------------------
-
-    function src_img_user($row_user, $prefix = '')
-    {
-        $src = URL_IMG . 'users/'. $prefix . 'user.png';
-            
-        if ( $row_user->image_id > 0 ) { $src = $row_user->url_thumbnail;}
-        
-        return $src;
-    }
-
-    function att_img_user($row_user, $prefix = '')
-    {
-        $att_img = array(
-            'src' => $this->src_img_user($row_user, $prefix),
-            'alt' => 'Imagen del usuario ' . $row_user->username,
-            'width' => '100%',
-            'onerror' => "this.src='" . URL_IMG . 'users/sm_user.png' . "'"
-        );
-        
-        return $att_img;
-    }
-
-    /**
-     * Establece un efecto BLUR en una imagen
-     */
-    function blur($original_file, $new_file)
-    {
-        $image = imagecreatefromjpeg($original_file);
-
-            /* Get original image size */
-            list($w, $h) = getimagesize($original_file);
-
-            /* Create array with width and height of down sized images */
-            $size = array('sm'=>array('w'=>intval($w/4), 'h'=>intval($h/4)),
-                        'md'=>array('w'=>intval($w/2), 'h'=>intval($h/2))
-                        );                       
-
-            /* Scale by 25% and apply Gaussian blur */
-            $sm = imagecreatetruecolor($size['sm']['w'],$size['sm']['h']);
-            imagecopyresampled($sm, $image, 0, 0, 0, 0, $size['sm']['w'], $size['sm']['h'], $w, $h);
-
-            for ($x=1; $x <=40; $x++){
-                imagefilter($sm, IMG_FILTER_GAUSSIAN_BLUR, 999);
-            } 
-
-            imagefilter($sm, IMG_FILTER_SMOOTH,99);
-            imagefilter($sm, IMG_FILTER_BRIGHTNESS, 10);        
-
-            /* Scale result by 200% and blur again */
-            $md = imagecreatetruecolor($size['md']['w'], $size['md']['h']);
-            imagecopyresampled($md, $sm, 0, 0, 0, 0, $size['md']['w'], $size['md']['h'], $size['sm']['w'], $size['sm']['h']);
-            imagedestroy($sm);
-
-                for ($x=1; $x <=25; $x++){
-                    imagefilter($md, IMG_FILTER_GAUSSIAN_BLUR, 999);
-                } 
-
-            imagefilter($md, IMG_FILTER_SMOOTH,99);
-            imagefilter($md, IMG_FILTER_BRIGHTNESS, 10);        
-
-        /* Scale result back to original size */
-        imagecopyresampled($image, $md, 0, 0, 0, 0, $w, $h, $size['md']['w'], $size['md']['h']);
-        imagedestroy($md);  
-        
-        imagejpeg($image, $new_file);   //Crear archivo
-        imagedestroy($image);
-    }
-
 }

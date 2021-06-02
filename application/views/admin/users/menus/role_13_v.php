@@ -3,9 +3,9 @@
     
     $cl_nav_2['users_explore'] = '';
     $cl_nav_2['users_profile'] = '';
+    $cl_nav_2['follow_following'] = '';
+    $cl_nav_2['follow_followers'] = '';
     $cl_nav_2['users_edit'] = '';
-    $cl_nav_2['users_albums'] = '';
-    $cl_nav_2['users_products'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
     //if ( $app_cf == 'users/explore' ) { $cl_nav_2['users_explore'] = 'active'; }
@@ -24,25 +24,18 @@
         cf: 'users/profile/' + element_id
     };
 
-    sections.albums = {
-        icon: 'fa fa-images',
-        text: 'Álbums',
-        class: '<?= $cl_nav_2['users_albums'] ?>',
-        cf: 'users/albums/' + element_id
-    };
-
     sections.followers = {
         icon: '',
         text: 'Seguidores',
-        class: '<?= $cl_nav_2['users_followers'] ?>',
-        cf: 'users/followers/' + element_id
+        class: '<?= $cl_nav_2['follow_followers'] ?>',
+        cf: 'follow/followers/' + element_id
     };
 
     sections.following = {
         icon: '',
         text: 'Seguidos',
-        class: '<?= $cl_nav_2['users_folloging'] ?>',
-        cf: 'users/following/' + element_id
+        class: '<?= $cl_nav_2['follow_folloging'] ?>',
+        cf: 'follow/following/' + element_id
     };
 
     sections.edit = {
@@ -53,9 +46,8 @@
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['profile', 'albums', 'followers', 'following', 'edit'];
-    sections_role[2] = ['profile'];
-    sections_role[13] = ['profile', 'edit'];
+    sections_role[1] = ['profile', 'followers', 'following', 'edit'];
+    sections_role[2] = ['profile', 'followers', 'following', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

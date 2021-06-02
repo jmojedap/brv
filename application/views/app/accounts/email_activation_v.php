@@ -29,5 +29,5 @@
     <a style="<?= $styles['button'] ?>" href="<?= URL_ADMIN . $texts['link'] ?>" target="_blank">
         <?= $texts['button'] ?>
     </a>
-    <footer style="<?= $styles['footer'] ?>">Creado por VeBonit Comunicaciones</footer>
+    <footer style="<?= $styles['footer'] ?>">Creado por Brave Comunicaciones</footer>
 </div>

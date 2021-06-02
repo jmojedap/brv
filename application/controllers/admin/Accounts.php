@@ -47,7 +47,7 @@ class Accounts extends CI_Controller {
         //Verificar si está logueado
             if ( $this->session->userdata('logged') )
             {
-                redirect('app/application/logged');
+                redirect('start/logged');
             } else {
                 $data['head_title'] = APP_NAME;
                 $data['view_a'] = $this->views_folder . 'login_v';

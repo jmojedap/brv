@@ -98,7 +98,6 @@ class Users extends CI_Controller{
         $this->App_model->view(TPL_ADMIN, $data);
     }
     
-    
 // CRUD
 //-----------------------------------------------------------------------------
 
@@ -140,18 +139,19 @@ class Users extends CI_Controller{
      * Guardar datos de un usuario, insertar o actualizar
      * 2021-02-17
      */
-    function save($user_id = NULL)
+    function save()
     {
-        $validation = $this->User_model->validate($user_id);
+        $validation = $this->User_model->validate($this->input->post('id'));
         
         if ( $validation['status'] == 1 )
         {
-            $data = $this->User_model->save($user_id);
+            $data = $this->User_model->save();
         } else {
             $data = $validation;
         }
         
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
+        //$this->output->enable_profiler(TRUE);
     }
     
 // EDICIÓN Y ACTUALIZACIÓN
@@ -269,7 +269,7 @@ class Users extends CI_Controller{
             );
         
         //Variables específicas
-            $data['destination_form'] = "users/import_e";
+            $data['destination_form'] = "admin/users/import_e";
             $data['template_file_name'] = 'f01_usuarios.xlsx';
             $data['sheet_name'] = 'usuarios';
             $data['url_file'] = URL_RESOURCES . 'import_templates/' . $data['template_file_name'];
@@ -310,6 +310,8 @@ class Users extends CI_Controller{
             $data['nav_2'] = $this->views_folder . 'explore/menu_v';
 
         $this->App_model->view(TPL_ADMIN, $data);
+        //Salida JSON
+        //$this->output->set_content_type('application/json')->set_output(json_encode($imported_data));
     }
     
 //---------------------------------------------------------------------------------------------------

@@ -9,7 +9,8 @@ class User_model extends CI_Model{
         $data['view_a'] = 'admin/users/user_v';
         $data['nav_2'] = 'admin/users/menus/user_v';
 
-        if ( $data['row']->role == 13 ) { $data['nav_2'] = 'admin/users/menus/model_v'; }
+        if ( $data['row']->role == 13 ) { $data['nav_2'] = 'admin/users/menus/role_13_v'; }
+        if ( $data['row']->role == 21 ) { $data['nav_2'] = 'admin/users/menus/role_21_v'; }
 
         return $data;
     }
@@ -238,27 +239,9 @@ class User_model extends CI_Model{
 // GUARDAR
 //-----------------------------------------------------------------------------
 
-    /**
-     * Inserta o actualiza un registro de users
-     * 2021-02-17
-     */
-    function save($user_id = NULL, $arr_row = NULL)
+    function save()
     {
-        //Resultado inicial
-        $data = array('status' => 0, 'saved_id' => 0);
-
-        //Establecer array del registro
-        if ( is_null($arr_row) ) { $arr_row = $this->arr_row($user_id); }
-
-        //Guardar
-        $condition = "id = {$user_id}";
-        if ( is_null($user_id) ) $condition = 'id = 0'; //Para crear un nuevo usauario
-
-        $data['saved_id'] = $this->Db_model->save('users', $condition, $arr_row);
-
-        //Verificar resultado
-        if ( $data['saved_id'] > 0 ) $data['status'] = 1;
-    
+        $data['saved_id'] = $this->Db_model->save_id('users');
         return $data;
     }
     
@@ -323,10 +306,14 @@ class User_model extends CI_Model{
 // ELIMINAR
 //-----------------------------------------------------------------------------
     
+    /**
+     * Determina si un usuario puede ser eliminado o no de la base de datos
+     * 2021-06-02
+     */
     function deleteable()
     {
         $deleteable = 0;
-        if ( $in_array($this->session->userdata('role'), array(1,2)) ) { $deleteable = 1; }
+        if ( in_array($this->session->userdata('role'), array(1)) ) { $deleteable = 1; }
 
         return $deleteable;
     }
@@ -429,69 +416,68 @@ class User_model extends CI_Model{
 
     /**
      * Importa usuarios a la base de datos
-     * 2019-09-20
-     * 
-     * @param type $array_sheet    Array con los datos de usuarios
-     * @return type
+     * 2021-06-01
      */
     function import($arr_sheet)
     {
-        $this->load->model('Account_model');
+        $data = array('qty_imported' => 0, 'results' => array());
 
-        $data = array('qty_imported' => 0, 'not_imported' => array());
+        $this->load->model('Account_model');
         
         foreach ( $arr_sheet as $key => $row_data )
-        {    
-            //Validar
-                $validate_import = $this->validate_import($row_data);
-                
-            //Si cumple las conditions
-                if ( $validate_import['status'] )
-                {
-                    $arr_row['first_name'] = $row_data[0];
-                    $arr_row['last_name'] = $row_data[1];
-                    $arr_row['display_name'] = $row_data[0] . ' ' . $row_data[1];
-                    $arr_row['email'] = $row_data[2];
-                    $arr_row['username'] = $row_data[2];
-                    $arr_row['password'] = $this->Account_model->crypt_pw($row_data[3]);
-                    $arr_row['role'] = $row_data[4];
-                    $arr_row['document_type'] = ( strlen($row_data[5]) > 0 ) ? $row_data[5] : 0;
-                    $arr_row['document_number'] = $row_data[6];
-                    $arr_row['birth_date'] = date('Y-m-d H:i:s', $this->pml->date_excel_unix($row_data[7]));
-                    $arr_row['gender'] = ( $row_data[8] >= 1 && $row_data[8] <= 2 ) ? $row_data[8] : 0;
-                    $arr_row['creator_id'] = $this->session->userdata('user_id');
-                    $arr_row['updater_id'] = $this->session->userdata('user_id');
-
-                    $this->insert($arr_row);
-                    $data['qty_imported']++;
-                } else {
-                    $data['not_imported'][$key + 2] = $validate_import['message'];    //Se agrega número de fila al array (inicia en la fila 2)
-                }
+        {
+            $data_import = $this->import_user($row_data);
+            $data['qty_imported'] += $data_import['status'];
+            $data['results'][$key + 2] = $data_import;
         }
         
         return $data;
     }
 
     /**
-     * Validar fila de excel para importación
-     * 2019-09-20
+     * Realiza la importación de una fila del archivo excel. Valida los campos, crea registro
+     * en la tabla users.
+     * 2021-06-01
      */
-    function validate_import($row_data)
+    function import_user($row_data)
     {
-        $data = array('status' => 1, 'message' => 'OK');
-        $message = '';
+        //Validar
+            $error_text = '';
 
-        //Validar condiciones
-        if ( strlen($row_data[0]) == 0 ) { $message .= 'El nombre está vacío. '; }          //Debe tener nombre escrito
-        if ( strlen($row_data[1]) == 0 ) { $message .= 'El apellido está vacío. '; }        //Debe tener apellido
-        if ( strlen($row_data[2]) == 0 ) { $message .= 'El e-mail está vacío. '; }          //Debe tener apellido
-        if ( strlen($row_data[3]) < 8 ) { $message .= 'La contraseña debe tener al menos 8 caracteres. '; }       //Debe tener contraseña de 8 caracteres
-        if ( strlen($row_data[4]) <= 1 ) { $message .= 'El código del rol no es válido.'; } //No rol de administrador o desarrollador
-        if ( ! $this->Db_model->is_unique('users', 'email', $row_data[2]) ) { $message .= 'El e-mail ya está registrado. '; } //El email debe ser único
-        if ( ! $this->Db_model->is_unique('users', 'document_number', $row_data[6]) ) { $message .= 'El No. documento ya está registrado para otro usuario. '; } //El documento debe ser único
+            if ( strlen($row_data[0]) == 0 ) { $error_text .= 'El nombre está vacío. '; }          //Debe tener nombre escrito
+            if ( strlen($row_data[1]) == 0 ) { $error_text .= 'El apellido está vacío. '; }        //Debe tener apellido
+            if ( strlen($row_data[2]) == 0 ) { $error_text .= 'El e-mail está vacío. '; }          //Debe tener email
+            if ( strlen($row_data[3]) < 8 ) { $error_text .= 'La contraseña debe tener al menos 8 caracteres. '; }       //Debe tener contraseña de 8 caracteres
+            if ( strlen($row_data[4]) <= 1 ) { $error_text .= 'El código del rol no es válido.'; } //No rol de administrador o desarrollador
+            if ( ! $this->Db_model->is_unique('users', 'email', $row_data[2]) ) { $error_text .= 'El e-mail ya está registrado. '; } //El email debe ser único
+            if ( ! $this->Db_model->is_unique('users', 'document_number', $row_data[6]) ) { $error_text .= 'El No. documento ya está registrado para otro usuario. '; } //El documento debe ser único
 
-        //Si el mensaje tiene texto, el registro no es válido
-        if ( strlen($message) > 0 ) { $data = array('status' => 0, 'message' => $message); }
+        //Si no hay error
+            if ( $error_text == '' )
+            {
+                $arr_row['first_name'] = $row_data[0];
+                $arr_row['last_name'] = $row_data[1];
+                $arr_row['display_name'] = $row_data[0] . ' ' . $row_data[1];
+                $arr_row['email'] = $row_data[2];
+                $arr_row['username'] = explode('@', $row_data[2])[0];
+                $arr_row['password'] = $this->Account_model->crypt_pw($row_data[3]);
+                $arr_row['role'] = $row_data[4];
+                $arr_row['document_type'] = ( strlen($row_data[5]) > 0 ) ? $row_data[5] : 0;
+                $arr_row['document_number'] = ( strlen($row_data[6]) > 0 ) ? $row_data[6] : '';
+                $arr_row['document_number'] = ( strlen($row_data[6]) > 0 ) ? $row_data[6] : '';
+                //$arr_row['birth_date'] = date('Y-m-d H:i:s', $this->pml->date_excel_unix($row_data[7]));
+                $arr_row['birth_date'] = ( strlen($row_data[7]) ) ? date('Y-m-d H:i:s', $this->pml->dexcel_unix($row_data[7])) : '';
+                $arr_row['gender'] = ( $row_data[8] >= 1 && $row_data[8] <= 2 ) ? $row_data[8] : 0;
+                $arr_row['creator_id'] = $this->session->userdata('user_id');
+                $arr_row['updater_id'] = $this->session->userdata('user_id');
+
+                //Guardar en tabla user
+                $saved_id = $this->Db_model->save_id('users', $arr_row);
+
+                $data = array('status' => 1, 'text' => '', 'imported_id' => $saved_id);
+            } else {
+                $data = array('status' => 0, 'text' => $error_text, 'imported_id' => 0);
+            }
 
         return $data;
     }
@@ -499,60 +485,60 @@ class User_model extends CI_Model{
 // GENERAL
 //-----------------------------------------------------------------------------
 
-function generate_username($first_name, $last_name)
-{
-    //Sin espacios iniciales o finales
-    $first_name = trim($first_name);
-    $last_name = trim($last_name);
-    
-    //Sin acentos
-    $this->load->helper('text');
-    $first_name = convert_accented_characters($first_name);
-    $last_name = convert_accented_characters($last_name);
-    
-    //Arrays con partes
-    $arr_last_name = explode(" ", $last_name);
-    $arr_first_name = explode(" ", $first_name);
-    
-    //Construyendo por partes
-        $username = $arr_first_name[0];
-        //if ( isset($arr_first_name[1]) ){ $username .= substr($arr_first_name[1], 0, 2);}
-        
-        //Apellidos
-        $username .= '_' . $arr_last_name[0];
-        //if ( isset($arr_last_name[1]) ){ $username .= substr($arr_last_name[1], 0, 2); }    
-    
-    //Reemplazando caracteres
-        $username = str_replace (' ', '', $username); //Quitando espacios en blanco
-        $username = strtolower($username); //Se convierte a minúsculas    
-    
-    //Verificar, si el username requiere un suffix numérico para hacerlo único
-        $suffix = $this->username_suffix($username);
-        $username .= $suffix;
-    
-    return $username;
-}
-
-/**
- * Devuelve un entero aleatorio de tres cifras cuando el username generado inicialmente (generate_username)
- * ya exista dentro de la plataforma.
- * 2019-11-05
- */
-function username_suffix($username)
-{
-    $suffix = '';
-    
-    $condition = "username = '{$username}'";
-    $qty_users = $this->Db_model->num_rows('users', $condition);
-
-    if ( $qty_users > 0 )
+    function generate_username($first_name, $last_name)
     {
-        $this->load->helper('string');
-        $suffix = random_string('numeric', 4);
+        //Sin espacios iniciales o finales
+        $first_name = trim($first_name);
+        $last_name = trim($last_name);
+        
+        //Sin acentos
+        $this->load->helper('text');
+        $first_name = convert_accented_characters($first_name);
+        $last_name = convert_accented_characters($last_name);
+        
+        //Arrays con partes
+        $arr_last_name = explode(" ", $last_name);
+        $arr_first_name = explode(" ", $first_name);
+        
+        //Construyendo por partes
+            $username = $arr_first_name[0];
+            //if ( isset($arr_first_name[1]) ){ $username .= substr($arr_first_name[1], 0, 2);}
+            
+            //Apellidos
+            $username .= '_' . $arr_last_name[0];
+            //if ( isset($arr_last_name[1]) ){ $username .= substr($arr_last_name[1], 0, 2); }    
+        
+        //Reemplazando caracteres
+            $username = str_replace (' ', '', $username); //Quitando espacios en blanco
+            $username = strtolower($username); //Se convierte a minúsculas    
+        
+        //Verificar, si el username requiere un suffix numérico para hacerlo único
+            $suffix = $this->username_suffix($username);
+            $username .= $suffix;
+        
+        return $username;
     }
-    
-    return $suffix;
-}
+
+    /**
+     * Devuelve un entero aleatorio de tres cifras cuando el username generado inicialmente (generate_username)
+     * ya exista dentro de la plataforma.
+     * 2019-11-05
+     */
+    function username_suffix($username)
+    {
+        $suffix = '';
+        
+        $condition = "username = '{$username}'";
+        $qty_users = $this->Db_model->num_rows('users', $condition);
+
+        if ( $qty_users > 0 )
+        {
+            $this->load->helper('string');
+            $suffix = random_string('numeric', 4);
+        }
+        
+        return $suffix;
+    }
 
 // CONTENIDOS VIRUTALES ASIGNADOS
 //-----------------------------------------------------------------------------

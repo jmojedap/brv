@@ -91,7 +91,7 @@
     <div v-show="show_existing">
         <div class="alert alert-success text-center">
             <i class="fa fa-user fa-2x"></i> <br>
-            Hola {{ user.display_name }}, ya eres usuario de VeBonit.com
+            Hola {{ user.display_name }}, ya eres usuario de Brave.com
         </div>
         <a href="<?= URL_ADMIN . "orders/compra_a/" ?>" class="btn btn-main btn-lg btn-block">
             CONTINUAR

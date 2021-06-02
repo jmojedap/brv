@@ -106,7 +106,7 @@ class Config extends CI_Controller {
         $username = $this->Db_model->field_id('users', $user_id, 'username');
         if ( in_array($this->session->userdata('role'), array(1,2)) ) { $this->Account_model->create_session($username, FALSE); }
         
-        redirect('app/application/logged');
+        redirect('start/logged');
     }
 
 // Procesos
@@ -131,8 +131,12 @@ class Config extends CI_Controller {
      */
     function reset()
     {
-        $this->db->query('DELETE FROM users_meta WHERE type_id = 1011;');
-        $this->db->query('UPDATE users SET qty_followers = 0, qty_following = 0;');
+        //IMPORT USERS
+        $this->db->query('DELETE FROM users WHERE id != 200002;');
+
+        //FOLLOWERS
+        //$this->db->query('DELETE FROM users_meta WHERE type_id = 1011;');
+        //$this->db->query('UPDATE users SET qty_followers = 0, qty_following = 0;');
 
         $data = array('status' => 1, 'message' => 'Listo');
         //Salida JSON
