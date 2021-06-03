@@ -2,8 +2,6 @@
     <div class="card" style="max-width: 800px; margin: 0 auto;">
         <div class="card-body">
             <form id="edit_form" accept-charset="utf-8" @submit.prevent="validate_send">
-                
-
                 <div class="form-group row">
                     <label for="display_name" class="col-md-4 col-form-label text-right">Nombre y Apellidos</label>
                     <div class="col-md-8">
@@ -99,7 +97,7 @@
 
                 <div class="form-group row">
                     <div class="offset-md-4 col-md-8">
-                        <button class="btn btn-main w120p" type="submit">
+                        <button class="btn btn-primary w120p" type="submit">
                             Guardar
                         </button>
                     </div>
@@ -124,52 +122,44 @@ var form_values = {
 // VueApp
 //-----------------------------------------------------------------------------
 var edit_app = new Vue({
-el: '#edit_app',
-    data: {
-        form_values: form_values,
-        row_id: '<?= $row->id ?>',
-        validation: {
-            document_number_is_unique: true
+    el: '#edit_app',
+        data: {
+            form_values: form_values,
+            row_id: '<?= $row->id ?>',
+            validation: {
+                document_number_is_unique: true
+            },
+            options_city_id: <?= json_encode($options_city_id) ?>,
+            options_document_type: <?= json_encode($options_document_type) ?>,
+            options_gender: <?= json_encode($options_gender) ?>,
+            options_privacy: <?= json_encode($options_privacy) ?>,
         },
-        options_city_id: <?= json_encode($options_city_id) ?>,
-        options_document_type: <?= json_encode($options_document_type) ?>,
-        options_gender: <?= json_encode($options_gender) ?>,
-        options_privacy: <?= json_encode($options_privacy) ?>,
-    },
-    methods: {
-        validate_form: function() {
-            axios.post(url_api + 'accounts/validate_form/', $('#edit_form').serialize())
-            .then(response => {
-                this.validation = response.data.validation;
-            })
-            .catch(function (error) { console.log(error) })
-        },
-        validate_send: function () {
-            axios.post(url_api + 'accounts/validate_form/' + this.row_id, $('#edit_form').serialize())
-            .then(response => {
-                if (response.data.status == 1) {
-                this.send_form();
-                } else {
-                toastr['error']('Revise las casillas en rojo');
-                }
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-        },
-        send_form: function() {
-            axios.post(url_api + 'accounts/update/', $('#edit_form').serialize())
+        methods: {
+            validate_form: function() {
+                axios.post(url_api + 'accounts/validate_form/', $('#edit_form').serialize())
                 .then(response => {
-                    console.log('status: ' + response.data.message);
-                    if (response.data.status == 1)
-                    {
-                    toastr['success']('Datos actualizados');
+                    this.validation = response.data.validation;
+                })
+                .catch(function (error) { console.log(error) })
+            },
+            validate_send: function () {
+                axios.post(url_api + 'accounts/validate_form/' + this.row_id, $('#edit_form').serialize())
+                .then(response => {
+                    if (response.data.status == 1) {
+                        this.send_form()
+                    } else {
+                        toastr['error']('Revise las casillas en rojo');
                     }
                 })
-                .catch(function (error) {
-                    console.log(error);
-            });
+                .catch(function (error) { console.log(error) })
+            },
+            send_form: function() {
+                axios.post(url_api + 'accounts/update/', $('#edit_form').serialize())
+                .then(response => {    
+                    if (response.data.saved_id > 0) toastr['success']('Datos actualizados');
+                })
+                .catch(function (error) { console.log(error) })
+            }
         }
-    }
-});
+    })
 </script>

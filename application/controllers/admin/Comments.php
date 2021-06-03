@@ -23,7 +23,7 @@ class Comments extends CI_Controller{
     
     function index($comment_id)
     {
-        redirect("comments/info/{$comment_id}");
+        redirect("admin/comments/info/{$comment_id}");
     }
     
 //EXPLORE FUNCTIONS
@@ -101,10 +101,9 @@ class Comments extends CI_Controller{
             $data['options_table'] = $this->Item_model->options('category_id = 30 AND cod IN (1020,2000,3100)');
 
         //Variables generales
-            $data['head_title'] = 'Comentario';
-            $data['head_subtitle'] = 'Nuevo';
-            $data['nav_2'] = 'comments/explore/menu_v';
-            $data['view_a'] = 'comments/add_v';
+            $data['head_title'] = 'Crear comentario';
+            $data['nav_2'] = $this->views_folder . 'explore/menu_v';
+            $data['view_a'] = $this->views_folder . 'add_v';
 
         $this->App_model->view(TPL_ADMIN, $data);
     }
@@ -129,7 +128,7 @@ class Comments extends CI_Controller{
         //Datos básicos
             $data = $this->Comment_model->basic($comment_id);
         
-            $view_a = "comments/edit/{$section}_v";
+            $view_a = $this->views_folder . "edit_v/{$section}_v";
         
         //Array data espefícicas
             $data['nav_2'] = 'comments/menu_v';
@@ -159,8 +158,9 @@ class Comments extends CI_Controller{
         $data['subcomments'] = $this->Comment_model->element_comments($data['row']->table_id, $data['row']->element_id, $comment_id, 1); 
         
         //Variables específicas
-        $data['nav_2'] = 'comments/menu_v';
-        $data['view_a'] = 'comments/info_v';
+        $data['nav_2'] = $this->views_folder . 'menu_v';
+        $data['view_a'] = $this->views_folder . 'info_v';
+        $data['back_link'] = $this->url_controller . 'explore';
         
         $this->App_model->view(TPL_ADMIN, $data);
     }

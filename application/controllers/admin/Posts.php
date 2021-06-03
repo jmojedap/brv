@@ -178,7 +178,7 @@ class Posts extends CI_Controller{
         $data['options_type'] = $this->Item_model->options('category_id = 33', 'Todos');
         
         //Array data espefícicas
-            $data['head_subtitle'] = 'Editar';
+            $data['back_link'] = $this->url_controller . 'explore';
             $data['view_a'] = $data['type_folder'] . 'edit_v';
         
         $this->App_model->view(TPL_ADMIN, $data);

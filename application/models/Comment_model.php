@@ -27,7 +27,7 @@ class Comment_model extends CI_Model{
         //Elemento de exploración
             $data['controller'] = 'comments';                      //Nombre del controlador
             $data['cf'] = 'comments/explore/';                      //Nombre del controlador
-            $data['views_folder'] = 'comments/explore/';           //Carpeta donde están las vistas de exploración
+            $data['views_folder'] = 'admin/comments/explore/';           //Carpeta donde están las vistas de exploración
             $data['num_page'] = $num_page;                      //Número de la página
             
         //Vistas

@@ -4,9 +4,6 @@
     $cl_nav_2['accounts_profile'] = '';
     $cl_nav_2['accounts_edit'] = '';
     $cl_nav_2['accounts_solicitudes'] = '';
-    $cl_nav_2['orders_my_orders'] = '';
-    $cl_nav_2['orders_my_credit'] = '';
-    //$cl_nav_2['accounts_import'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
     //if ( $app_cf == 'accounts/explore' ) { $cl_nav_2['accounts_explore'] = 'active'; }
@@ -38,28 +35,14 @@
         class: '<?= $cl_nav_2['accounts_solicitudes'] ?>',
         cf: 'accounts/solicitudes'
     };
-
-    sections.my_orders = {
-        icon: '',
-        text: 'Compras',
-        class: '<?= $cl_nav_2['orders_my_orders'] ?>',
-        cf: 'orders/my_orders'
-    };
-
-    sections.my_credit = {
-        icon: '',
-        text: 'Mi saldo',
-        class: '<?= $cl_nav_2['orders_my_credit'] ?>',
-        cf: 'orders/my_credit'
-    };
     
     //Secciones para cada rol
     sections_role[1] = ['profile', 'edit'];
     sections_role[2] = ['profile', 'edit'];
     sections_role[3] = ['profile', 'edit'];
     sections_role[13] = ['profile', 'solicitudes', 'edit'];
-    sections_role[21] = ['profile', 'solicitudes', 'my_orders', 'my_credit', 'edit'];
-    sections_role[23] = ['profile', 'solicitudes', 'my_orders', 'my_credit', 'edit'];
+    sections_role[21] = ['profile', 'solicitudes', 'edit'];
+    sections_role[23] = ['profile', 'solicitudes', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

@@ -15,7 +15,7 @@
                         <label for="element_id" class="col-md-4 col-form-label text-right">ID Elemento</label>
                         <div class="col-md-8">
                             <input
-                                type="number" class="form-control" required
+                                type="number" class="form-control" required min="1"
                                 v-model="element_id"
                             >
                         </div>
@@ -64,10 +64,10 @@ var add_comment_app = new Vue({
     data: {
         row_id: 0,
         table_id: 2000,
-        element_id: 1644,
+        element_id: 0,
         form_values: {
             parent_id: 0,
-            comment_text: 'Pruebas de comentario <?= date('Y-m-d H:i:s') ?>'
+            comment_text: ''
         },
         options_table: <?= json_encode($options_table) ?>
     },

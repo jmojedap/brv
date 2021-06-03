@@ -13,7 +13,7 @@
         <div class="start_container">
             <a href="<?= URL_APP ?>"><img src="<?= URL_BRAND ?>logo-start.png" alt="Logo aplicación"></a>
             <?php $this->load->view($view_a); ?>
-            <a href="<?= URL_APP ?>" class="btn btn-light w120p">
+            <a href="<?= base_url('start') ?>" class="btn btn-light w120p">
                 <i class="fa fa-home"></i> Inicio
             </a>
         </div>

@@ -57,7 +57,7 @@
                     this.errors = response.data.errors;
                     if ( response.data.status == 1 ) {
                         toastr['success']('Tu contraseña fue cambiada exitosamente');
-                        setTimeout(function(){ window.location = url_app + 'app/logged'; }, 3000);
+                        setTimeout(function(){ window.location = '<?= base_url('start/logged') ?>'; }, 3000);
                     }
                 })
                 .catch(function (error) {

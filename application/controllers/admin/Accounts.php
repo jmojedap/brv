@@ -5,7 +5,7 @@ class Accounts extends CI_Controller {
 
 // Variables generales
 //-----------------------------------------------------------------------------
-    public $views_folder = 'admin/accounts/';
+    public $views_folder = 'app/accounts/';
     public $url_controller = URL_ADMIN . 'accounts/';
 
 // Constructor
@@ -290,8 +290,56 @@ class Accounts extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
+// ADMINISTRACIÓN DE CUENTA
+//-----------------------------------------------------------------------------
+
+    /** Perfil del usuario en sesión */
+    function profile()
+    {        
+        $data = $this->User_model->basic($this->session->userdata('user_id'));
+        
+        //Variables específicas
+        $data['nav_2'] = $this->views_folder . 'menu_v';
+        $data['view_a'] = $this->views_folder . 'profile_v';
+        
+        $this->App_model->view('templates/admin_pml/main', $data);
+    }
+
 // ACTUALIZACIÓN DE DATOS
 //-----------------------------------------------------------------------------
+
+    /**
+     * Formulario edición datos usuario en sessión. Los datos que se
+     * editan dependen de la $section elegida.
+     */
+    function edit($section = 'basic')
+    {
+        //Datos básicos
+        $user_id = $this->session->userdata('user_id');
+
+        $data = $this->User_model->basic($user_id);
+
+        $data['options_document_type'] = $this->Item_model->options('category_id = 53');
+        $data['options_gender'] = $this->Item_model->options('category_id = 59 AND cod <= 2');
+        $data['options_privacy'] = $this->Item_model->options('category_id = 66');
+        $data['options_city_id'] = $this->App_model->options_place('type_id = 4 AND status = 1');
+        
+        $view_a = "app/accounts/edit/{$section}_v";
+        if ( $section == 'cropping' )
+        {
+            $view_a = 'files/cropping_v';
+            $data['image_id'] = $data['row']->image_id;
+            $data['url_image'] = $data['row']->url_image;
+            $data['back_destination'] = "admin/accounts/edit/image";
+        }
+        
+        //Array data espefícicas
+            $data['nav_2'] = 'app/accounts/menu_v';
+            $data['nav_3'] = 'app/accounts/edit/menu_v';
+            $data['view_a'] = $view_a;
+        
+        $this->App_model->view('templates/admin_pml/main', $data);
+    }
 
     /**
      * AJAX JSON
@@ -316,9 +364,9 @@ class Accounts extends CI_Controller {
     {
         $arr_row = $this->input->post();
         //$arr_row['display_name'] = $this->input->post('first_name') . ' ' . $this->input->post('last_name');
-        $user_id = $this->session->userdata('user_id');
+        $arr_row['id'] = $this->session->userdata('user_id');
 
-        $data = $this->User_model->save($user_id, $arr_row);
+        $data['saved_id'] = $this->Db_model->save_id('users', $arr_row);
         
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }

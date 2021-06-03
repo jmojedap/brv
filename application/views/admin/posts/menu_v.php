@@ -48,7 +48,7 @@
     
     //Secciones para cada rol
     sections_role[1] = ['info', 'images', 'details', 'edit'];
-    sections_role[2] = ['info', 'image', 'edit'];
+    sections_role[2] = ['info', 'images', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 
@@ -57,6 +57,7 @@
         nav_2.push(sections[key]);    //Agregar el elemento correspondiente
     }
     
+    console.log(nav_2)
 </script>
 
 <?php

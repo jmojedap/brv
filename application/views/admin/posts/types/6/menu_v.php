@@ -8,7 +8,7 @@
     //$cl_nav_2['posts_import'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
-    if ( $app_cf_index == 'posts_cropping' ) { $cl_nav_2['posts_image'] = 'active'; }
+    if ( $app_cf_index == 'posts_cropping' ) { $cl_nav_2['posts_images'] = 'active'; }
 ?>
 
 <script>
@@ -48,7 +48,7 @@
     
     //Secciones para cada rol
     sections_role[1] = ['info', 'images', 'details', 'edit'];
-    sections_role[2] = ['info', 'image', 'edit'];
+    sections_role[2] = ['info', 'images', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

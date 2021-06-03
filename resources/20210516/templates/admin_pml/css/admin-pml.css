@@ -1710,7 +1710,7 @@ table.table-hover tr:hover{
   text-align: center;
   background-color: #FFFFFF;
   padding: 25px;
-  height: 480px;
+  min-height: 480px;
   width: 350px;
   border-radius: 6px;
   border: 1px solid #f1f1f1;

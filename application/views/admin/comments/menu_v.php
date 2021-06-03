@@ -14,14 +14,6 @@
     var nav_2 = [];
     var sections_role = [];
     var element_id = '<?= $row->id ?>';
-    
-    sections.explore = {
-        icon: 'fa fa-arrow-left',
-        text: 'Explorar',
-        class: '',
-        cf: 'comments/explore/',
-        anchor: true
-    };
 
     sections.info = {
         icon: '',
@@ -29,18 +21,10 @@
         class: '<?= $cl_nav_2['comments_info'] ?>',
         cf: 'comments/info/' + element_id
     };
-
-    sections.edit = {
-        icon: '',
-        text: 'Editar',
-        class: '<?= $cl_nav_2['comments_edit'] ?>',
-        cf: 'comments/edit/' + element_id,
-        anchor: true
-    };
     
     //Secciones para cada rol
-    sections_role[1] = ['explore', 'info'];
-    sections_role[2] = ['explore', 'info'];
+    sections_role[1] = ['info'];
+    sections_role[2] = ['info'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

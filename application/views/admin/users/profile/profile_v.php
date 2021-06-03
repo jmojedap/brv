@@ -95,7 +95,7 @@ var profile_app = new Vue({
         setActivationKey: function(){
             axios.get(url_api + 'users/set_activation_key/' + this.user_id)
             .then(response => {
-                this.activation_link = url_app + 'users/recover/' + response.data
+                this.activation_link = '<?= URL_APP ?>accounts/recover/' + response.data
                 toastr['success']('Copie el link y ábralo en otro navegador para establecer una nueva contraseña')
             })
             .catch(function(error) { console.log(error) })   

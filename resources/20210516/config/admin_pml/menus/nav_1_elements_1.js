@@ -52,37 +52,6 @@ var nav_1_elements = [
         ]
     },    
     {
-        text: 'Estadísticas',
-        active: false,
-        style: '',
-        icon: 'fa fa-chart-bar',
-        cf: '',
-        sections: [],
-        subelements: [
-            {
-                text: 'Visitas Girls',
-                active: false,
-                icon: 'fa fa-user',
-                cf: 'statistics/girls',
-                sections: []
-            },
-            {
-                text: 'Visitas Álbums',
-                active: false,
-                icon: 'fa fa-image',
-                cf: 'statistics/albums',
-                sections: []
-            },
-            {
-                text: 'Usuarios',
-                active: false,
-                icon: 'fa fa-user',
-                cf: 'statistics/users',
-                sections: []
-            }
-        ]
-    },
-    {
         text: 'Ajustes',
         active: false,
         style: '',

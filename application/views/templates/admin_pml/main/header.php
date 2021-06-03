@@ -15,8 +15,8 @@
                     <img src="<?= $this->session->userdata('picture') ?>" class="navbar-user-image" alt="User Image" onerror="this.src='<?= URL_IMG ?>users/sm_user.png'">
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="<?= URL_ADMIN . 'accounts/profile' ?>">Mi cuenta</a>
-                    <a class="dropdown-item" href="<?= URL_ADMIN . 'accounts/logout' ?>">Cerrar sesión</a>
+                    <a class="dropdown-item" href="<?= URL_APP . 'accounts/profile' ?>">Mi cuenta</a>
+                    <a class="dropdown-item" href="<?= URL_APP . 'accounts/logout' ?>">Cerrar sesión</a>
                 </ul>
             </div>
         </div>
