@@ -3,7 +3,7 @@
     <div class="center_box_750">
         <div class="bg-white">
             <div class="d-flex mb-2 border-bottom p-2" v-for="(user, uk) in users">
-                <a v-bind:href="`<?= URL_ADMIN . "bonitas/hoy/" ?>` + user.id + `/` + user.username" class="">
+                <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + user.id + `/` + user.username" class="">
                     <img
                         v-bind:src="user.url_thumbnail"
                         class="rounded rounded-circle w40p mr-3"
@@ -12,7 +12,7 @@
                     >
                 </a>
                 <div>
-                    <a v-bind:href="`<?= URL_ADMIN . "bonitas/hoy/" ?>` + user.id + `/` + user.username" class="user_link">
+                    <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + user.id + `/` + user.username" class="user_link">
                         <span class="username">{{ user.username }}</span><br>
                         <span class="display_name">{{ user.display_name }}</span>
                     </a>

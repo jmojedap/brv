@@ -43,11 +43,13 @@ class Products extends CI_Controller{
             $data = $this->Product_model->explore_data($filters, $num_page);
         
         //Opciones de filtros de búsqueda
-            //$data['options_role'] = $this->Item_model->options('category_id = 58', 'Todos');
+            $data['options_status'] = $this->Item_model->options('category_id = 8', 'Todos');
+            $data['options_category'] = $this->Item_model->options('category_id = 25', 'Todos');
             
         //Arrays con valores para contenido en lista
-            //$data['arr_roles'] = $this->Item_model->arr_cod('category_id = 58');
-            //$data['arr_document_types'] = $this->Item_model->arr_item('category_id = 53', 'cod_abr');
+            $data['arr_status'] = $this->Item_model->arr_cod('category_id = 8');
+            $data['arr_categories'] = $this->Item_model->arr_cod('category_id = 25');
+            //$data['arr_id_number_types'] = $this->Item_model->arr_item('category_id = 53', 'cod_abr');
             
         //Cargar vista
             $this->App_model->view(TPL_ADMIN, $data);
@@ -57,11 +59,11 @@ class Products extends CI_Controller{
      * JSON
      * Listado de users, según filtros de búsqueda
      */
-    function get($num_page = 1)
+    function get($num_page = 1, $per_page = 10)
     {
         $this->load->model('Search_model');
         $filters = $this->Search_model->filters();
-        $data = $this->Product_model->get($filters, $num_page);
+        $data = $this->Product_model->get($filters, $num_page, $per_page);
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
@@ -81,6 +83,39 @@ class Products extends CI_Controller{
         
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
+
+// INFORMACIÓN
+//-----------------------------------------------------------------------------
+
+    /**
+     * Información general del producto
+     */
+    function info($product_id)
+    {        
+        //Datos básicos
+        $data = $this->Product_model->basic($product_id);
+        
+        //Variables específicas
+        $data['head_subtitle'] = 'Información general';
+        $data['view_a'] = $this->views_folder . 'info_v';
+        
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
+    /**
+     * Información detallada registro producto
+     * 2021-03-19
+     */
+    function details($product_id)
+    {        
+        //Datos básicos
+        $data = $this->Product_model->basic($product_id);
+        
+        //Variables específicas
+        $data['view_a'] = 'common/row_details_v';
+        
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
     
 // CRUD
 //-----------------------------------------------------------------------------
@@ -92,37 +127,10 @@ class Products extends CI_Controller{
     function add()
     {
         //Variables generales
-            $data['head_title'] = 'Productos';
-            $data['head_subtitle'] = 'Nuevo';
-            $data['nav_2'] = $this->views_folder . 'explore/menu_v';
-            $data['view_a'] = $this->views_folder . 'add_v';
+        $data['head_title'] = 'Productos';
+        $data['nav_2'] = $this->views_folder . 'explore/menu_v';
+        $data['view_a'] = $this->views_folder . 'add_v';
 
-        $this->App_model->view(TPL_ADMIN, $data);
-    }
-
-    /**
-     * AJAX JSON
-     * Toma datos de POST e inserta un registro en la tabla group. 
-     * 2019-10-29
-     */ 
-    function insert()
-    {
-        $data = $this->Product_model->insert();
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-    
-    /**
-     * Información general del grupo
-     */
-    function info($product_id)
-    {        
-        //Datos básicos
-        $data = $this->Product_model->basic($product_id);
-        
-        //Variables específicas
-        $data['head_subtitle'] = 'Información general';
-        $data['view_a'] = $this->views_folder . 'info_v';
-        
         $this->App_model->view(TPL_ADMIN, $data);
     }
     
@@ -137,6 +145,9 @@ class Products extends CI_Controller{
     {
         //Datos básicos
             $data = $this->Product_model->basic($product_id);
+
+            $data['options_status'] = $this->Item_model->options('category_id = 8');
+            $data['options_cat_1'] = $this->Item_model->options('category_id = 25 AND level = 0', 'Todos las categorías');
         
         //Variables cargue vista
             $data['nav_2'] = $this->views_folder . 'menu_v';
@@ -148,9 +159,9 @@ class Products extends CI_Controller{
     /**
      * POST JSON
      */
-    function update($product_id)
+    function save()
     {
-        $data = $this->Product_model->update($product_id);
+        $data = $this->Product_model->save();
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
@@ -167,7 +178,6 @@ class Products extends CI_Controller{
 
         $data['view_a'] = $this->views_folder . 'images/images_v';
         $data['nav_2'] = $this->views_folder . 'menu_v';
-        $data['subtitle_head'] = 'Imágenes';
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
@@ -233,7 +243,7 @@ class Products extends CI_Controller{
     /**
      * Mostrar formulario de importación de products
      * con archivo Excel. El resultado del formulario se envía a 
-     * 'products/import_e'
+     * $this->views_folder . 'import_e'
      */
     function import($type = 'general')
     {
@@ -274,6 +284,8 @@ class Products extends CI_Controller{
             $data['nav_2'] = $this->views_folder . 'explore/menu_v';
 
         $this->App_model->view(TPL_ADMIN, $data);
+        //Salida JSON
+        //$this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
 // CATÁLOGO
@@ -286,7 +298,6 @@ class Products extends CI_Controller{
         
         //Variables
             $data['product_family'] = $product_family;
-            $data['num_page'] = $num_page;
             $data['head_title'] = 'Libros';
             $data['view_a'] = $this->views_folder . 'catalog_v';
             
@@ -302,65 +313,12 @@ class Products extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
-    /**
-     * Vista detalles de un producto
-     * 2020-08-18
-     */
-    function details($product_id)
-    {
-        $this->load->model('Noticia_model');
-        $data = $this->Product_model->basic($product_id);
-
-        //Variables
-        $data['posts'] = $this->Product_model->assigned_posts($product_id);
-        $data['view_a'] = $this->views_folder . 'details_v';
-        unset($data['nav_2']);
-        if ( $data['row']->cat_1 == 1111 ) { $data['view_a'] = $this->views_folder . 'details/books_v'; }
-        if ( $data['row']->cat_1 == 2115 ) { $data['view_a'] = $this->views_folder . 'details/books_v'; }
-        if ( $data['row']->cat_1 == 2110 ) { $data['view_a'] = $this->views_folder . 'details/digital_contents_v'; }
-        if ( $data['row']->cat_1 == 2125 ) { $data['view_a'] = $this->views_folder . 'details/girls_media_v'; }
-            
-        //Cargar vista
-            $this->App_model->view('templates/admin_pml/main', $data);
-    }
-
 // METADATA
 //-----------------------------------------------------------------------------
 
     function delete_meta($product_id, $meta_id)
     {
         $data = $this->Product_model->delete_meta($product_id, $meta_id);
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-// CONTENIDOS ASIGNADOS
-//-----------------------------------------------------------------------------
-
-    /**
-     * Contenidos digitales asignados a un producto
-     * 2020-04-18
-     */
-    function posts($product_id)
-    {
-        $data = $this->Product_model->basic($product_id);
-
-        $data['posts'] = $this->Product_model->assigned_posts($product_id);
-        $data['options_post'] = $this->App_model->options_post('type_id IN (5,8)', 'n', 'Contenido');
-
-        $data['view_a'] = $this->views_folder . 'posts_v';
-
-        $this->App_model->view(TPL_ADMIN, $data);
-    }
-
-    /**
-     * Agrega un post a un producto
-     * 2020-05-22
-     */
-    function add_post($product_id, $post_id)
-    {
-        $data = $this->Product_model->add_post($product_id, $post_id);
-
-        //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
@@ -372,7 +330,7 @@ class Products extends CI_Controller{
         $data = $this->Product_model->basic($product_id);
 
         //Variables
-        $data['view_a'] = $this->views_folder . 'details_v';
+        $data['view_a'] = 'products/details_v';
             
         //Cargar vista
             $this->App_model->view(TPL_FRONT, $data);

@@ -39,6 +39,7 @@
         <script src="<?= URL_RESOURCES . 'js/pcrn.js' ?>"></script>
         <script>
             const url_app = '<?= URL_ADMIN ?>'; const url_admin = '<?= URL_ADMIN ?>'; const url_api = '<?= URL_API ?>'; const url_front = '<?= URL_FRONT ?>';
+            const url_base = '<?= base_url() ?>';
             var app_cf = '<?= $this->uri->segment(2) . '/' . $this->uri->segment(3); ?>';
         </script>
 
@@ -49,5 +50,6 @@
 
             <script>
                 const app_rid = <?= $this->session->userdata('role') ?>;
+                const app_uid = <?= $this->session->userdata('user_id') ?>;
             </script>
         <?php endif; ?>

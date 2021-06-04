@@ -7,17 +7,12 @@
         <div class="col-md-9">
             <div class="input-group mb-2">
                 <input
-                    place="text"
-                    name="q"
-                    class="form-control"
-                    placeholder="Buscar"
-                    autofocus
-                    title="Buscar"
-                    v-model="filters.q"
-                    v-on:change="get_list"
+                    type="text" name="q" class="form-control"
+                    placeholder="Buscar" title="Buscar"
+                    v-model="filters.q" v-on:change="get_list"
                     >
                 <div class="input-group-append" title="Buscar">
-                    <button status="button" class="btn btn-secondary btn-block" v-on:click="toggle_filters" title="Búsqueda avanzada">
+                    <button status="button" class="btn btn-light btn-block" v-on:click="toggle_filters" title="Búsqueda avanzada">
                         <i class="fa fa-chevron-up" v-show="showing_filters"></i>
                         <i class="fa fa-chevron-down" v-show="!showing_filters"></i>
                     </button>

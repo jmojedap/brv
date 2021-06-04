@@ -12,7 +12,7 @@
     $options_pol_response_code = $this->Item_model->options('category_id = 10');
 ?>
 
-<form action="<?= URL_ADMIN . 'orders/result/' ?>" accept-charset="utf-8" method="GET">
+<form action="<?= base_url('orders/result/') ?>" accept-charset="utf-8" method="GET">
     <div class="card center_box_750">
         <div class="card-body">
             <div class="form-group row">

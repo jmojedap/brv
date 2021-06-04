@@ -70,7 +70,7 @@ var comments_info = new Vue({
     },
     data: {
         row: <?= json_encode($row) ?>,
-        list: <?= json_encode($subcomments->result()) ?>
+        list: <?= json_encode($subcomments) ?>
     },
     methods: {
         

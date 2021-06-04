@@ -22,7 +22,7 @@
                 $cl_link = $this->pml->active_class($lapse_days, $qty_days, 'active');
             ?>
             <li class="nav-item">
-                <a href="<?= URL_ADMIN . "admin/events/summary/{$lapse_days}" ?>" class="nav-link <?= $cl_link ?> w2">
+                <a href="<?= URL_ADMIN . "events/summary/{$lapse_days}" ?>" class="nav-link <?= $cl_link ?> w2">
                     <?= $lapse_name ?>
                 </a>
             </li>

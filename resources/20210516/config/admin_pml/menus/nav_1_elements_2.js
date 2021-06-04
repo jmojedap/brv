@@ -5,11 +5,11 @@ var nav_1_elements = [
         subelements: []
     },
     {
-        text: 'Posts',
+        text: 'Publicaciones',
         active: false,
         icon: 'far fa-file-alt',
         cf: 'posts/explore',
-        sections: ['posts/explore', 'posts/add', 'posts/import', 'posts/info', 'posts/edit', 'posts/image', 'posts/details'],
+        sections: ['posts/explore', 'posts/add', 'posts/import', 'posts/info', 'posts/edit', 'posts/image', 'posts/details', 'posts/comments'],
         subelements: []
     },
     {

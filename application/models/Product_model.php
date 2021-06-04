@@ -6,8 +6,8 @@ class Product_model extends CI_Model{
         $data['product_id'] = $product_id;
         $data['row'] = $this->Db_model->row_id('products', $product_id);
         $data['head_title'] = $data['row']->name;
-        $data['view_a'] = $this->views_folder . 'product_v';
-        $data['nav_2'] = $this->views_folder . 'menu_v';
+        $data['nav_2'] = 'admin/products/menu_v';
+        $data['back_link'] = $this->url_controller . 'explore';
 
         return $data;
     }
@@ -18,16 +18,16 @@ class Product_model extends CI_Model{
     /**
      * Array con los datos para la vista de exploración
      */
-    function explore_data($filters, $num_page)
+    function explore_data($filters, $num_page, $per_page = 10)
     {
         //Data inicial, de la tabla
-            $data = $this->get($filters, $num_page);
+            $data = $this->get($filters, $num_page, $per_page);
         
         //Elemento de exploración
-            $data['controller'] = 'products';                      //Nombre del controlador
+            $data['controller'] = 'products';                       //Nombre del controlador
             $data['cf'] = 'products/explore/';                      //Nombre del controlador
-            $data['views_folder'] = $this->views_folder . 'explore/';           //Carpeta donde están las vistas de exploración
-            $data['num_page'] = $num_page;                      //Número de la página
+            $data['views_folder'] = 'admin/products/explore/'; //Carpeta donde están las vistas de exploración
+            $data['num_page'] = $num_page;                          //Número de la página
             
         //Vistas
             $data['head_title'] = 'Productos';
@@ -45,10 +45,12 @@ class Product_model extends CI_Model{
      */
     function get($filters, $num_page, $per_page = 8)
     {
-        //Referencia
-            $offset = ($num_page - 1) * $per_page;      //Número de la página de datos que se está consultado
+        //Load
+            $this->load->model('Search_model');
 
         //Búsqueda y Resultados
+            $data['filters'] = $filters;
+            $offset = ($num_page - 1) * $per_page;      //Número de la página de datos que se está consultado
             $elements = $this->search($filters, $per_page, $offset);    //Resultados para página
         
         //Cargar datos
@@ -120,7 +122,7 @@ class Product_model extends CI_Model{
         }
         
         //Otros filtros
-        if ( $filters['condition'] != '' ) { $condition .= "{$filters['condition']} AND "; }
+        //if ( $filters['cat_1'] != '' ) { $condition .= "role = {$filters['cat_1']} AND "; }
         
         //Quitar cadena final de ' AND '
         if ( strlen($condition) > 0 ) { $condition = substr($condition, 0, -5);}
@@ -206,7 +208,7 @@ class Product_model extends CI_Model{
     function editable($product_id)
     {
         $editable = FALSE;
-        if ( in_array($this->session->userdata('role'), array(1,2,3)) ) { $editable = TRUE; }
+        if ( $this->session->userdata('role') <= 2 ) { $editable = TRUE; }
         if ( $this->session->userdata('product_id') == $product_id ) { $editable = TRUE; }
 
         return $editable;
@@ -214,68 +216,20 @@ class Product_model extends CI_Model{
 
 // CRUD
 //-----------------------------------------------------------------------------
-    
+
     /**
-     * Insertar un registro en la tabla products.
-     * 2019-10-31
+     * Guardar registro de producto
+     * 2021-03-19
      */
-    function insert($arr_row = NULL)
+    function save()
     {
-        if ( is_null($arr_row) ) { $arr_row = $this->arr_row('insert'); }
-        
-        //Insert in table
-            $this->db->insert('products', $arr_row);
-            $product_id = $this->db->insert_id();
-
-            if ( $product_id > 0 )
-            {
-                //$this->update_dependent($product_id);
-
-                //Set result
-                    $data = array('status' => 1, 'message' => 'Producto creado', 'saved_id' => $product_id);
-            }
-        
+        $data['saved_id'] = $this->Db_model->save_id('products');
         return $data;
     }
 
-    /**
-     * Actualiza un registro en la tabla product
-     * 2019-10-30
-     */
-    function update($product_id, $arr_row = NULL)
-    {
-        if ( is_null($arr_row) ) { $arr_row = $this->arr_row('update'); }
-
-        //Actualizar
-            $this->db->where('id', $product_id);
-            $this->db->update('products', $arr_row);
-
-        //Actualizar campos dependientes
-            //$this->update_dependent($product_id);
-    
-        //Preparar resultado
-            $data = array('status' => 1);
-        
-        return $data;
-    }
-
-    /**
-     * Array con datos para editar o crear un registro de un producto
-     * 2019-10-29
-     */
-    function arr_row($process = 'update')
-    {
-        $arr_row = $this->input->post();
-        $arr_row['updater_id'] = $this->session->userdata('user_id');
-        
-        if ( $process == 'insert' )
-        {
-            $arr_row['creator_id'] = $this->session->userdata('user_id');
-        }
-        
-        return $arr_row;
-    }
-    
+// ELINMINACIÓN
+//-----------------------------------------------------------------------------
+       
     /**
      * Establece permiso para eliminar un producto
      */
@@ -284,7 +238,7 @@ class Product_model extends CI_Model{
         $deletable = 0;
         $row = $this->Db_model->row_id('products', $product_id);
 
-        if ( $in_array($this->session->userdata('role'), array(1,2)) ) { $deletable = 1; }
+        if ( $this->session->userdata('role') <= 1 ) { $deletable = 1; }
         
         return $deletable;
     }
@@ -320,10 +274,8 @@ class Product_model extends CI_Model{
 //-----------------------------------------------------------------------------
 
     /**
-     * Actualiza los campos adicionales de la tabla producto, dependientes del 
-     * curso y la institución
+     * Actualiza los campos adicionales de la tabla producto
      * 
-     * @param type $product_id
      */
     function update_dependent($product_id) 
     {
@@ -372,10 +324,10 @@ class Product_model extends CI_Model{
         if ( ! is_null($row_file) )
         {
             //Quitar otro principal
-            $this->db->query("UPDATE file SET integer_1 = 0 WHERE table_id = 3100 AND related_1 = {$product_id} AND integer_1 = 1");
+            $this->db->query("UPDATE files SET integer_1 = 0 WHERE table_id = 3100 AND related_1 = {$product_id} AND integer_1 = 1");
 
             //Poner nuevo principal
-            $this->db->query("UPDATE file SET integer_1 = 1 WHERE id = {$file_id} AND related_1 = {$product_id}");
+            $this->db->query("UPDATE files SET integer_1 = 1 WHERE id = {$file_id} AND related_1 = {$product_id}");
 
             //Actualizar registro en tabla products
             $arr_row['image_id'] = $row_file->id;
@@ -444,46 +396,41 @@ class Product_model extends CI_Model{
         //Validar
             $error_text = '';
                             
-            if ( strlen($row_data[0]) == 0 ) { $error_text = 'La casilla Nombre está vacía. '; }
-            if ( strlen($row_data[5]) == 0 ) { $error_text = 'La casilla Descripción está vacía. '; }
-            if ( ! (floatval($row_data[8]) > 0) ) { $error_text .= 'Debe tener costo (' . $row_data[8] .  ') mayor a 0. '; }
-            if ( ! (floatval($row_data[10]) > floatval($row_data[8])) ) { $error_text .= 'El precio debe ser mayor al costo. '; }
+            if ( strlen($row_data[1]) == 0 ) { $error_text = 'La casilla Nombre está vacía. '; }
+            if ( strlen($row_data[3]) == 0 ) { $error_text = 'La casilla Descripción está vacía. '; }
+            if ( ! (floatval($row_data[6]) > 0) ) { $error_text .= 'Debe tener costo (' . $row_data[6] .  ') mayor a 0. '; }
+            if ( ! (floatval($row_data[8]) > floatval($row_data[6])) ) { $error_text .= 'El precio debe ser mayor al costo. '; }
 
         //Si no hay error
             if ( $error_text == '' )
             {
-                $arr_row['name'] = $row_data[0];
-                $arr_row['type_id'] = $row_data[1];
+                $arr_row['name'] = $row_data[1];
+                $arr_row['type_id'] = 1;    //Producto
                 $arr_row['code'] = $row_data[2];
-                $arr_row['cat_1'] = $row_data[3];
+                $arr_row['cat_1'] = $row_data[4];
                 $arr_row['status'] = $this->pml->if_strlen($row_data[4], 2);
-                $arr_row['description'] = $row_data[5];
-                $arr_row['meta'] = $this->pml->if_strlen($row_data[6], '');
-                $arr_row['keywords'] = $row_data[7];
-                $arr_row['cost'] = $row_data[8];
-                $arr_row['tax_percent'] = $row_data[9];
-                $arr_row['price'] = $row_data[10];
-                $arr_row['weight'] = $row_data[11];
-                $arr_row['width'] = $row_data[12];
-                $arr_row['height'] = $row_data[13];
-                $arr_row['depth'] = $row_data[14];
-                $arr_row['stock'] = $row_data[15];
-                $arr_row['supplier_id'] = $row_data[16];
-                $arr_row['text_1'] = $row_data[17];
-                $arr_row['text_2'] = $row_data[18];
-                $arr_row['integer_1'] = $row_data[19];
-                $arr_row['integer_2'] = $this->pml->if_strlen($row_data[20], '');
-                $arr_row['external_url'] = $row_data[21];
+                $arr_row['description'] = $row_data[3];
+                $arr_row['keywords'] = $this->pml->if_null($row_data[5]);
+                $arr_row['cost'] = $row_data[6];
+                $arr_row['tax_percent'] = $this->pml->if_null($row_data[7]);
+                $arr_row['price'] = $row_data[8];
+                $arr_row['weight'] = $this->pml->if_null($row_data[9]);
+                $arr_row['width'] = $this->pml->if_null($row_data[10]);
+                $arr_row['height'] = $this->pml->if_null($row_data[11]);
+                $arr_row['depth'] = $this->pml->if_null($row_data[12]);
+                $arr_row['stock'] = $this->pml->if_null($row_data[13]);
                 
-                $arr_row['slug'] = $this->Db_model->unique_slug($row_data[0], 'products');
+                $arr_row['slug'] = $this->Db_model->unique_slug($row_data[1], 'products');
                 
                 $arr_row['creator_id'] = $this->session->userdata('user_id');
                 $arr_row['updater_id'] = $this->session->userdata('user_id');
 
                 //Guardar en tabla user
-                $data_insert = $this->insert($arr_row);
+                //if ( strlen($row_data[0]) ) { $arr_row['id'] = $row_data[0]; }
+                $condition = "code = '{$row_data[2]}'";
+                $saved_id = $this->Db_model->save('products', $condition, $arr_row);
 
-                $data = array('status' => 1, 'text' => '', 'imported_id' => $data_insert['saved_id']);
+                $data = array('status' => 1, 'text' => '', 'imported_id' => $saved_id);
             } else {
                 $data = array('status' => 0, 'text' => $error_text, 'imported_id' => 0);
             }

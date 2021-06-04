@@ -3,7 +3,7 @@
     
     $cl_nav_2['orders_info'] = '';
     $cl_nav_2['orders_details'] = '';
-    $cl_nav_2['orders_payu'] = '';
+    $cl_nav_2['orders_responses'] = '';
     $cl_nav_2['orders_edit'] = '';
     $cl_nav_2['orders_test'] = '';
     //$cl_nav_2['orders_import'] = '';
@@ -24,7 +24,6 @@
         class: '',
         cf: 'orders/explore/',
         anchor: true
-
     };
 
     sections.info = {
@@ -41,11 +40,11 @@
         cf: 'orders/details/' + element_id
     };
 
-    sections.payu = {
+    sections.responses = {
         icon: '',
-        text: 'PayU',
-        class: '<?= $cl_nav_2['orders_payu'] ?>',
-        cf: 'orders/payu/' + element_id
+        text: 'Wompi',
+        class: '<?= $cl_nav_2['orders_responses'] ?>',
+        cf: 'orders/responses/' + element_id
     };
 
     sections.edit = {
@@ -59,11 +58,12 @@
         icon: 'fa fa-test',
         text: 'Test',
         class: '<?= $cl_nav_2['orders_test'] ?>',
-        cf: 'orders/test/confirmation/' + element_id
+        cf: 'orders/test/' + element_id + '/confirmation'
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['explore', 'details', 'payu', 'edit', 'test'];
+    sections_role[0] = ['explore', 'info', 'details', 'responses', 'edit', 'test'];
+    sections_role[2] = ['explore', 'info', 'details', 'responses', 'edit', 'test'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

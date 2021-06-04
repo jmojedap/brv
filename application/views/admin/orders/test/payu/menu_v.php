@@ -33,7 +33,7 @@
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['confirmation', 'result'];
+    sections_role[0] = ['confirmation', 'result'];
     //sections_role[2] = ['explore', 'info', 'edit', 'test'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú

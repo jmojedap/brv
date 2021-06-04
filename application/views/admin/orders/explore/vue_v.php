@@ -35,14 +35,15 @@
         data: {
             cf: '<?= $cf; ?>',
             controller: '<?= $controller; ?>',
-            num_page: <?= $num_page ?>,
-            max_page: <?= $max_page ?>,
+            num_page: 1,
+            max_page: 1,
             list: <?= json_encode($list) ?>,
             element: [],
             selected: [],
             all_selected: false,
             filters: <?= json_encode($filters) ?>,
-            showing_filters: false
+            showing_filters: false,
+            loading: false
         },
         methods: {
             get_list: function(){
@@ -60,12 +61,10 @@
                 });
             },
             select_all: function() {
-                this.selected = [];
-                if (!this.all_selected) {
-                    for (element in this.list) {
-                        this.selected.push(this.list[element].id);
-                    }
-                }
+                if ( this.all_selected )
+                { this.selected = this.list.map(function(element){ return element.id }) }
+                else
+                { this.selected = [] }
             },
             sum_page: function(sum){
                 this.num_page = Pcrn.limit_between(this.num_page + sum, 1, this.max_page);

@@ -5,7 +5,7 @@
         </div>
 
         <div class="col">
-            <a href="<?= URL_ADMIN . "groups/export/?{$str_filters}" ?>" class="btn btn-light only-lg" title="Exportar registros encontrados a Excel">
+            <a href="<?= base_url("groups/export/?{$str_filters}") ?>" class="btn btn-light only-lg" title="Exportar registros encontrados a Excel">
                 <i class="fa fa-download"></i>
             </a>
             <button class="btn btn-light"
@@ -25,7 +25,7 @@
     </div>
 
     <div id="elements_table">
-        <?php $this->load->view($views_folder . 'table_v'); ?>
+        <?php $this->load->view($views_folder . 'list_v'); ?>
         <?php $this->load->view($views_folder . 'detail_v'); ?>
     </div>
 

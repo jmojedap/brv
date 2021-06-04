@@ -20,7 +20,7 @@
                 <td>Usuario ID</td>
                 <td>
                     <?= $row->user_id ?> &middot;
-                    <a href="<?= URL_ADMIN . "usuarios/actividad/{$row->user_id}" ?>" class="">
+                    <a href="<?= base_url("usuarios/actividad/{$row->user_id}") ?>" class="">
                         <?= $this->App_model->name_user($row->user_id); ?>
                     </a>
                 </td>
@@ -34,7 +34,7 @@
             <tr>
                 <td>No. documento</td>
                 <td>
-                    <?= $row->document_number ?>
+                    <?= $row->id_number ?>
                 </td>
             </tr>
             <tr>
@@ -126,7 +126,7 @@
             <?php foreach ( $products->result() as $row_product ) { ?>
                 <tr>
                     <td>
-                        <a href="<?= URL_ADMIN . "products/info/{$row_product->product_id}" ?>">
+                        <a href="<?= base_url("products/info/{$row_product->product_id}") ?>">
                             <?= $row_product->name ?>
                         </a>
                     </td>

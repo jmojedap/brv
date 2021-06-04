@@ -231,6 +231,21 @@ class Posts extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
+// COMENTARIOS
+//-----------------------------------------------------------------------------
+
+    /**
+     * Comentarios del post
+     */
+    function comments($post_id)
+    {
+        $data = $this->Post_model->basic($post_id);
+        $data['table_id'] = 2000;   //Código tabla posts
+
+        $data['view_a'] = $this->views_folder . 'comments_v';
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
 // IMPORTACIÓN DE POSTS
 //-----------------------------------------------------------------------------
 

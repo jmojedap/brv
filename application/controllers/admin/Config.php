@@ -122,6 +122,24 @@ class Config extends CI_Controller {
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
+// Funciones de ayuda
+//-----------------------------------------------------------------------------
+
+    /**
+     * AJAX - POST
+     * Return String, with unique slut
+     */
+    function unique_slug()
+    {
+        $text = $this->input->post('text');
+        $table = $this->input->post('table');
+        $field = $this->input->post('field');
+        
+        $unique_slug = $this->Db_model->unique_slug($text, $table, $field);
+        
+        $this->output->set_content_type('application/json')->set_output($unique_slug);
+    }
+
 // Pruebas y desarrollo
 //-----------------------------------------------------------------------------
 

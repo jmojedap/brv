@@ -11,7 +11,7 @@
 
     <body class="start_body">
         <div class="start_container">
-            <a href="<?= URL_APP ?>"><img src="<?= URL_BRAND ?>logo-start.png" alt="Logo aplicación"></a>
+            <a href="<?= URL_APP ?>"><img class="w240p mb-2" src="<?= URL_BRAND ?>logo-start.png" alt="Logo aplicación"></a>
             <?php $this->load->view($view_a); ?>
             <a href="<?= base_url('start') ?>" class="btn btn-light w120p">
                 <i class="fa fa-home"></i> Inicio

@@ -1,11 +1,15 @@
-<div class="table-responsive">
+<div class="text-center mb-2" v-show="loading">
+    <i class="fa fa-spin fa-spinner fa-3x text-muted"></i>
+</div>
+
+<div class="table-responsive" v-show="!loading">
     <table class="table bg-white">
         <thead>
             <th width="10px">
                 <input type="checkbox" @change="select_all" v-model="all_selected">
             </th>
             <th width="10px"></th>
-            <th>Ref. venta</th>
+            <th>Cód. compra</th>
             <th>Estado</th>
             <th>Comprador</th>
             <th>Valor</th>
@@ -24,7 +28,7 @@
                     <i class="far fa-circle text-muted" v-if="element.status == 10"></i>
                 </td>
                 <td>
-                    <a v-bind:href="`<?= URL_ADMIN . "orders/details/" ?>` + element.id">
+                    <a v-bind:href="`<?= base_url("orders/info/") ?>` + element.id">
                         {{ element.order_code }}
                     </a>
                 </td>
@@ -33,7 +37,7 @@
                 </td>
 
                 <td>
-                    <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + element.user_id">
+                    <a v-bind:href="`<?= base_url("users/profile/") ?>` + element.user_id">
                         {{ element.buyer_name }}
                     </a>
                     <br>

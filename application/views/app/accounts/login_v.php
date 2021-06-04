@@ -1,10 +1,4 @@
 <div id="login_app" class="text-center center_box mw360p">
-    <p>
-        Escribe tu correo electrónico
-        <br/>
-        y tu contraseña para ingresar.
-    </p>
-
     <form accept-charset="utf-8" method="POST" id="login_form" @submit.prevent="validate_login">
         <div class="form-group">
             <input

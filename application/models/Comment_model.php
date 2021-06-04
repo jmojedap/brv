@@ -191,7 +191,7 @@ class Comment_model extends CI_Model{
     
     /**
      * Insertar un registro en la tabla comment.
-     * 2020-06-08
+     * 2021-04-27
      */
     function save($table_id, $element_id)
     {
@@ -203,6 +203,7 @@ class Comment_model extends CI_Model{
             $arr_row['table_id'] = $table_id;       //Tabla del elemento comentado
             $arr_row['element_id'] = $element_id;   //ID del elemento comentado
             $arr_row['creator_id'] = $this->session->userdata('user_id');
+            $arr_row['created_at'] = date('Y-m-d H:i:s');
 
             //Insertar en la tabla
                 $this->db->insert('comments', $arr_row);
@@ -234,22 +235,81 @@ class Comment_model extends CI_Model{
 
         return $insertable;
     }
-    
 
+    /**
+     * Proceso alternado, like o unlike de un comentario
+     * 2021-05-18
+     */
+    function alt_like($comment_id)
+    {
+        //Condición
+        $condition = "user_id = {$this->session->userdata('user_id')} AND related_1 = {$comment_id} AND type_id = 1063";
+
+        $row_meta = $this->Db_model->row('users_meta', $condition);
+
+        $data = array();
+
+        if ( is_null($row_meta) )
+        {
+            //No existe, crear like
+            $arr_row['user_id'] = $this->session->userdata('user_id');
+            $arr_row['related_1'] = $comment_id;
+            $arr_row['type_id'] = 1063; //Like comment
+            $arr_row['updater_id'] = $this->session->userdata('user_id');
+            $arr_row['creator_id'] = $this->session->userdata('user_id');
+
+            $this->db->insert('users_meta', $arr_row);
+            
+            $data['saved_id'] = $this->db->insert_id();
+            $data['qty_sum'] = 1;
+            $data['like_status'] = 1;
+        } else {
+            //Existe, eliminar like
+            $this->db->where('id', $row_meta->id)->delete('users_meta');
+            
+            $data['qty_sum'] = -1;
+            $data['like_status'] = 0;
+        }
+
+        //Actualizar contador en registro tabla post
+        $this->db->query("UPDATE comments SET score = (score + ({$data['qty_sum']})) WHERE id = {$comment_id}");
+
+        return $data;
+    }
 
 // INFO
 //-----------------------------------------------------------------------------
 
     /**
+     * Array con listado de comentarios
+     */
+    function element_comments($table_id, $element_id, $parent_id, $num_page, $per_page = 10)
+    {
+        $query_comments = $this->element_comments_pre($table_id, $element_id, $parent_id, $num_page, $per_page);
+
+        $comments = array();
+
+        foreach ($query_comments->result() as $comment)
+        {
+            //Identificar si al usuario en sesión le gusta el comentario.
+            $condition = "user_id = {$this->session->userdata('user_id')} AND type_id = 1063 AND related_1 = {$comment->id}";
+            $comment->liked = $this->Db_model->num_rows('users_meta', $condition);
+
+            $comments[] = $comment;
+        }
+
+        return $comments;
+    }
+
+    /**
      * Query con listado de comentarios, si se agrega $parent_id se filtran los subcomentarios
      * hechos al comentario con ID = $parent_id.
      */
-    function element_comments($table_id, $element_id, $parent_id, $num_page)
+    function element_comments_pre($table_id, $element_id, $parent_id, $num_page, $per_page)
     {
-        $per_page = 10;
         $offset = $per_page * ($num_page - 1);
 
-        $this->db->select('comments.id, comment_text, parent_id, score, qty_comments, comments.created_at, comments.creator_id, users.username, users.display_name');
+        $this->db->select('comments.id, comment_text, parent_id, score, qty_comments, comments.created_at, comments.creator_id, users.username, users.display_name, users.url_thumbnail AS user_thumbnail');
         $this->db->where('element_id', $element_id);
         $this->db->where('table_id', $table_id);
         $this->db->where('parent_id', $parent_id);
@@ -258,6 +318,54 @@ class Comment_model extends CI_Model{
         $comments = $this->db->get('comments', $per_page, $offset);
 
         return $comments;
+    }
+
+    /**
+     * Array, información adicional sobre listado de comentarios de un elemento:
+     * Cantidad de comentarios y cantidad máxima de páginas en las que se podrían separar los comentarios 
+     * de un elemento teniendo en cuenta una cantidad de comentarios por página ($per_page)
+     * 2021-04-06
+     */
+    function element_comments_meta($table_id, $element_id, $parent_id, $per_page)
+    {
+        $data = array('total_comments' => 0, 'max_page' => 1);
+
+        $this->db->select('comments.id');
+        $this->db->where('element_id', $element_id);
+        $this->db->where('table_id', $table_id);
+        $this->db->where('parent_id', $parent_id);
+        $comments = $this->db->get('comments');
+
+        if ( $comments->num_rows() > 0 && $per_page > 0 )
+        {
+            $data['total_comments'] = $comments->num_rows();
+            $data['max_page'] = ceil($comments->num_rows() / $per_page);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Cantidad máxima de páginas en las que se podrían separar los comentarios de un elemento
+     * teniendo en cuenta una cantidad de comentarios por página ($per_page)
+     * 2021-04-06
+     */
+    function max_page($table_id, $element_id, $parent_id, $per_page)
+    {
+        $max_page = 1;  //Valor por defecto
+
+        $this->db->select('comments.id');
+        $this->db->where('element_id', $element_id);
+        $this->db->where('table_id', $table_id);
+        $this->db->where('parent_id', $parent_id);
+        $comments = $this->db->get('comments');
+
+        if ( $comments->num_rows() > 0 && $per_page > 0 )
+        {
+            $max_page = ceil($comments->num_rows() / $per_page);
+        }
+
+        return $max_page;
     }
 
 // ELIMINACIÓN DE COMENTARIOS
@@ -270,7 +378,7 @@ class Comment_model extends CI_Model{
 
         if ( ! is_null($row) )  //Existe
         {
-            if ( in_array($this->session->userdata('role'), array(1,2,3)) ) { $deleteable = TRUE; }    //Tiene Rol Editor o superior
+            if ( $this->session->userdata('role') <= 2 ) { $deleteable = TRUE; }    //Tiene Rol Editor o superior
             if ( $this->session->userdata('user_id') == $row->creator_id ) { $deleteable = TRUE; }  //Es quien creó el comentario
         }
 

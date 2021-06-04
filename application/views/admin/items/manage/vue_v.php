@@ -164,14 +164,12 @@
                 params.append('table', 'items');
                 params.append('field', 'slug');
                 
-                axios.post(url_app + 'application/unique_slug/', params)
+                axios.post(url_base + 'tools/unique_slug/', params)
                 .then(response => {
                     console.log(response.data);
-                    this.form_values.slug = response.data;
+                    this.form_values.slug = response.data
                 })
-                .catch(function (error) {
-                     console.log(error);
-                });
+                .catch(function (error) { console.log(error) })
             }
         }
     });

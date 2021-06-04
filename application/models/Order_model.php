@@ -5,6 +5,7 @@ class Order_model extends CI_Model{
     {
         $data['row'] = $this->Db_model->row_id('orders', $order_id);
         $data['head_title'] = $data['row']->order_code;
+        $data['nav_2'] = $this->views_folder . 'menu_v';
 
         return $data;
     }
@@ -23,8 +24,7 @@ class Order_model extends CI_Model{
         //Elemento de exploración
             $data['controller'] = 'orders';                      //Nombre del controlador
             $data['cf'] = 'orders/explore/';                      //Nombre del controlador
-            $data['views_folder'] = 'orders/explore/';           //Carpeta donde están las vistas de exploración
-            $data['num_page'] = $num_page;                      //Número de la página
+            $data['views_folder'] = $this->views_folder . 'explore/';           //Carpeta donde están las vistas de exploración
             
         //Vistas
             $data['head_title'] = 'Compras';
@@ -150,33 +150,42 @@ class Order_model extends CI_Model{
     {
         $order_options = array(
             '' => '[ Ordenar por ]',
-            'id' => 'ID Pedido',
-            'order_code' => 'Ref. venta'
+            'id' => 'ID Compra',
+            'order_code' => 'Cód. venta'
         );
         
         return $order_options;
-    }
-    
-    function editable()
-    {
-        return TRUE;
     }
 
 // CRUD
 //-----------------------------------------------------------------------------
 
     /**
-     * Crear un pedido en la tabla orders
+     * Actualiza los datos de una compra desde la edición de la administración
+     * 2021-05-04
+     */
+    function admin_update()
+    {
+        $arr_row = $this->input->post();
+        $arr_row['updater_id'] = $this->session->userdata('user_id');
+        $arr_row['updated_at'] = date('Y-m-d H:i:s');
+
+        //Actualizar registro orders
+        $saved_id = $this->Db_model->save_id('orders', $arr_row);
+    
+        return $saved_id;
+    }
+
+    /**
+     * Crear una compra, la tabla orders
      */
     function create()
     {
-        $data = array('status' => 0);
-        
-        //Construir registro
+        $data = array('order_id' => 0, 'order_code' => NULL);
 
         //Datos por defecto
-            $arr_row['city'] = '';    //Colombia
-            $arr_row['country_id'] = 51;    //Colombia
+            $arr_row['city'] = '';
+            $arr_row['country_id'] = 51;    //Colombia, ver tabla places
             $arr_row['address'] = '';
             $arr_row['created_at'] = date('Y-m-d H:i:s');
             $arr_row['updated_at'] = date('Y-m-d H:i:s');
@@ -198,7 +207,6 @@ class Order_model extends CI_Model{
         //Establecer resultado
         if ( $order_id > 0 )
         {
-            $data['status'] = 1;
             $data['order_id'] = $order_id;
             $data['order_code'] = $this->set_order_code($order_id);
         }
@@ -207,10 +215,48 @@ class Order_model extends CI_Model{
     }
 
     /**
-     * Actualizar los datos de un pedido.
+     * Genera y establece un código único para un pedido. Campo order.order_code
+     * 2019-06-17
+     */
+    function set_order_code($order_id)
+    {
+        $this->load->helper('string');
+        
+        $order_code = 'CP' . strtoupper(random_string('alpha', 2)) . '-' . $order_id;
+
+        $arr_row['order_code'] = $order_code;
+        $arr_row['description'] = 'Compra ' . $order_code . ' en ' . APP_NAME;
+        
+        $this->db->where('id', $order_id)->update('orders', $arr_row);
+
+        return $arr_row['order_code'];
+    }
+
+    /**
+     * Determina sin una compra puede ser modificada o no, según su estado o rol de usuario
+     * 2021-05-06
+     */
+    function editable($row_order)
+    {
+        $editable = false;   //Valor por defecto
+
+        //La compra tiene estado iniciado
+        if ( $row_order->status == 10 ) $editable = true;
+
+        //Es administrador
+        if ( $this->session->userdata('logged') && $this->session->userdata('role') <= 1 ) $editable = true;
+
+        return $editable;
+    }
+
+    /**
+     * Actualizar los datos de una compra, enviados por POST y actualiza totales
+     * 2021-04-13
      */
     function update($order_id)
     {
+        $data['status'] = 0;
+
         $arr_row = $this->input->post();
         $arr_row['updater_id'] = $this->session->userdata('user_id');
         $arr_row['updated_at'] = date('Y-m-d H:i:s');
@@ -224,10 +270,17 @@ class Order_model extends CI_Model{
             $arr_row['region_id'] = $row_city->region_id;
         }
 
-        $this->db->where('id', $order_id);
-        $this->db->update('orders', $arr_row);
-        
-        $data = array('status' => 1);
+        //Actualizar registro orders
+        $this->db->where('id', $order_id)->update('orders', $arr_row);
+
+        //Verificar y actualizar totales
+        if ( $this->db->affected_rows() >= 0)
+        {
+            $data['status'] = 1;
+
+            
+            $this->update_totals($order_id);           //Actualizar totales
+        }
 
         return $data;
     }
@@ -237,95 +290,244 @@ class Order_model extends CI_Model{
      * en la tabla order_producto (op), devuelve ID del registro guardado.
      * 2019-06-17
      */
-    function add_product($product_id, $quantity = 1)
+    function add_product($product_id, $quantity = 1, $order_id)
     {
-        $order_id = $this->session->userdata('order_id');
+        $data = array('status' => 0, 'op_id' => 0, 'qty_items' => NULL);
 
+        //Identificar producto
         $this->load->model('Product_model');
         $row_product = $this->Db_model->row_id('products', $product_id);
 
+        //Construir registro order_product
         $arr_row['order_id'] = $order_id;
         $arr_row['product_id'] = $product_id;
         $arr_row['original_price'] = $row_product->price;
         $arr_row['price'] = $row_product->price;
         $arr_row['quantity'] = $quantity;
 
-        $data['op_id'] = $this->Db_model->save('order_product', "order_id = {$arr_row['order_id']} AND product_id = {$arr_row['product_id']}", $arr_row);
+        //Guardar registro en order_product
+        $condition = "order_id = {$arr_row['order_id']} AND product_id = {$arr_row['product_id']} AND type_id = 1";
+        $data['op_id'] = $this->Db_model->save('order_product', $condition, $arr_row);
 
-        //Actualizar totales del pedido
+        //Actualizar totales de la compra
         $this->update_totals($order_id);
+
+        //Calcular número de productos (tipo 1) en la compra, y ponerla en variables de sesión
+        $data['qty_items'] = $this->Db_model->num_rows('order_product', "order_id = {$arr_row['order_id']} AND type_id = 1");
+        $this->session->set_userdata('order_qty_items', $data['qty_items']);
         
+        //Actualizar resultado respuesta
         $data['status'] = ($data['op_id'] > 0 ) ? 1 : 0 ;
 
         return $data;
     }
 
     /**
-     * Genera y establece un código único para un pedido. Campo order.order_code
-     * 2019-06-17
+     * Quita un producto de la orden y recalcula totales, elimina de la tabla order_product
+     * y recalcula totales.
+     * 2021-02-09 (No modificar pagos ya procesados)
      */
-    function set_order_code($order_id)
+    function remove_product($product_id, $row_order)
     {
-        $this->load->helper('string');
+        $data = array('status' => 0, 'message' => 'El producto no fue retirado de la compra');
         
-        //$order_code = 'VBN-' . strtoupper(random_string('alpha', 3)) . '-' . $order_id;
-        $order_code = $order_id . '-V' . strtoupper(random_string('alpha', 3));
-
-        $arr_row['order_code'] = $order_code;
-        $arr_row['description'] = 'Acceso a contenidos digitales ' . $order_code . ' en ' . APP_NAME;
+        $this->db->where('product_id', $product_id);
+        $this->db->where('order_id', $row_order->id);
+        $this->db->where('type_id', 1);     //Es un producto
+        $this->db->delete('order_product');
         
-        $this->db->where('id', $order_id);
-        $this->db->update('orders', $arr_row);
+        $data['qty_deleted'] = $this->db->affected_rows();
 
-        return $arr_row['order_code'];
+        //Actualizar totales de la compra
+        $this->update_totals($row_order->id);
+        
+        //Verificar resultado
+        if ( $data['qty_deleted'] > 0 ) 
+        {
+            $data['status'] = ( $data['qty_deleted'] > 0 ) ? 1 : 0 ;
+            $data['message'] = 'Producto retirado de la compra';
+        }
+
+        return $data;
+    }
+
+    /**
+     * Elimina las variables de sesión asociadas a una compra
+     * 2021-05-06
+     */
+    function unset_session()
+    {
+        $this->session->unset_userdata('order_code');
+        $this->session->unset_userdata('order_qty_items');
+
+        $data = array('status' => 1, 'message' => 'Compra desactivada');
+    
+        return $data;
+    }
+
+    /**
+     * Actualiza el campo products.stock después de que se confirma el pago de una compra
+     * 2021-05-03
+     */
+    function substract_stock($order_id)
+    {
+        $products = $this->products($order_id);
+        
+        foreach ( $products->result() as $row_product ) {
+            $sql = "UPDATE products SET stock = stock - {$row_product->quantity} WHERE id = {$row_product->product_id}";
+            $this->db->query($sql);
+        }
+    }
+
+// COSTOS DE ENVÍO
+//-----------------------------------------------------------------------------
+
+    /**
+     * Actualiza el valor del costo de una compra
+     * Agrega o edita el registro en la tabla order_product
+     */
+    function update_shipping_cost($order_id)
+    {
+        $data = array('status' => 0, 'saved_id' => 0, 'shipping_info' => array());
+
+        $row_order = $this->Db_model->row_id('orders', $order_id);
+        
+        //Se actualiza si la ciudad destino ya está definida
+        if ( $row_order->city_id > 0 ) 
+        {
+            //Guardar costo de envío, tabla order_product
+                $this->load->model('Shipping_model');
+                $shipping_info = $this->Shipping_model->shipping_info(909, $row_order->city_id, $row_order->total_weight);
+
+                $saved_id = $this->save_shipping_cost($row_order->id, $shipping_info);
+
+            //Actualizar método de envío, tabla orders
+                $arr_row['shipping_method_id'] = $shipping_info['method_id'];
+                $this->db->where('id', $row_order->id)->update('orders', $arr_row);
+
+            //Actualizar resultado
+            if ( $saved_id > 0 )
+            {
+                $data = array('status' => 1, 'saved_id' => $saved_id, 'shipping_info' => $shipping_info);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Guardar registro de costos de envío en tabla order_product
+     * 2021-04-21
+     */
+    function save_shipping_cost($order_id, $shipping_info)
+    {
+        //Construir registro
+        $arr_row['order_id'] = $order_id;
+        $arr_row['product_id'] = 1;   //COD 1, corresponde a flete, ver Ajustes > Parámetros > Extras pedidos
+        $arr_row['type_id'] = 2;       //No es un producto (1), es un elemento extra (2)
+        $arr_row['price'] = $shipping_info['cost'];
+        $arr_row['quantity'] = 1;      //Un envío
+        $arr_row['cost'] = 0;          //No aplica
+        $arr_row['tax'] = 0;           //No aplica
+
+        //Guardar
+        $condition = "order_id = {$order_id} AND product_id = {$arr_row['product_id']} AND type_id = {$arr_row['type_id']}";
+        $saved_id = $this->Db_model->save('order_product', $condition, $arr_row);
+
+        return $saved_id;
     }
 
 // CÁLCULO Y ACTUALIZACIÓN DE TOTALES
 //-----------------------------------------------------------------------------
 
+    function update_totals($order_id)
+    {
+        $this->update_products_totals($order_id);
+        $this->update_shipping_cost($order_id);
+        $this->update_extras_totals($order_id);
+    }
+
     /**
      * Actualiza los valores numéricos totales del pedido, a partir de los datos detallados en la tabla
      * order_product.
-     * 2019-06-17
+     * 2021-04-23
      */
-    function update_totals($order_id)
+    function update_products_totals($order_id)
     {
-        $this->update_totals_1($order_id);  //Total productos
-        $this->update_totals_3($order_id);  //Total valor, order.amount
+        
+        $arr_row = $this->order_totals_1($order_id);    //Productos, impuestos y peso
+
+        $arr_row['updater_id'] = $this->session->userdata('user_id');
+        $arr_row['updated_at'] = date('Y-m-d H:i:s');
+
+        $this->db->where('id', $order_id)->update('orders', $arr_row);
     }
 
-    function update_totals_1($order_id)
+    /**
+     * Actualiza los valores numéricos totales del pedido, a partir de los datos detallados en la tabla
+     * order_product.
+     * 2021-04-23
+     */
+    function update_extras_totals($order_id)
+    {
+        $row_order = $this->Db_model->row_id('orders', $order_id);
+
+        $arr_row['total_extras'] = $this->total_extras($order_id);
+        $arr_row['amount'] = $row_order->total_products + $arr_row['total_extras'];
+
+        $arr_row['updater_id'] = $this->session->userdata('user_id');
+        $arr_row['updated_at'] = date('Y-m-d H:i:s');
+
+        $this->db->where('id', $order_id)->update('orders', $arr_row);
+    }
+
+    /**
+     * Array, totales para tabla orders: total_products, total_tax y total_weight, a partir de datos en order_product
+     * 2021-04-21
+     */
+    function order_totals_1($order_id)
     {
         //Valor inicial por defecto
         $arr_row['updater_id'] = $this->session->userdata('user_id');
         $arr_row['total_products'] = 0;
         $arr_row['total_tax'] = 0;
+        $arr_row['total_weight'] = 0;
 
         //Consulta para calcular totales
-        $this->db->select('SUM(order_product.price * quantity) AS total_products, SUM(order_product.tax * quantity) AS total_tax');
+        $this->db->select('SUM(order_product.price * quantity) AS total_products, SUM(order_product.tax * quantity) AS total_tax, SUM(order_product.quantity * weight) as total_weight');
         $this->db->where('order_id', $order_id);
         $this->db->where('order_product.type_id', 1);  //Productos
+        $this->db->join('products', 'products.id = order_product.product_id');
         $query = $this->db->get('order_product');
 
         if ( $query->num_rows() > 0 ) 
         {
             $arr_row['total_products'] = $query->row()->total_products;
             $arr_row['total_tax'] = $query->row()->total_tax;
+            $arr_row['total_weight'] = ceil($query->row()->total_weight / 1000); //Convierte de gramos a Kg, y redondea hacia arriba;
         }
 
-        //Actualizar
-        $this->db->where('id', $order_id);
-        $this->db->update('orders', $arr_row);
+        return $arr_row;
     }
 
     /**
-     * Actualiza los totales: order.amount
-     * @param type $order_id
+     * Calcula y devuelve sumatoria de extras (order_product, type 2), para actualizar orders.total_extras
+     * 2021-04-13
      */
-    function update_totals_3($order_id)
+    function total_extras($order_id)
     {
-        $sql = "UPDATE orders SET amount = total_products + total_extras WHERE id = {$order_id}";
-        $this->db->query($sql);
+        $total_extras = 0;
+        
+        $this->db->select('SUM(order_product.price * quantity) AS total_extras');
+        $this->db->where('order_id', $order_id);
+        $this->db->where('order_product.type_id', 2);  //Extras
+        $query = $this->db->get('order_product');
+        
+        if ($query->num_rows() > 0 ) {
+            $total_extras = $query->row()->total_extras;
+        }
+        
+        return $total_extras;
     }
 
 // DATOS DEL PEDIDO
@@ -334,33 +536,59 @@ class Order_model extends CI_Model{
     //Productos incluidos en un pedido
     function products($order_id)
     {
-        $this->db->select('products.name, products.description, order_product.*');
+        $this->db->select('order_product.*, products.name, products.url_thumbnail, products.slug, products.stock');
         $this->db->join('products', 'products.id = order_product.product_id');
         $this->db->where('order_id', $order_id);
+        $this->db->where('order_product.type_id', 1);  //Producto
         $products = $this->db->get('order_product');
 
         return $products;
     }
 
     /**
-     * Devuelve un elemento row, de un pedido dado el código del pedido
-     * @param type $order_code
-     * @return type
+     * Elementos extras (no productos) en una compra, items categoría 6
+     * 2021-04-22
+     */
+    function extras($order_id)
+    {
+        $this->db->select('order_product.*, items.item_name AS extra_name');
+        $this->db->join('items', 'items.cod = order_product.product_id AND items.category_id = 6');
+        $this->db->where('order_id', $order_id);
+        $this->db->where('order_product.type_id', 2);  //Elementos extra
+        $extras = $this->db->get('order_product');
+
+        return $extras;
+    }
+
+    /**
+     * Devuelve un elemento row, de una compra dado el código de la compra
      */
     function row_by_code($order_code) 
     {
-        $row = $this->Db_model->row('orders', "order_code = '{$order_code}'");
+        $row = null;
+
+        $code_parts = explode('-', $order_code);
+        if ( count($code_parts) == 2 )
+        {
+            $row = $this->Db_model->row('orders', "id = '{$code_parts[1]}' AND order_code = '{$order_code}'");
+        }
+
         return $row;
     }
 
     /**
      * Query con posts confirmaciones de un pedido hechas por PayU
-     * 2021-01-26
+     * 2021-05-03
      */
     function confirmations($order_id)
     {
+        $this->db->select('id, status, content_json,
+            code AS reference_sale, slug AS value, excerpt AS response_message_pol, related_1 AS response_code_pol, 
+            related_2 AS payment_method_id, cat_1 AS merchant_id, cat_2 AS state_pol, text_1 AS sign,
+            text_2 AS currency, created_at, updated_at');
         $this->db->where('type_id', 54);
         $this->db->where('parent_id', $order_id);
+        $this->db->order_by('id', 'DESC');
         $confirmations = $this->db->get('posts');    
 
         return $confirmations;
@@ -373,7 +601,7 @@ class Order_model extends CI_Model{
      * Array con todos los datos para construir el formulario que se envía a PayU
      * para iniciar el proceso de pago.
      */
-    function payu_form_data($order_id)
+    function z_payu_form_data($order_id)
     {
         //Registro del pedido
         $row = $this->Db_model->row_id('orders', $order_id);
@@ -404,7 +632,7 @@ class Order_model extends CI_Model{
     /**
      * Genera la firma que se envía en el Formulario para ir al pago en PayU
      */
-    function payu_signature($row_order)
+    function z_payu_signature($row_order)
     {
         $signature_pre = K_PUAK;
         $signature_pre .= '~' . K_PUMI;
@@ -415,87 +643,64 @@ class Order_model extends CI_Model{
         return md5($signature_pre);
     }
 
+    function payu_confirmation_signature($order_id, $row_confirmation)
+    {
+        $new_value = number_format($row_confirmation->value, 1, '.', '');   //
+        $arr_response_pol = json_decode($row_confirmation->content_json, TRUE);
+
+        $signature_pre = K_PUAK;
+        $signature_pre .= '~' . $row_confirmation->merchant_id;
+        $signature_pre .= '~' . $row_confirmation->reference_sale;
+        $signature_pre .= '~' . $new_value;
+        $signature_pre .= '~' . $row_confirmation->currency;
+        $signature_pre .= '~' . $row_confirmation->state_pol;
+
+        $confirmation_signature = $signature_pre;
+
+        return md5($signature_pre);
+    }
+
     /**
-     * Tomar y procesar los datos POST que envía PayU a la página 
-     * de confirmación.
+     * Tomar y procesar los datos POST que envía PayU a la página de confirmación
      * url_confirmacion >> 'orders/confirmation_payu'
+     * 2021-05-03
      */
     function confirmation_payu()
     {   
         //Identificar Pedido
         $confirmation_id = 0;
-        $row = $this->row_by_code($this->input->post('reference_sale'));
+        $order = $this->row_by_code($this->input->post('reference_sale'));
 
-        if ( ! is_null($row) )
+        if ( ! is_null($order) )
         {
             //Guardar array completo de confirmación en la tabla "meta"
-                $row_confirmation = $this->save_confirmation($row);
+                $row_confirmation = $this->save_confirmation($order);
 
-            //Actualizar registro de pedido
+            //Restar existencias si hay confirmación de pago y la compra no sido marcada como pagada aún (1)
+                if ( $row_confirmation->status == 1 && $order->status != 1 )
+                {
+                    $this->substract_stock($order->id);     //Restar vendidos de cantidades disponibles
+                }
+
+            //Actualizar registro de la compra
                 if ( ! is_null($row_confirmation) )
                 {
                     $confirmation_id = $row_confirmation->id;
-                    $this->update_status($row_confirmation);
+                    $this->update_status($order, $row_confirmation);
                 }
 
-            //Asignar contenidos digitales
-                if ( $row_confirmation->status == 1 )
-                {
-                    //Asignar contenidos digitales asociados a los productos comprados
-                    $this->assign_posts($row->id);
-                }
-
-            //Enviar mensaje a administradores de tienda y al cliente
-                //$this->email_buyer($row->id);
-                //if ( $order_status == 1 ) { $this->email_admon($row->id); }
-                
-
-            
+            //Enviar mensaje a administradores de tienda y al comprador
+                if ( ENV == 'production' ) { $this->email_buyer($order->id); } 
         }
 
         return $confirmation_id;
     }
 
     /**
-     * Crea un registro en la tabla post, con los datos recibidos tras en la 
-     * ejecución de la página de confirmación por parte de PayU.
-     */
-    function save_confirmation($row)
-    {
-        //Datos POL
-            $arr_confirmation_payu = $this->input->post();
-            $arr_confirmation_payu['ip_address'] = $this->input->ip_address();
-            $json_confirmation_payu = json_encode($arr_confirmation_payu);
-        
-        //Construir registro para tabla Post
-            $arr_row['type_id'] = 54;  //54: Confirmación de pago, Ver: items.category_id = 33
-            $arr_row['post_name'] = 'Confirmación ' . $arr_confirmation_payu['reference_sale'];
-            $arr_row['content_json'] = $json_confirmation_payu;
-            $arr_row['status'] = ( $arr_confirmation_payu['response_code_pol'] == 1 ) ? 1 : 0;
-            $arr_row['parent_id'] = $row->id;
-            $arr_row['related_1'] = $arr_confirmation_payu['response_code_pol'];
-            $arr_row['related_2'] = $arr_confirmation_payu['payment_method_id'];
-            $arr_row['date_1'] = date('Y-m-d H:i:s');
-            $arr_row['text_1'] = $arr_confirmation_payu['sign'];
-            $arr_row['text_2'] = $arr_confirmation_payu['response_message_pol'];
-            $arr_row['updater_id'] = 100001;     //PayU internal user
-            $arr_row['creator_id'] = 100001;    //PayU internal user
-        
-        //Guardar
-            $condition = "type_id = 54 AND parent_id = {$row->id}";
-            $confirmation_id =$this->Db_model->save('posts', $condition, $arr_row);
-
-        //Row de confirmación
-            $row_confirmation = $this->Db_model->row_id('posts', $confirmation_id);
-        
-        return $row_confirmation;
-    }
-
-    /**
      * Actualiza el estado de un pedido, dependiendo del código de respuesta en la 
      * confirmación
      */
-    function update_status($row_confirmation)
+    function update_status($order, $row_confirmation)
     {
         $arr_row['status'] = ( $row_confirmation->related_1 == 1 ) ? 1 : 5;
         $arr_row['response_code_pol'] = $row_confirmation->related_1;
@@ -503,7 +708,7 @@ class Order_model extends CI_Model{
         $arr_row['updated_at'] = date('Y-m-d H:i:s');
         $arr_row['updater_id'] = 100001;  //PayU Automático
 
-        $this->db->where('id', $row_confirmation->parent_id);   //Parent ID = Order ID
+        $this->db->where('id', $order->id);   //Parent ID = Order ID
         $this->db->update('orders', $arr_row);
     }
 
@@ -533,56 +738,6 @@ class Order_model extends CI_Model{
         return $data;
     }
 
-// ASIGNACIÓN DE PRODUCTOS DIGITALES
-//-----------------------------------------------------------------------------
-
-    /**
-     * Verifica qué productos de los comprados incluyen contenidos digitales y se los asigna
-     * al usuario que realizó la compra
-     * 2020-04-16
-     * 
-     */
-    function assign_posts($order_id)
-    {
-        //Cargue inicial
-        $this->load->model('Product_model');
-        $this->load->model('Post_model');
-        $row = $this->Db_model->row_id('orders', $order_id);
-
-        $products = $this->digital_products($order_id);   //Productos con contenidos digitales
-
-        $arr_posts = array();
-        foreach( $products->result() as $row_product )
-        {
-            $posts = $this->Product_model->assigned_posts($row_product->id);
-            foreach ( $posts->result() as $row_post )
-            {
-                $arr_posts[] = array('id' => $row_post->id, 'title' => $row_post->title);
-                $this->Post_model->add_to_user($row_post->id, $row->user_id);
-            }
-        }
-
-        $data['products'] = $products->result();
-        $data['posts'] = $arr_posts;
-        $data['qty_posts'] = count($arr_posts);
-
-        return $data;
-    }
-
-    /**
-     * Listado de productos con contenidos digitales que están incluidos en un pedido
-     * 2020-04-16
-     */
-    function digital_products($order_id)
-    {
-        $this->db->select('id, name');
-        $this->db->where("id IN (SELECT product_id FROM order_product WHERE order_id = {$order_id} AND type_id = 1)");
-        $this->db->where('cat_1', 2115);  //Contenidos digitales
-        $products = $this->db->get('products');
-
-        return $products;
-    }
-
 // Datos de compras asociados a usuarios
 //-----------------------------------------------------------------------------
 
@@ -599,80 +754,20 @@ class Order_model extends CI_Model{
         return $orders;
     }
 
-    /**
-     * Compras realizadass por el usuario que incluyen productos con crédito para consumo
-     * de contenidos digitales.
-     */
-    function user_credit_orders($user_id)
-    {
-        $query_products = 'SELECT id FROM products WHERE cat_1 = 2110';   //Productos de Crédito Contenidos Digitales
-        $query_order_product = "SELECT order_id FROM order_product WHERE product_id IN ({$query_products})";
-
-        $this->db->select('orders.*');
-        $this->db->where('orders.user_id', $user_id);
-        $this->db->where('orders.status', 1);   //Pago confirmado
-        $this->db->order_by('id', 'DESC');
-        $this->db->where("orders.id IN ({$query_order_product})");
-        $orders = $this->db->get('orders');
-
-        return $orders;
-    }
-
-    /**
-     * Posts que fueron pagados por el usuario haciendo uso de su saldo o crédito pagado
-     * 2020-08-21
-     */
-    function user_payed_posts($user_id)
-    {
-        $this->db->select('posts.id, post_name AS title, users_meta.integer_2 AS price');
-        $this->db->join('users_meta', 'posts.id = users_meta.related_1');
-        $this->db->where('users_meta.type_id', 100012);   //Asignación de post
-        $this->db->where('users_meta.user_id', $user_id);
-        $this->db->where('users_meta.integer_2 > 0');
-        $posts = $this->db->get('posts');
-
-        return $posts;
-    }
-
-    /**
-     * Saldo que tiene un usuario para consumir contenidos digitales
-     * 2020-08-13
-     */
-    function credit($user_id)
-    {
-        //Compras        
-        $credit_orders = $this->user_credit_orders($user_id);
-        $sum_orders = 0;
-        foreach ( $credit_orders->result() as $row_order ) { $sum_orders += $row_order->amount; }
-        
-        //Consumos
-        $payed_posts = $this->user_payed_posts($user_id);
-        $sum_pays = 0;
-        foreach ( $payed_posts->result() as $row_post ) { $sum_pays += $row_post->price; }
-
-        //Balance
-        $credit = $sum_orders - $sum_pays;
-        if ( $credit < 0 ) $credit = 0;
-
-        return $credit;
-    }
-
 // MENSAJES DE CORREO ELECTRÓNICO
 //-----------------------------------------------------------------------------
 
     /**
      * Tras la confirmación PayU, se envía un mensaje de estado del pedido
      * al cliente
-     * 
-     * @param type $order_id
      */
     function email_buyer($order_id)
     {
         $row_order = $this->Db_model->row_id('orders', $order_id);
-        $admin_email = $this->Db_model->field_id('sis_option', 25); //Opción 25
+        $admin_email = $this->Db_model->field_id('sis_option', 25, 'option_value'); //Opción 25
             
         //Asunto de mensaje
-            $subject = "Estado de la compra {$row_order->order_code}: " . $this->Item_model->name(10, $row_order->response_code_pol);
+            $subject = "Estado compra {$row_order->order_code}: " . $this->Item_model->name(7, $row_order->status);
         
         //Enviar Email
             $this->load->library('email');
@@ -686,7 +781,6 @@ class Order_model extends CI_Model{
             $this->email->message($this->message_buyer($row_order));
             
             $this->email->send();   //Enviar
-            
     }
 
     /**
@@ -696,12 +790,13 @@ class Order_model extends CI_Model{
     function message_buyer($row_order)
     {
         $data['row_order'] = $row_order;
-        $data['product'] = $this->products($row_order->id);
+        $data['products'] = $this->products($row_order->id);
+        $data['extras'] = $this->extras($row_order->id);
 
         $str_style = file_get_contents(URL_RESOURCES . 'css/email.json');
         $data['style'] = json_decode($str_style);
         
-        $message = $this->load->view('orders/emails/message_buyer_v', $data, TRUE);
+        $message = $this->load->view($this->views_folder . 'emails/message_buyer_v', $data, TRUE);
         
         return $message;
     }

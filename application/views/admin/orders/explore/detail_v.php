@@ -56,7 +56,7 @@
                 </table>
             </div>
             <div class="modal-footer">
-                    <a class="btn btn-primary w100p" v-bind:href="`<?= URL_ADMIN . "{$controller}/info/" ?>` + element.id">Abrir</a>
+                    <a class="btn btn-primary w100p" v-bind:href="`<?= base_url("{$controller}/info/") ?>` + element.id">Abrir</a>
                     <button type="button" class="btn btn-secondary w100p" data-dismiss="modal">Cerrar</button>
             </div>
         </div>

@@ -86,10 +86,9 @@ class Comments extends CI_Controller{
     //Elimina un comentario, tabla comment
     function delete($comment_id, $element_id)
     {
-        $data = $this->Comment_model->delete($comment_id, $element_id);
+        $data['qty_deleted'] = $this->Comment_model->delete($comment_id, $element_id);
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
-
 
     /**
      * Formulario para agregar un nuevo comentario
@@ -165,24 +164,31 @@ class Comments extends CI_Controller{
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
+// PROCESOS
+//-----------------------------------------------------------------------------
+
+    /**
+     * Alternar like and unlike a un comment por parte del usuario en sesión
+     * 2021-05-18
+     */
+    function alt_like($comment_id)
+    {
+        $data = $this->Comment_model->alt_like($comment_id);
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
 // INFO 
 //-----------------------------------------------------------------------------
 
     /**
      * AJAX JSON
      * Listado de comentarios de un elemento
-     * 2020-06-08
+     * 2021-06-04
      */
     function element_comments($table_id, $element_id, $parent_id = 0, $num_page = 1)
     {
-        $data = array('qty_comments' => 0, 'comments' => array());
-        $comments = $this->Comment_model->element_comments($table_id, $element_id, $parent_id, $num_page);
-
-        if ( $comments->num_rows() > 0 )
-        {
-            $data['qty_comments'] = $comments->num_rows();
-            $data['comments'] = $comments->result();
-        }
+        $data['comments'] = $this->Comment_model->element_comments($table_id, $element_id, $parent_id, $num_page);
 
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
