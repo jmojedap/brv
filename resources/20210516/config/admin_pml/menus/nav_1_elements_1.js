@@ -1,5 +1,10 @@
 var nav_1_elements = [
     {
+        text: 'Inicio', active: false, icon: 'fa fa-home', cf: 'app/dashboard', anchor: false,
+        sections: ['app/dashboard'],
+        subelements: []
+    },
+    {
         text: 'Usuarios', active: false, icon: 'fa fa-user', cf: 'users/explore', anchor: false,
         sections: ['users/explore', 'users/add', 'users/import', 'users/profile', 'users/edit', 'users/assigned_contents'],
         subelements: []

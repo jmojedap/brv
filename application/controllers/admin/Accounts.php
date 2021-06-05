@@ -29,9 +29,9 @@ class Accounts extends CI_Controller {
     {
         if ( $this->session->userdata('logged') )
         {
-            redirect('app/logged');
+            redirect('start/logged');
         } else {
-            redirect('accounts/login');
+            redirect('app/accounts/login');
         }    
     }
     
@@ -83,15 +83,6 @@ class Accounts extends CI_Controller {
     {
         $this->Account_model->logout();
         redirect('app/accounts/login');
-    }
-
-    //ML Master Login, 
-    function ml($user_id)
-    {
-        $username = $this->Db_model->field_id('users', $user_id, 'username');
-        if ( in_array($this->session->userdata('role'), array(1,2)) ) { $this->Account_model->create_session($username, FALSE); }
-        
-        redirect('app/logged');
     }
     
 //REGISTRO DE USUARIOS

@@ -152,14 +152,12 @@ var app_insert = new Vue({
             params.append('table', 'product');
             params.append('field', 'slug');
             
-            axios.post(app_url + 'app/unique_slug/', params)
+            axios.post(app_url + 'tools/unique_slug/', params)
             .then(response => {
                 $('#field-slug').val(response.data);
                 //console.log(response.data);
             })
-            .catch(function (error) {
-                console.log(error);
-            });
+            .catch(function (error) { console.log(error) })
         },*/
         update_dependents: function(){
             var base_price = form_values.price / ( 1 + form_values.tax_percent/100) ;

@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Application extends CI_Controller {
+class App extends CI_Controller {
     
     function __construct()
     {
@@ -27,7 +27,7 @@ class Application extends CI_Controller {
     function denied()
     {
         $data['head_title'] = 'Acceso no permitido';
-        $data['view_a'] = 'app/application/denied_v';
+        $data['view_a'] = 'app/app/denied_v';
 
         $this->load->view('templates/admin_pml/start', $data);
     }

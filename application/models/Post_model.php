@@ -142,6 +142,7 @@ class Post_model extends CI_Model{
         
         //Otros filtros
         if ( $filters['type'] != '' ) { $condition .= "type_id = {$filters['type']} AND "; }
+        if ( $filters['u'] != '' ) { $condition .= "creator_id = {$filters['u']} AND "; }
         if ( $filters['condition'] != '' ) { $condition .= "{$filters['condition']} AND "; }
         
         //Quitar cadena final de ' AND '

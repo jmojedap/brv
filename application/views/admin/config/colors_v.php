@@ -13,11 +13,11 @@
     );
 
     $app_colors = array(
-        array('name' => 'main','background' => '#FF0066', 'font_color' => '#FFFFFF'),
-        array('name' => 'light','background' => '#FFCCE5', 'font_color' => '#000'),
-        array('name' => 'dark','background' => '#700030', 'font_color' => '#FFF'),
-        array('name' => 'darker','background' => '#1F0010', 'font_color' => '#FFF'),
-        array('name' => 'secondary','background' => '#2571d4', 'font_color' => '#FFFFFF'),
+        array('name' => 'main','background' => '#60C83C', 'font_color' => '#FFFFFF'),
+        array('name' => 'light','background' => '#D8DF9E', 'font_color' => '#000'),
+        array('name' => 'dark','background' => '#39B44A', 'font_color' => '#FFF'),
+        array('name' => 'darker','background' => '#458F2E', 'font_color' => '#FFF'),
+        array('name' => 'secondary','background' => '#A81493', 'font_color' => '#FFFFFF'),
         array('name' => 'color-2','background' => '#3E8EF7', 'font_color' => '#FFFFFF'),
         array('name' => 'color-3','background' => '#11C26D', 'font_color' => '#FFFFFF'),
         array('name' => 'color-4','background' => '#FDD835', 'font_color' => '#FFFFFF'),

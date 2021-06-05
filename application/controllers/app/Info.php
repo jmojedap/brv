@@ -33,28 +33,5 @@ class Info extends CI_Controller {
 // FUNCIONES FRONT INFO
 //-----------------------------------------------------------------------------
 
-    function about()
-    {
-        //Variables generales
-            $data['head_title'] = 'Sobre nosotras';
-            $data['view_a'] = 'info/about_v';
-            $this->App_model->view(TPL_FRONT, $data);
-    }
-
-    function contacto()
-    {
-        $data['recaptcha_sitekey'] = K_RCSK;    //config/constants.php
-
-        //Variables generales
-        $data['head_title'] = 'Contacto';
-        $data['view_a'] = 'info/contacto_v';
-        $this->App_model->view('templates/magnews/main_v', $data);
-    }
-
-    function loading()
-    {
-        $data['head_title'] = 'Brave :: Cargando...';
-        $data['view_a'] = 'info/loading_v';
-        $this->App_model->view('templates/magnews/main_v', $data);
-    }
+    
 }

@@ -70,6 +70,19 @@ class App_model extends CI_Model{
         return $data;
     }
 
+//Resumen para dashboard
+    function summary()
+    {
+        $summary = array();
+
+        $summary['users']['num_rows'] = $this->db->count_all('users');
+        $summary['orders']['num_rows'] = $this->db->count_all('orders');
+        $summary['products']['num_rows'] = $this->db->count_all('products');
+        $summary['posts']['num_rows'] = $this->db->count_all('posts');
+    
+        return $summary;
+    }
+
 // NOMBRES
 //-----------------------------------------------------------------------------
 

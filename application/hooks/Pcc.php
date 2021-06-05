@@ -20,7 +20,7 @@ class Pcc {
             } else {
                 //No tiene allow
                 //header('HTTP/1.0 403 Forbidden');
-                redirect("app/application/denied/{$cf}");
+                redirect("app/app/denied/{$cf}");
                 //exit;
             }
     }

@@ -27,11 +27,22 @@
     <div id="adv_filters" style="<?= $filters_style ?>" class="mb-2">
         <div class="form-group row">
             <div class="col-md-9">
-                <select name="type" v-model="filters.type" class="form-control" required>
+                <select name="type" v-model="filters.type" class="form-control">
                     <option v-for="(option_type, key_option) in options_type" v-bind:value="key_option">{{ option_type }}</option>
                 </select>
             </div>
             <label for="role" class="col-md-3 col-form-label">Tipo</label>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-9">
+                <input
+                name="u" type="number" class="form-control"
+                title="ID usuario creador" placeholder="ID usuario creador"
+                v-model="filters.u"
+                >
+            </div>
+            <label for="u" class="col-md-3 col-form-label">ID usuario creador</label>
         </div>
 
         <!-- Botón ejecutar y limpiar filtros -->

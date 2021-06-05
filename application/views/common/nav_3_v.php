@@ -1,6 +1,6 @@
 <div id="nav_3_vue" class="mb-2">
     <div class="only-lg">
-        <ul class="nav nav-pills" role="tablist">
+        <ul class="nav nav-pills justify-content-center" role="tablist">
             <li class="nav-item" v-for="(element, key) in nav_3">
                 <a
                     class="nav-link"

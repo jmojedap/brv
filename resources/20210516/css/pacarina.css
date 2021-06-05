@@ -1,3 +1,6 @@
+/* ESTILOS GENERALES APLICACIONES PML */
+/* VERSIÓN 2021-06-05 */
+
 /* Layout */
 /*-----------------------------------------------------------------------------*/
 
@@ -16,7 +19,7 @@
     gap: 0.5em 0.5em;
   }
   @media (max-width: 1366px) { .grid-general{ grid-template-columns: 1fr 1fr 1fr 1fr; }}
-  @media (max-width: 730px) { .grid-general{ grid-template-columns: 1fr 1fr; }}
+  @media (max-width: 767px) { .grid-general{ grid-template-columns: 1fr 1fr; }}
   @media (max-width: 450px) { .grid-general{ grid-template-columns: 1fr; }}
 
 .grid-3 {
@@ -49,6 +52,15 @@
 
 /* LINKS Y BOTONES */
 /*-----------------------------------------------------------------------------*/
+a.link-bold{
+    color: #666;
+    font-weight: bold;
+}
+
+a.link-bold:hover{
+    text-decoration: underline;
+}
+
 .a4{
     display: inline-block;
     text-align: center;
@@ -84,15 +96,14 @@ a.a4{
 }
 
 /* DISPLAY PANTALLAS GRANES Y PEQUEÑAS */
-/* 2020-05-23 */
 /*-----------------------------------------------------------------------------*/
 
 /* Grandes */
-@media (min-width: 731px) {
+@media (min-width: 768px) {
     .only-sm { display: none; }
 }
 
 /* Pantallas pequeñas */
-@media (max-width: 730px) {
+@media (max-width: 767px) {
     .only-lg { display: none; }
 }

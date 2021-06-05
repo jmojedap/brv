@@ -3,7 +3,7 @@
     <div class="center_box_750">
         <div class="bg-white">
             <div class="d-flex mb-2 border-bottom p-2" v-for="(user, uk) in users">
-                <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + user.id + `/` + user.username" class="">
+                <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + user.id + `/` + user.username">
                     <img
                         v-bind:src="user.url_thumbnail"
                         class="rounded rounded-circle w40p mr-3"
@@ -12,10 +12,11 @@
                     >
                 </a>
                 <div>
-                    <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + user.id + `/` + user.username" class="user_link">
-                        <span class="username">{{ user.username }}</span><br>
-                        <span class="display_name">{{ user.display_name }}</span>
+                    <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + user.id + `/` + user.username" class="link-bold">
+                        <span class="username">{{ user.username }}</span>
                     </a>
+                    <br>
+                    <span class="text-muted">{{ user.display_name }}</span>
                 </div>
                 <div class="ml-auto">
                     <button type="button" class="btn btn-primary btn-sm w100p" v-on:click="toggle_follow(uk)" v-show="user.follow_status == 1">Siguiendo</button>

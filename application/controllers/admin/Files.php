@@ -119,6 +119,10 @@ class Files extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
+    /**
+     * Formulario de edición de datos del archivo
+     * 2021-06-05
+     */
     function edit($file_id)
     {
         $data = $this->File_model->basic($file_id);
@@ -132,8 +136,6 @@ class Files extends CI_Controller{
             $data['back_link'] = URL_ADMIN . 'files/explore';
             $data['nav_2'] = $this->views_folder . 'menu_v';
             $data['view_a'] = $this->views_folder . 'edit_v';
-            
-        //Variables generales
         
         $this->App_model->view(TPL_ADMIN, $data);
     }
@@ -195,7 +197,6 @@ class Files extends CI_Controller{
         
         //Variables generales
             $data['file_id'] = $file_id;
-            $data['subtitulo_pagina'] = 'Cambiar archivo';
             $data['nav_2'] = $this->views_folder . 'menu_v';
             $data['view_a'] = $this->views_folder . 'change_v';
             $data['back_link'] = URL_ADMIN . 'files/explore';
@@ -242,6 +243,5 @@ class Files extends CI_Controller{
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-    
+    }   
 }

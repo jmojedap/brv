@@ -7,7 +7,7 @@
             <th width="50px"></th>
             <th>Título</th>
             <th width="150px">Tipo</th>
-            <th>Descripción</th>
+            <th class="only-lg">Descripción</th>
 
             <th width="50px"></th>
         </thead>
@@ -32,7 +32,7 @@
                     </a>
                 </td>
                 <td>{{ element.type_id | type_name  }}</td>
-                <td>{{ element.excerpt }}</td>
+                <td class="only-lg">{{ element.excerpt }}</td>
                 
                 <td>
                     <button class="a4" data-toggle="modal" data-target="#detail_modal" @click="set_current(key)">

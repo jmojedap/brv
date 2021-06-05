@@ -24,7 +24,7 @@ class Config extends CI_Controller {
         
     function index()
     {
-        redirect('admin/acl');
+        $this->options();
     }
         
 // SIS OPTION 2019-06-15
@@ -122,24 +122,6 @@ class Config extends CI_Controller {
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
-// Funciones de ayuda
-//-----------------------------------------------------------------------------
-
-    /**
-     * AJAX - POST
-     * Return String, with unique slut
-     */
-    function unique_slug()
-    {
-        $text = $this->input->post('text');
-        $table = $this->input->post('table');
-        $field = $this->input->post('field');
-        
-        $unique_slug = $this->Db_model->unique_slug($text, $table, $field);
-        
-        $this->output->set_content_type('application/json')->set_output($unique_slug);
-    }
-
 // Pruebas y desarrollo
 //-----------------------------------------------------------------------------
 
@@ -159,27 +141,5 @@ class Config extends CI_Controller {
         $data = array('status' => 1, 'message' => 'Listo');
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-    function test()
-    {
-        $data['head_title'] = 'Test';
-        $data['view_a'] = 'app/test_v';
-        $data['cant_resultados'] = '50';
-
-        $this->db->select('*');
-        $data['pictures'] = $this->db->get('pictures');
-
-        $this->App_model->view('templates/remark/main_v', $data);
-    }
-
-    function test_ajax()
-    {
-        $data['view_a'] = '<h1>Hola desde ajax</h1>';
-        $data['status'] = 1;
-
-        $this->output
-        ->set_content_type('application/json')
-        ->set_output(json_encode($data));
     }
 }

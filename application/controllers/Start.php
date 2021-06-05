@@ -26,8 +26,8 @@ class Start extends CI_Controller{
         if ( $this->session->userdata('logged') )
         {
             $arr_destination = array(
-                1 => 'admin/users/explore/',  //Desarrollador
-                2 => 'admin/users/explore/',  //Administrador
+                1 => 'admin/app/dashboard/',  //Desarrollador
+                2 => 'admin/app/dashboard/',  //Administrador
                 13 => 'app/accounts/profile/',    //Instructor
                 21 => 'app/accounts/profile/'     //Cliente
             );

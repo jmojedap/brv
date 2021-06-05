@@ -22,7 +22,7 @@ function load_sections(menu_type)
 //Antes de actualizar, limpiar o blanquear secciones
 function before_send_load_sections(menu_type)
 {
-    $('#view_a').html('Cargando...');
+    $('#view_a').html('<p class="text-center">Cargando...3</p>');
     $('#view_b').html('');
     
     if ( menu_type === 'nav_1' ) { $('#nav_2').html(''); }
