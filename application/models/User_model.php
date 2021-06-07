@@ -241,6 +241,7 @@ class User_model extends CI_Model{
 
     function save()
     {
+        $arr_row = $this->Db_model->arr_row('');
         $data['saved_id'] = $this->Db_model->save_id('users');
         return $data;
     }

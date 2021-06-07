@@ -7,10 +7,10 @@
                         <input type="hidden" name="id" value="<?= $row->id ?>">
 
                         <div class="form-group row">
-                            <label for="excerpt" class="col-md-4 col-form-label text-right">Descripción</label>
+                            <label for="excerpt" class="col-md-4 col-form-label text-right">Texto publicación</label>
                             <div class="col-md-8">
                                 <textarea
-                                    name="excerpt" type="text" class="form-control"
+                                    name="excerpt" class="form-control" rows="6"
                                     required
                                     title="Descripción" placeholder="Descripción"
                                     v-model="form_values.excerpt"

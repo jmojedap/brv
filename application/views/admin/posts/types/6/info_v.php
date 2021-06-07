@@ -1,12 +1,30 @@
+<?php
+    $creator = $this->Db_model->row_id('users', $row->creator_id);
+?>
+
 <div class="row">
     <div class="col-md-4">
         <div class="card mb-2">
+            <div class="card-body">
+            <div class="media">
+                <a href="<?= URL_ADMIN . "users/profile/{$creator->id}" ?>">
+                    <img src="<?= $creator->url_thumbnail ?>" class="w40p rounded rounded-circle mr-3" alt="...">
+                </a>
+                <div class="media-body">
+                    <a href="<?= URL_ADMIN . "users/profile/{$creator->id}" ?>" class="link-bold">
+                        <?= $creator->display_name ?>
+                    </a>
+                    <br>
+                    <span class="text-muted"><?= $creator->username ?></span>
+                </div>
+                </div>
+            </div>
+            <img class="w100pc" src="<?= $row->url_image ?>" alt="Imagen publicación">
             <div class="card-body">
                 <div>
                     <?= $row->excerpt ?>
                 </div>
             </div>
-            <img class="w100pc" src="<?= $row->url_image ?>" alt="Imagen publicación">
         </div>
     </div>
     <div class="col-md-8">

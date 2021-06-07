@@ -12,21 +12,12 @@
                 </div>
 
                 <div class="form-group row">
-                    <label for="first_name" class="col-md-4 col-form-label text-right">Nombres y Apellidos</label>
-                    <div class="col-md-4">
+                    <label for="display_name" class="col-md-4 col-form-label text-right">Nombres y Apellidos</label>
+                    <div class="col-md-8">
                         <input
-                            name="first_name" class="form-control"
-                            placeholder="Nombres" title="Nombres del usuario"
-                            required autofocus
-                            v-model="form_values.first_name"
-                            >
-                    </div>
-                    <div class="col-md-4">
-                        <input
-                            name="last_name" class="form-control"
-                            placeholder="Apellidos" title="Apellidos del usuario"
+                            name="display_name" class="form-control"
                             required
-                            v-model="form_values.last_name"
+                            v-model="form_values.display_name"
                             >
                     </div>
                 </div>

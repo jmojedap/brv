@@ -178,16 +178,6 @@
                                 ></textarea>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label for="about" class="col-md-4 col-form-label text-right">Acerca de mí</label>
-                        <div class="col-md-8">
-                            <textarea
-                                name="about" class="form-control"
-                                title="Acerca de mí"
-                                v-model="form_values.about"
-                                ></textarea>
-                        </div>
-                    </div>
 
                     <div class="form-group row">
                         <div class="offset-md-4 col-md-8">

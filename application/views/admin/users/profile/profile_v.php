@@ -1,3 +1,8 @@
+<?php
+    $condition = "creator_id = {$row->id} AND type_id IN (7,6)";
+    $qty_posts = $this->Db_model->num_rows('posts', $condition);
+?>
+
 <div class="container" id="profile_app">
     <div class="row">
         <div class="col col-md-4">
@@ -44,6 +49,15 @@
                         <td class="td-title">Seguidores / Seguidos</td>
                         <td><?= $row->qty_followers ?> / <?= $row->qty_following ?></td>
                     </tr>
+                    <tr>
+                        <td class="td-title">Publicaciones</td>
+                        <td>
+                            <a href="<?= URL_ADMIN . "posts/explore/?u={$row->id}" ?>" class="btn btn-sm btn-light w40p">
+                                <?= $qty_posts ?>
+                            </a>
+                        </td>
+                    </tr>
+
                     <tr>
                         <td class="td-title">Notas privadas</td>
                         <td><?= $row->admin_notes ?></td>

@@ -51,9 +51,9 @@ var add_user_app = new Vue({
         send_form: function() {
             axios.post(url_app + 'users/save/', $('#add_form').serialize())
             .then(response => {
-                if ( response.data.status == 1 )
+                if ( response.data.saved_id > 0 )
                 {
-                    this.row_id = response.data.saved_id;
+                    this.row_id = response.data.saved_id
                     this.clean_form()
                     $('#modal_created').modal()
                 }
@@ -61,19 +61,21 @@ var add_user_app = new Vue({
         },
         generate_username: function() {
             const params = new URLSearchParams();
-            params.append('first_name', this.form_values.first_name);
-            params.append('last_name', this.form_values.last_name);
+            params.append('first_name', this.form_values.first_name)
+            params.append('last_name', this.form_values.last_name)
             
             axios.post(url_app + 'users/username/', params)
             .then(response => {
                 this.form_values.username = response.data;
-            }).catch(function(error) {console.log(error)})
+            })
+            .catch(function(error) { console.log(error)} )
         },
         validate_form: function() {
             axios.post(url_app + 'users/validate/', $('#add_form').serialize())
             .then(response => {
                 this.validation = response.data.validation
-            }).catch(function (error) { console.log(error)})
+            })
+            .catch(function (error) { console.log(error)})
         },
         clean_form: function() {
             for ( key in form_values ) this.form_values[key] = ''
