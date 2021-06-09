@@ -29,7 +29,7 @@ class Accounts extends CI_Controller {
     {
         if ( $this->session->userdata('logged') )
         {
-            redirect('start/logged');
+            redirect('app/accounts/logged');
         } else {
             redirect('app/accounts/login');
         }    
@@ -47,7 +47,7 @@ class Accounts extends CI_Controller {
         //Verificar si está logueado
             if ( $this->session->userdata('logged') )
             {
-                redirect('start/logged');
+                redirect('app/accounts/logged');
             } else {
                 $data['head_title'] = APP_NAME;
                 $data['view_a'] = $this->views_folder . 'login_v';
@@ -64,6 +64,29 @@ class Accounts extends CI_Controller {
     {
         $this->Account_model->logout();
         redirect('app/accounts/login');
+    }
+
+    /**
+     * Destinos a los que se redirige después de validar el login de usuario
+     * según el rol de usuario (índice del array)
+     * 2021-06-08
+     */
+    function logged()
+    {
+        $destination = 'app/accounts/login';
+        if ( $this->session->userdata('logged') )
+        {
+            $arr_destination = array(
+                1 => 'admin/app/dashboard/',  //Desarrollador
+                2 => 'admin/app/dashboard/',  //Administrador
+                13 => 'app/accounts/profile/',    //Instructor
+                21 => 'app/accounts/profile/'     //Cliente
+            );
+                
+            $destination = $arr_destination[$this->session->userdata('role')];
+        }
+        
+        redirect($destination);
     }
     
 //REGISTRO DE USUARIOS

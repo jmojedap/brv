@@ -106,7 +106,7 @@ class Config extends CI_Controller {
         $username = $this->Db_model->field_id('users', $user_id, 'username');
         if ( in_array($this->session->userdata('role'), array(1,2)) ) { $this->Account_model->create_session($username, FALSE); }
         
-        redirect('start/logged');
+        redirect('app/accounts/logged');
     }
 
 // Procesos

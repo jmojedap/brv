@@ -50,7 +50,7 @@ var login_app = new Vue({
             .then(response => {
                 if ( response.data.status == 1 )
                 {
-                    window.location = '<?= base_url('start/logged') ?>';
+                    window.location = url_front + 'accounts/logged';
                 } else {
                     this.messages = response.data.messages;
                     this.status = response.data.status;

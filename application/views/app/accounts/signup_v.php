@@ -80,7 +80,7 @@
             <p>
                 ¡Ya haces parte de <?= APP_NAME ?>!
             </p>
-            <a href="<?= URL_APP . 'application/logged' ?>" class="btn btn-primary btn-lg">
+            <a href="<?= URL_APP . 'accounts/logged' ?>" class="btn btn-primary btn-lg">
                 CONTINUAR <i class="fa fa-arrow-right"></i>
             </a>
         </div>
@@ -111,8 +111,7 @@
                     this.loading = true
                     axios.post(url_api + 'accounts/register/', $('#signup_form').serialize())
                     .then(response => {
-                        console.log(response.data.message);
-                        if ( response.data.status == 1 ) {
+                        if ( response.data.saved_id > 0 ) {
                             this.saved_id = response.data.saved_id
                         } else {
                             this.recaptcha_message = response.data.recaptcha_message;
@@ -121,7 +120,6 @@
                     .catch(function (error) { console.log(error) })
                 } else {
                     toastr['error']('Revisa las casillas en rojo')
-                    console.log('El formulario no ha sido validado');
                 }
             },
             validate_form: function(){

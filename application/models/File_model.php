@@ -898,6 +898,7 @@ class File_model extends CI_Model{
             //Otras tablas
             $this->db->query("UPDATE users SET url_image = '{$arr_row['url']}', url_thumbnail = '{$arr_row['url_thumbnail']}' WHERE image_id = {$row->id}");
             $this->db->query("UPDATE posts SET url_image = '{$arr_row['url']}', url_thumbnail = '{$arr_row['url_thumbnail']}' WHERE image_id = {$row->id}");
+            $this->db->query("UPDATE products SET url_image = '{$arr_row['url']}', url_thumbnail = '{$arr_row['url_thumbnail']}' WHERE image_id = {$row->id}");
         }
 
         $data['message'] = 'Registros actualizados: ' . $data['qty_affected'];

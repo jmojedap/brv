@@ -29,7 +29,7 @@ class Accounts extends CI_Controller {
     {
         if ( $this->session->userdata('logged') )
         {
-            redirect('start/logged');
+            redirect('app/accounts/logged');
         } else {
             redirect('app/accounts/login');
         }    
@@ -47,7 +47,7 @@ class Accounts extends CI_Controller {
         //Verificar si está logueado
             if ( $this->session->userdata('logged') )
             {
-                redirect('start/logged');
+                redirect('app/accounts/logged');
             } else {
                 $data['head_title'] = APP_NAME;
                 $data['view_a'] = $this->views_folder . 'login_v';
@@ -101,6 +101,55 @@ class Accounts extends CI_Controller {
         $data['max_date'] = strtotime(date('Y-m-d') . ' -18 year');
         $this->load->view('templates/admin_pml/start', $data);
     }
+
+    /**
+     * AJAX JSON
+     * 
+     * Recibe los datos POST del form en accounts/signup. Si se validan los 
+     * datos, se registra el user. Se devuelve $data, con resultados de registro
+     * o de validación (si falló).
+     * 2021-04-15
+     */
+    function register()
+    {
+        $data = array('status' => 0, 'message' => 'La cuenta no fue creada');  //Initial result values
+        $res_validation = $this->Account_model->validate_form();
+        $this->load->model('Validation_model');
+        $recaptcha = $this->Validation_model->recaptcha(); //Validación Google ReCaptcha V3
+            
+        if ( $res_validation['status'] && $recaptcha->score > 0.5 )
+        {
+            //Construir registro del nuevo user
+                //$arr_row['firts_name'] = $this->input->post('first_name');
+                //$arr_row['last_name'] = $this->input->post('last_name');
+                //$arr_row['display_name'] = $this->input->post('first_name') . ' ' . $this->input->post('first_name');
+                //$arr_row['username'] = explode('@', $this->input->post('email'))[0] . rand(10,99);
+                
+                $arr_row['display_name'] = $this->input->post('display_name');
+                $arr_row['email'] = $this->input->post('email');
+                $arr_row['username'] = explode('@', $this->input->post('email'))[0] . rand(10,99);
+                $arr_row['password'] = $this->Account_model->crypt_pw($this->input->post('new_password'));
+                $arr_row['status'] = 2;     //Registrado sin confirmar email
+                $arr_row['role'] = 21;      //21: Rol por defecto
+
+            //Insert user
+                $data = $this->User_model->save($arr_row);
+                
+            //Enviar email con código de activación
+                $this->Account_model->activation_key($data['saved_id']);
+                if ( ENV == 'production' ) $this->Account_model->email_activation($data['saved_id']);                
+
+            //Iniciar sesión
+                $this->Account_model->create_session($arr_row['email']);
+        } else {
+            $data['validation'] = $res_validation['validation'];
+        }
+
+        //reCAPTCHA V3 validation
+        if ( $recaptcha->score <= 0.5 ) { $data['recaptcha_valid'] = FALSE; }
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
     
     /**
      * AJAX JSON
@@ -110,7 +159,7 @@ class Accounts extends CI_Controller {
      * o de validación (si falló).
      * 2021-03-09
      */
-    function register()
+    function register_ant()
     {
         $data = array('status' => 0, 'message' => 'La cuenta no fue creada');  //Initial result values
         $res_validation = $this->Account_model->validate_form();

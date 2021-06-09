@@ -13,28 +13,6 @@ class Start extends CI_Controller{
 
     function index()
     {
-        redirect('app/accounts');
-    }
-
-    /**
-     * Destinos a los que se redirige después de validar el login de usuario
-     * según el rol de usuario (índice del array)
-     */
-    function logged()
-    {
-        $destination = 'app/accounts/login';
-        if ( $this->session->userdata('logged') )
-        {
-            $arr_destination = array(
-                1 => 'admin/app/dashboard/',  //Desarrollador
-                2 => 'admin/app/dashboard/',  //Administrador
-                13 => 'app/accounts/profile/',    //Instructor
-                21 => 'app/accounts/profile/'     //Cliente
-            );
-                
-            $destination = $arr_destination[$this->session->userdata('role')];
-        }
-        
-        redirect($destination);
+        redirect('app/accounts/login');
     }
 }

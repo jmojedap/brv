@@ -239,10 +239,14 @@ class User_model extends CI_Model{
 // GUARDAR
 //-----------------------------------------------------------------------------
 
-    function save()
+    /**
+     * Crear o actualizar registro de usuario
+     * 2021-06-08
+     */
+    function save($arr_row = NULL)
     {
-        $arr_row = $this->Db_model->arr_row('');
-        $data['saved_id'] = $this->Db_model->save_id('users');
+        if ( is_null($arr_row) ) $arr_row = $this->Db_model->arr_row();
+        $data['saved_id'] = $this->Db_model->save_id('users', $arr_row);
         return $data;
     }
     

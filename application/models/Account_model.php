@@ -385,9 +385,9 @@ class Account_model extends CI_Model{
             $this->activation_key($user_id);
             
         //Asunto de mensaje
-            $subject = APP_NAME . ': Activate your account';
+            $subject = APP_NAME . ': Activa tu cuenta';
             if ( $activation_type == 'recovery' ) {
-                $subject = APP_NAME . ' Recover your account';
+                $subject = APP_NAME . ' Recupera tu cuenta';
             }
         
         //Enviar Email
@@ -413,7 +413,7 @@ class Account_model extends CI_Model{
         $data['row_user'] = $row_user ;
         $data['activation_type'] = $activation_type;
         
-        $message = $this->load->view('accounts/email_activation_v', $data, TRUE);
+        $message = $this->load->view('app/accounts/email_activation_v', $data, TRUE);
         
         return $message;
     }
