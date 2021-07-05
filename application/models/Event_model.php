@@ -211,7 +211,7 @@ class   Event_model extends CI_Model{
      */
     function delete($event_id)
     {
-        $quan_deleted = 0;
+        $qty_deleted = 0;
         $deletable = $this->deletable($event_id);
         
         if ( $deletable ) 
@@ -220,10 +220,10 @@ class   Event_model extends CI_Model{
                 $this->db->where('id', $event_id);
                 $this->db->delete('events');
                 
-            $quan_deleted = $this->db->affected_rows();
+            $qty_deleted = $this->db->affected_rows();
         }
             
-        return $quan_deleted;
+        return $qty_deleted;
     }
     
     /**

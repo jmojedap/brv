@@ -1,7 +1,6 @@
 <?php
     $app_cf_index = $this->uri->segment(2) . '_' . $this->uri->segment(3);
     
-    $cl_nav_2['places_explore'] = '';
     $cl_nav_2['places_info'] = '';
     $cl_nav_2['places_edit'] = '';
     $cl_nav_2['places_details'] = '';
@@ -17,20 +16,19 @@
     var nav_2 = [];
     var sections_role = [];
     var element_id = '<?= $row->id ?>';
-    
-    sections.explore = {
-        icon: 'fa fa-arrow-left',
-        text: 'Explorar',
-        class: '<?= $cl_nav_2['places_explore'] ?>',
-        cf: 'places/explore/',
-        anchor: true
-    };
 
     sections.info = {
         icon: '',
         text: 'Información',
         class: '<?= $cl_nav_2['places_info'] ?>',
         cf: 'places/info/' + element_id
+    };
+
+    sections.details = {
+        icon: '',
+        text: 'Detalles',
+        class: '<?= $cl_nav_2['places_details'] ?>',
+        cf: 'places/details/' + element_id
     };
 
     sections.edit = {
@@ -42,8 +40,8 @@
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['info', 'edit'];
-    sections_role[2] = ['info', 'edit'];
+    sections_role[1] = ['details', 'edit'];
+    sections_role[2] = ['details', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

@@ -13,12 +13,6 @@ Vue.filter('type_name', function (value) {
     return value
 })
 
-Vue.filter('number_format', function (value) {
-    if (!value) return ''
-    value = new Intl.NumberFormat().format(value)
-    return value
-})
-
 // App
 //-----------------------------------------------------------------------------
 
@@ -41,6 +35,7 @@ var app_explore = new Vue({
         display_filters: false,
         loading: false,
         options_type: <?= json_encode($options_type) ?>,
+        options_status: <?= json_encode($options_status) ?>,
         active_filters: false
     },
     methods: {
@@ -106,6 +101,7 @@ var app_explore = new Vue({
         remove_filters: function(){
             this.filters.q = ''
             this.filters.type = ''
+            this.filters.status = ''
             this.display_filters = false
             //$('#adv_filters').hide()
             setTimeout(() => { this.get_list() }, 100)
@@ -114,22 +110,9 @@ var app_explore = new Vue({
             var calculated_active_filters = false
             if ( this.filters.q ) calculated_active_filters = true
             if ( this.filters.type ) calculated_active_filters = true            
+            if ( this.filters.status ) calculated_active_filters = true            
 
             this.active_filters = calculated_active_filters
-        },
-        // Funciones especiales para places
-        //-----------------------------------------------------------------------------
-        set_status: function(key, status){
-            var form_data = new FormData
-            form_data.append('id', this.list[key].id)
-            form_data.append('status', status)
-            axios.post(url_api + 'places/set_status/', form_data)
-            .then(response => {
-                if ( response.data.saved_id > 0 ) {
-                    this.list[key].status = status
-                }
-            })
-            .catch( function(error) {console.log(error)} )
         },
     }
 })

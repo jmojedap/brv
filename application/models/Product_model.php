@@ -122,7 +122,8 @@ class Product_model extends CI_Model{
         }
         
         //Otros filtros
-        //if ( $filters['cat_1'] != '' ) { $condition .= "role = {$filters['cat_1']} AND "; }
+        if ( $filters['cat_1'] != '' ) { $condition .= "cat_1 = {$filters['cat_1']} AND "; }
+        if ( $filters['cat_2'] != '' ) { $condition .= "cat_2 = {$filters['cat_2']} AND "; }
         
         //Quitar cadena final de ' AND '
         if ( strlen($condition) > 0 ) { $condition = substr($condition, 0, -5);}

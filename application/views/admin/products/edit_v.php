@@ -78,6 +78,15 @@
                         </div>
 
                         <div class="form-group row">
+                            <label for="cat_2" class="col-md-4 col-form-label text-right">Sub categoría</label>
+                            <div class="col-md-8">
+                                <select name="cat_2" v-model="form_values.cat_2" class="form-control">
+                                    <option v-for="(option_cat_2, key_cat_2) in options_cat_2" v-bind:value="key_cat_2">{{ option_cat_2 }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
                             <label for="stock" class="col-md-4 col-form-label text-right">Cantidad existencias</label>
                             <div class="col-md-8">
                                 <input name="stock" type="number" class="form-control" min="0" required v-model="form_values.stock">

@@ -90,24 +90,6 @@ class Config extends CI_Controller {
         $data['view_a'] = $this->views_folder . 'colors_v';
         $this->App_model->view(TPL_ADMIN, $data);
     }
-    
-//Login maestro
-//---------------------------------------------------------------------------------------------------
-    
-    /**
-     * ml > master login
-     * Función para el login de administradores ingresando con otro user
-     * 
-     * @param type $user_id
-     */
-    function ml($user_id)
-    {
-        $this->load->model('Account_model');
-        $username = $this->Db_model->field_id('users', $user_id, 'username');
-        if ( in_array($this->session->userdata('role'), array(1,2)) ) { $this->Account_model->create_session($username, FALSE); }
-        
-        redirect('app/accounts/logged');
-    }
 
 // Procesos
 //-----------------------------------------------------------------------------

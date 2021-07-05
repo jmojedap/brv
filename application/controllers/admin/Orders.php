@@ -58,11 +58,11 @@ class Orders extends CI_Controller{
     function delete_selected()
     {
         $selected = explode(',', $this->input->post('selected'));
-        $data['quan_deleted'] = 0;
+        $data['qty_deleted'] = 0;
         
         foreach ( $selected as $row_id ) 
         {
-            $data['quan_deleted'] += $this->Order_model->delete($row_id);
+            $data['qty_deleted'] += $this->Order_model->delete($row_id);
         }
 
         //Establecer resultado

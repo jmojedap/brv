@@ -1,15 +1,15 @@
 <?php
     $app_cf_index = $this->uri->segment(2) . '_' . $this->uri->segment(3);
     
-    $cl_nav_2['places_explore'] = '';
-    $cl_nav_2['places_info'] = '';
-    $cl_nav_2['places_edit'] = '';
-    $cl_nav_2['places_details'] = '';
-    $cl_nav_2['places_images'] = '';
-    //$cl_nav_2['places_import'] = '';
+    $cl_nav_2['periods_explore'] = '';
+    $cl_nav_2['periods_info'] = '';
+    $cl_nav_2['periods_edit'] = '';
+    $cl_nav_2['periods_details'] = '';
+    $cl_nav_2['periods_images'] = '';
+    //$cl_nav_2['periods_import'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
-    if ( $app_cf_index == 'places_cropping' ) { $cl_nav_2['places_image'] = 'active'; }
+    if ( $app_cf_index == 'periods_cropping' ) { $cl_nav_2['periods_image'] = 'active'; }
 ?>
 
 <script>
@@ -21,23 +21,23 @@
     sections.explore = {
         icon: 'fa fa-arrow-left',
         text: 'Explorar',
-        class: '<?= $cl_nav_2['places_explore'] ?>',
-        cf: 'places/explore/',
+        class: '<?= $cl_nav_2['periods_explore'] ?>',
+        cf: 'periods/explore/',
         anchor: true
     };
 
     sections.info = {
         icon: '',
         text: 'Información',
-        class: '<?= $cl_nav_2['places_info'] ?>',
-        cf: 'places/info/' + element_id
+        class: '<?= $cl_nav_2['periods_info'] ?>',
+        cf: 'periods/info/' + element_id
     };
 
     sections.edit = {
         icon: '',
         text: 'Editar',
-        class: '<?= $cl_nav_2['places_edit'] ?>',
-        cf: 'places/edit/' + element_id,
+        class: '<?= $cl_nav_2['periods_edit'] ?>',
+        cf: 'periods/edit/' + element_id,
         anchor: true
     };
     

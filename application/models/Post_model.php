@@ -84,7 +84,7 @@ class Post_model extends CI_Model{
      */
     function select($format = 'general')
     {
-        $arr_select['general'] = 'id, post_name, excerpt, type_id, url_thumbnail';
+        $arr_select['general'] = 'id, post_name, excerpt, type_id, url_thumbnail, url_image';
         $arr_select['export'] = '*';
         $arr_select['5_album'] = 'id, post_name AS name, status, slug, related_1 AS girl_id, related_2 AS cat_clothes, integer_1 AS album_type, integer_2 AS price, url_image, url_thumbnail';
         $arr_select['6_picture'] = 'id, content, posts.related_1 AS user_id, text_1 AS file_name, text_2 AS private_file_name, related_1 AS girl_id, status, parent_id AS album_id';
@@ -242,7 +242,7 @@ class Post_model extends CI_Model{
     /**
      * Nombre de la vista con el formulario para la edición del post. Puede cambiar dependiendo
      * del tipo (type_id).
-     * 2021-03-26
+     * 2021-06-09
      */
     function type_folder($type_id)
     {

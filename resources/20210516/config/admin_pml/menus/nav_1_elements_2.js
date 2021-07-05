@@ -64,6 +64,10 @@ var nav_1_elements = [
                 text: 'Eventos', active: false, icon: 'far fa-clock', cf: 'events/summary', anchor: false,
                 sections: ['events/explore', 'events/summary']
             },
+            {
+                text: 'Periodos', active: false, icon: 'far fa-calendar', cf: 'periods/explore', anchor: false,
+                sections: ['periods/explore', 'periods/add']
+            },
         ]
     },
     {

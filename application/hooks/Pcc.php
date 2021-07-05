@@ -4,6 +4,9 @@ class Pcc {
     
     //Pcc, hace referencia al punto del hook, Post Controller Constructor
     
+    /**
+     * 2021-06-12
+     */
     function index()
     {
         //Crea instancia para obtener acceso a las librerías de codeigniter, basado en el id
@@ -12,6 +15,9 @@ class Pcc {
         //Identificar controlador/función, y allow
             $cf = $this->CI->uri->segment(2) . '/' . $this->CI->uri->segment(3);
             $allow_cf = $this->allow_cf($cf);    //Permisos de acceso al recurso controlador/función
+
+        //Si es API
+            if ( $this->CI->uri->segment(1) == 'api' ) $allow_cf = true;
         
         //Verificar allow
             if ( $allow_cf )

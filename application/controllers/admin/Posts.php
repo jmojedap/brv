@@ -94,9 +94,7 @@ class Posts extends CI_Controller{
         $destination = "posts/read/{$post_id}";
 
         if ( $row->type_id == 2 ) $destination = "app/noticias/leer/{$row->id}/{$row->slug}";
-        if ( $row->type_id == 5 ) $destination = "app/bonitas/album/{$row->related_1}/{$row->id}/{$meta_id}";
-        if ( $row->type_id == 8 ) $destination = "app/books/read/{$row->code}/{$row_meta->id}/{$row->slug}";
-
+        
         redirect($destination);
     }
 

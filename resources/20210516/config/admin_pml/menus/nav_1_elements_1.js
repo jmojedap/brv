@@ -26,6 +26,14 @@ var nav_1_elements = [
         subelements: []
     },
     {
+        text: 'Periodos',
+        active: false,
+        icon: 'far fa-calendar',
+        cf: 'periods/explore',
+        sections: ['periods/explore', 'periods/add'],
+        subelements: []
+    },
+    {
         text: 'Comentarios',
         active: false,
         icon: 'far fa-comment',

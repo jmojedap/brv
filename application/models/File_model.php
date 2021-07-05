@@ -603,26 +603,19 @@ class File_model extends CI_Model{
      * Elimina los registros que relacionan al file con otros elementos de la
      * base de datos. Tambien edita los fields de registros referentes al 
      * file_id
+     * 2021-06-10
      */
     function delete_related_rows($file_id)
     {
-        //Imagen de perfil de usuario
+        //Prepara registro
             $arr_row['image_id'] = 0;
             $arr_row['url_image'] = '';
             $arr_row['url_thumbnail'] = '';
-            $this->db->where('image_id', $file_id);
-            $this->db->update('users', $arr_row);
 
-        //Imagen de post
-            $arr_row_post['image_id'] = 0;
-            $arr_row_post['url_image'] = '';
-            $arr_row_post['url_thumbnail'] = '';
-            $this->db->where('image_id', $file_id);
-            $this->db->update('posts', $arr_row_post);
-
-        //Otras Aplicación
-            //$this->db->query("DELETE FROM post_meta WHERE type_id = 1 AND related_1  = {$file_id}"); //Imágen de post
-            $this->db->query("DELETE FROM users_meta WHERE type_id = 1 AND related_1  = {$file_id}"); //Imágen de usuario
+        //Actualizar registros en tablas tablas
+            $this->db->where('image_id', $file_id)->update('users', $arr_row);
+            $this->db->where('image_id', $file_id)->update('posts', $arr_row);
+            $this->db->where('image_id', $file_id)->update('products', $arr_row);
     }
 
     /**
@@ -792,7 +785,7 @@ class File_model extends CI_Model{
      */
     function unlink_unused($year, $month)
     {
-        $quan_deleted = 0;
+        $qty_deleted = 0;
         $this->load->helper('file');
         $files = get_filenames(PATH_UPLOADS . $year . '/' . $month);
         
@@ -804,11 +797,11 @@ class File_model extends CI_Model{
             $has_row = $this->has_row($folder, $without_prefix);
             
             if ( ! $has_row ) { 
-                $quan_deleted += $this->unlink($folder, $without_prefix);
+                $qty_deleted += $this->unlink($folder, $without_prefix);
             }
         }
         
-        return $quan_deleted;
+        return $qty_deleted;
     }
     
     /**

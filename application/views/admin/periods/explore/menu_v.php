@@ -1,11 +1,11 @@
 <?php
     $app_cf_index = $this->uri->segment(2) . '_' . $this->uri->segment(3);
     
-    $cl_nav_2['places_explore'] = '';
-    $cl_nav_2['places_add'] = '';
+    $cl_nav_2['periods_explore'] = '';
+    $cl_nav_2['periods_add'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
-    if ( $app_cf_index == 'places_import_e' ) { $cl_nav_2['places_import'] = 'active'; }
+    if ( $app_cf_index == 'periods_import_e' ) { $cl_nav_2['periods_import'] = 'active'; }
 ?>
 
 <script>
@@ -16,21 +16,28 @@
     sections.explore = {
         icon: 'fa fa-search',
         text: 'Explorar',
-        class: '<?= $cl_nav_2['places_explore'] ?>',
-        cf: 'places/explore'
+        class: '<?= $cl_nav_2['periods_explore'] ?>',
+        cf: 'periods/explore'
+    };
+
+    sections.calendar = {
+        icon: '',
+        text: 'Calendario',
+        class: '<?= $cl_nav_2['periods_calendar'] ?>',
+        cf: 'periods/calendar'
     };
 
     sections.add = {
         icon: 'fa fa-plus',
         text: 'Nuevo',
-        class: '<?= $cl_nav_2['places_add'] ?>',
-        cf: 'places/add'
+        class: '<?= $cl_nav_2['periods_add'] ?>',
+        cf: 'periods/add'
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['explore', 'add'];
-    sections_role[2] = ['explore', 'add'];
-    sections_role[2] = ['explore', 'add'];
+    sections_role[1] = ['calendar', 'explore', 'add'];
+    sections_role[2] = ['calendar', 'explore', 'add'];
+    sections_role[2] = ['calendar', 'explore', 'add'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

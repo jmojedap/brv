@@ -84,6 +84,20 @@ class Accounts extends CI_Controller {
         $this->Account_model->logout();
         redirect('app/accounts/login');
     }
+
+    /**
+     * ml > master login
+     * Función para el login de administradores ingresando con otro user
+     * 
+     * @param type $user_id
+     */
+    function ml($user_id)
+    {
+        $username = $this->Db_model->field_id('users', $user_id, 'username');
+        if ( in_array($this->session->userdata('role'), array(1,2)) ) { $this->Account_model->create_session($username, FALSE); }
+        
+        redirect('app/accounts/logged');
+    }
     
 //REGISTRO DE USUARIOS
 //---------------------------------------------------------------------------------------------------

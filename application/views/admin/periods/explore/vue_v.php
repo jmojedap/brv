@@ -13,11 +13,15 @@ Vue.filter('type_name', function (value) {
     return value
 })
 
-Vue.filter('number_format', function (value) {
-    if (!value) return ''
-    value = new Intl.NumberFormat().format(value)
-    return value
-})
+Vue.filter('date_format', function (date) {
+    if (!date) return ''
+    return moment(date).format('dddd, MMMM D [de] YYYY')
+});
+
+Vue.filter('ago', function (date) {
+    if (!date) return ''
+    return moment(date, 'YYYY-MM-DD HH:mm:ss').fromNow()
+});
 
 // App
 //-----------------------------------------------------------------------------
@@ -119,14 +123,12 @@ var app_explore = new Vue({
         },
         // Funciones especiales para places
         //-----------------------------------------------------------------------------
-        set_status: function(key, status){
-            var form_data = new FormData
-            form_data.append('id', this.list[key].id)
-            form_data.append('status', status)
-            axios.post(url_api + 'places/set_status/', form_data)
+        toggle_business_days: function(key){
+            var period_id = this.list[key].id
+            axios.get(url_api + 'periods/toggle_business_days/' + period_id)
             .then(response => {
                 if ( response.data.saved_id > 0 ) {
-                    this.list[key].status = status
+                    this.list[key].qty_business_days = response.data.qty_business_days
                 }
             })
             .catch( function(error) {console.log(error)} )

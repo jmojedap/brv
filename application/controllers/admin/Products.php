@@ -44,7 +44,8 @@ class Products extends CI_Controller{
         
         //Opciones de filtros de búsqueda
             $data['options_status'] = $this->Item_model->options('category_id = 8', 'Todos');
-            $data['options_category'] = $this->Item_model->options('category_id = 25', 'Todos');
+            $data['options_cat_1'] = $this->Item_model->options('category_id = 25 AND level = 0', 'Todos');
+            $data['options_cat_2'] = $this->Item_model->options('category_id = 25 AND level = 1', 'Todos');
             
         //Arrays con valores para contenido en lista
             $data['arr_status'] = $this->Item_model->arr_cod('category_id = 8');
@@ -148,6 +149,7 @@ class Products extends CI_Controller{
 
             $data['options_status'] = $this->Item_model->options('category_id = 8');
             $data['options_cat_1'] = $this->Item_model->options('category_id = 25 AND level = 0', 'Todos las categorías');
+            $data['options_cat_2'] = $this->Item_model->options('category_id = 25 AND level = 1', 'Todos las categorías');
         
         //Variables cargue vista
             $data['nav_2'] = $this->views_folder . 'menu_v';

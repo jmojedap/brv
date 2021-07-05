@@ -1,4 +1,4 @@
-<div id="edit_place">
+<div id="add_place">
     <div class="center_box_750">
         <div class="card">
             <div class="card-body">
@@ -11,6 +11,7 @@
                             </select>
                         </div>
                     </div>
+
                     <!-- UBICACIÓN ASCENDENCIA -->
                     <div class="form-group row">
                         <label for="country_id" class="col-md-4 col-form-label text-right">País * </label>
@@ -30,14 +31,18 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="place_name" class="col-md-4 col-form-label text-right">Nombre *</label>
+                        <label for="place_name" class="col-md-4 col-form-label text-right"><strong>Nombre *</strong></label>
                         <div class="col-md-8">
-                            <input
-                                name="place_name" type="text" class="form-control"
-                                required
-                                title="Nombre lugar" placeholder="Nombre lugar"
-                                v-model="form_values.place_name"
-                            >
+                            <input name="place_name" type="text" class="form-control" required v-model="form_values.place_name">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="status" class="col-md-4 col-form-label text-right">Status</label>
+                        <div class="col-md-8">
+                            <select name="status" v-model="form_values.status" class="form-control" required>
+                                <option v-for="(option_status, key_status) in options_status" v-bind:value="key_status">{{ option_status }}</option>
+                            </select>
                         </div>
                     </div>
 
@@ -87,47 +92,59 @@
 
                     <div class="form-group row">
                         <div class="col-md-8 offset-md-4">
-                            <button class="btn btn-primary w120p" type="submit">Guardar</button>
+                            <button class="btn btn-primary w120p" type="submit">
+                                Crear
+                            </button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+    <?php $this->load->view('common/modal_created_v') ?>
 </div>
 
 <script>
-// Variables
-//-----------------------------------------------------------------------------
-    var row_place = <?= json_encode($row) ?>;
-    row_place.type_id = '0<?= $row->type_id ?>';
-    row_place.country_id = '0<?= $row->country_id ?>';
-    row_place.region_id = '0<?= $row->region_id ?>';
-
-// Vue Applicación
-//-----------------------------------------------------------------------------
-var edit_place = new Vue({
-    el: '#edit_place',
-    created: function(){
-        //this.get_list()
-    },
+var add_place = new Vue({
+    el: '#add_place',
     data: {
-        row_id: <?= $row->id ?>,
-        form_values: row_place,
+        row_id: 0,
+        form_values: {
+            type_id: '04',
+            place_name: '',
+            full_name: '',
+            keywords: '',
+            cod: '',
+            cod_full: '',
+            cod_official: '',
+            country_id: '051',
+            region_id: '0285',
+            population: 0,
+            population_year: '<?= date('Y') ?>',
+        },
         options_type: <?= json_encode($options_type) ?>,
         options_country: <?= json_encode($options_country) ?>,
         options_region: <?= json_encode($options_region) ?>,
+        options_status: <?= json_encode($options_status) ?>,
     },
     methods: {
         send_form: function(){
-            axios.post(url_api + 'places/save/' + this.row_id, $('#place_form').serialize())
+            axios.post(url_api + 'places/save/', $('#place_form').serialize())
             .then(response => {
                 console.log(response.data)
                 if ( response.data.saved_id > 0 )
                 {
-                    toastr['success']('Datos actualizados')
+                    this.row_id = response.data.saved_id
+                    this.clean_form()
+                    $('#modal_created').modal()
                 }
             }).catch(function(error) {console.log(error)})  
+        },
+        clean_form: function() {
+            this.form_values.place_name = ''
+        },
+        go_created: function() {
+            window.location = url_app + 'places/info/' + this.row_id;
         },
         get_regions: function(){
             var form_data = new FormData

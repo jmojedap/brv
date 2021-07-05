@@ -8,7 +8,7 @@
             <th width="10px"><input type="checkbox" @change="select_all" v-model="all_selected"></th>
             <th width="10px">ID</th>
             <th>Nombre</th>
-            <th>Status</th>
+            <th></th>
             <th width="150px">Tipo</th>
             <th>País</th>
             <th>Departamento</th>
@@ -21,21 +21,21 @@
                 <td class="text-muted">{{ element.id }}</td>
 
                 <td>
-                    <a v-bind:href="`<?= URL_ADMIN . "places/edit/" ?>` + element.id">
+                    <a v-bind:href="`<?= URL_ADMIN . "admin/places/index/" ?>` + element.id">
                         {{ element.place_name }}
                     </a>
                 </td>
                 <td>
-                    <button v-if="element.status == 0" v-on:click="set_status(key, 1)" class="btn btn-warning w100p btn-sm">Inactivo</button>
-                    <button v-if="element.status == 1" v-on:click="set_status(key, 0)" class="btn btn-light w100p btn-sm">Activo</button>
+                    <span v-show="element.status == 1"><i class="fa fa-check-circle text-success"></i> Activo</span>
+                    <span v-show="element.status == 0"><i class="far fa-circle text-warning"></i> Inactivo</span>
                 </td>
                 <td>
-                    <a v-bind:href="`<?= URL_ADMIN . "places/explore/1/?type=0" ?>` + element.type_id">{{ element.type_id | type_name }}</a>
+                    <a v-bind:href="`<?= URL_ADMIN . "admin/places/explore/1/?type=" ?>` + element.type_id">{{ element.type_id | type_name }}</a>
                 </td>
 
                 <td>{{ element.country }}</td>
                 <td>{{ element.region }}</td>
-                <td>{{ element.population | number_format }} <i class="text-muted fa fa-caret-right"></i> <span class="text-muted">{{ element.population_year }}</span></td>
+                <td>{{ element.population }} <span class="text-muted">({{ element.population_year }})</span></td>
                 
                 <td>
                     <button class="a4" data-toggle="modal" data-target="#detail_modal" @click="set_current(key)">

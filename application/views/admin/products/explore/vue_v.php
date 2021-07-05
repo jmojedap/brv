@@ -39,7 +39,7 @@ var app_explore = new Vue({
         filters: <?= json_encode($filters) ?>,
         display_filters: false,
         loading: false,
-        options_category: <?= json_encode($options_category) ?>,
+        options_cat_1: <?= json_encode($options_cat_1) ?>,
         active_filters: false
     },
     methods: {

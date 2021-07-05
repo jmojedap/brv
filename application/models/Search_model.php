@@ -34,6 +34,8 @@ class Search_model extends CI_Model{
         $search_indexes = array(
             'q',        //Query or search text
             'cat',      //Category
+            'cat_1',    //Category 1
+            'cat_2',    //Category 2
             'type',     //Type ID
             'status',   //Status
             'u',        //User ID

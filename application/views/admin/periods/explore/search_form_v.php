@@ -27,11 +27,25 @@
     <div id="adv_filters" style="<?= $filters_style ?>" class="mb-2">
         <div class="form-group row">
             <div class="col-md-9">
-                <select name="cat_1" v-model="filters.cat_1" class="form-control" title="Filtrar por categoría">
-                    <option v-for="(option_cat_1, key_cat_1) in options_cat_1" v-bind:value="key_cat_1">{{ option_cat_1 }}</option>
+                <select name="type" v-model="filters.type" class="form-control" title="Filtrar por tipo de lugar">
+                    <option v-for="(option_type, key_type) in options_type" v-bind:value="key_type">{{ option_type }}</option>
                 </select>
             </div>
-            <label for="cat_1" class="col-md-3 col-form-label">Categoría</label>
+            <label for="type" class="col-md-3 col-form-label">Tipo</label>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-9">
+                <input name="d1" type="date" class="form-control" v-model="filters.d1">
+            </div>
+            <label for="d1" class="col-md-3 col-form-label">Desde</label>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-9">
+                <input name="d2" type="date" class="form-control" v-model="filters.d2">
+            </div>
+            <label for="d2" class="col-md-3 col-form-label">Hasta</label>
         </div>
 
         <!-- Botón ejecutar y limpiar filtros -->
