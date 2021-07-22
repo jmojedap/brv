@@ -274,17 +274,18 @@ class Period_model extends CI_Model{
     function weeks($date_1, $date_2)
     {
         $this->db->select('year, week_number, MIN(start) AS first_day');
-        $this->db->where('type_id', 9);
+        $this->db->where('type_id', 9); //Tipo día
         $this->db->where('start >= ', $date_1);
         $this->db->where('start <= ', $date_2);
         $this->db->group_by('year, week_number');
         $query_weeks = $this->db->get('periods');
 
-        foreach ($query_weeks->result() as $row_week) {
+        foreach ($query_weeks->result() as $row_week)
+        {
             $week['year'] = $row_week->year;
             $week['week_number'] = $row_week->week_number;
             $week['first_day'] = $row_week->first_day;
-            $week['days'] = $this->days_week($row_week->year, $row_week->week_number);
+            $week['days'] = $this->days_week($row_week->week_number);
 
             $weeks[] = $week;
         }
@@ -294,14 +295,32 @@ class Period_model extends CI_Model{
         return $weeks;
     }
 
-    function days_week($year, $week_number)
+    function days_week($week_number)
     {
         $this->db->where('type_id', 9); //Tipo día
-        $this->db->where('year', $year);
         $this->db->where('week_number', $week_number);
         $days = $this->db->get('periods');
 
         return $days->result();
+    }
+
+// Tools
+//-----------------------------------------------------------------------------
+
+    /**
+     * Query con días en un rango de fechas y que cumplen una condición.
+     * 2021-07-21
+     */
+    function days($start, $end, $condition = NULL)
+    {
+        //Seleccionar días laborales
+        $this->db->where('type_id', 9); //Periodo tipo día
+        $this->db->where('start >=', $start);
+        $this->db->where('start <=', $end);
+        if ( ! is_null($condition) ) $this->db->where($condition);
+        $days = $this->db->get('periods');
+
+        return $days;
     }
 
 // Calendario

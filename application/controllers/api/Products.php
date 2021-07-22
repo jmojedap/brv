@@ -38,6 +38,18 @@ class Products extends CI_Controller{
     }
 
     /**
+     * JSON
+     * Datos de un producto
+     */
+    function get_info($product_id)
+    {
+        $data['product'] = $this->Db_model->row_id('products', $product_id);
+        
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
      * AJAX JSON
      * Imágenes de un producto
      * 2020-07-07

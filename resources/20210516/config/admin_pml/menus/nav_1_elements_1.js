@@ -26,11 +26,11 @@ var nav_1_elements = [
         subelements: []
     },
     {
-        text: 'Periodos',
+        text: 'Calendario',
         active: false,
         icon: 'far fa-calendar',
-        cf: 'periods/explore',
-        sections: ['periods/explore', 'periods/add'],
+        cf: 'calendar/calendar',
+        sections: ['calendar/calendar', 'calendar/programacion_automatica'],
         subelements: []
     },
     {

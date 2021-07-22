@@ -172,6 +172,7 @@ class Periods extends CI_Controller{
     {
         if ( is_null($year) ) $year = date('Y');
         if ( is_null($month) ) $month = date('m');
+        $row_month = $this->Db_model->row('periods', "year = {$year} AND month = {$month}");
 
         $calendar_prefs = $this->Period_model->calendar_prefs();
         $calendar_prefs['template'] = $this->Period_model->calendar_template();
@@ -179,10 +180,11 @@ class Periods extends CI_Controller{
 
         $this->load->library('calendar', $calendar_prefs);
 
-        $data['weeks'] = $this->Period_model->weeks('2021-01-01', '2021-12-31');
+        $data['weeks'] = $this->Period_model->weeks($row_month->start, $row_month->end);
 
         $data['head_title'] = 'Calendario';
         $data['nav_2'] = $this->views_folder . 'explore/menu_v';
+        $data['day_start'] = $row_month->start;
         $data['year'] = $year;
         $data['month'] = $month;
         $data['view_a'] = $this->views_folder . 'calendar_v';

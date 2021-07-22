@@ -156,7 +156,7 @@ var calendar_app = new Vue({
             return day_class
         },
         toggle_business_day: function(){
-            axios.get(url_api + 'periods/toggle_business_day/' + this.active_day.id)
+            axios.get(url_api + 'calendar/toggle_business_day/' + this.active_day.id)
             .then(response => {
                 if ( response.data.saved_id > 0 ) {
                     this.active_day.qty_business_day = response.data.qty_bussines_day
@@ -165,7 +165,7 @@ var calendar_app = new Vue({
             .catch(function(error) { console.log(error) })
         },
         set_month: function(){
-            window.location = url_app + 'periods/calendar/' + this.year + '/' + this.month
+            window.location = url_app + 'calendar/calendar/' + this.year + '/' + this.month
         },
         sum_month: function(month){
             this.month = month

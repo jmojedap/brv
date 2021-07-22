@@ -197,6 +197,36 @@ class App_model extends CI_Model{
         
         return $options_post;
     }
+    
+// Específicas de la aplicación
+//-----------------------------------------------------------------------------
+
+    /**
+     * Listado de zonas de entrenamiento
+     * 2021-07-19
+     */
+    function rooms()
+    {
+        $this->db->select('cod AS room_id');
+        $this->db->where('category_id', 520);
+        $rooms = $this->db->get('items');
+
+        return $rooms;
+    }
+
+    /**
+     * Query horarios de entrenamiento presencial
+     * 2021-07-19
+     */
+    function schedules()
+    {
+        $this->db->select('id AS horario_id, short_name AS hour');
+        $this->db->where('category_id', 510);
+        $schedules = $this->db->get('items');
+
+        return $schedules;
+    }
+
 
 // Procesos del sistema para la aplicación
 //-----------------------------------------------------------------------------

@@ -244,9 +244,7 @@ class   Event_model extends CI_Model{
     
     /**
      * Guarda un registro en la tabla event
-     * 
-     * @param type $arr_row
-     * @return type
+     * 2021-07-19
      */
     function save($arr_row, $condition_add = NULL)
     {

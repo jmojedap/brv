@@ -5,10 +5,6 @@ class Account_model extends CI_Model{
     /**
      * Realiza la validación de login, user y password. Valida coincidencia
      * de password, y status del users.
-     * 
-     * @param type $userlogin
-     * @param type $password
-     * @return int
      */
     function validate_login($userlogin, $password)
     {
@@ -129,11 +125,11 @@ class Account_model extends CI_Model{
             $data = array(
                 'logged' => TRUE,
                 'username' => $row_user->username,
+                'email' => $row_user->email,
                 'display_name' => $row_user->display_name,
                 'short_name' => explode(' ', $row_user->display_name)[0],
                 'user_id' => $row_user->id,
                 'role' => $row_user->role,
-                'role_abbr' => $this->Db_model->field('items', "category_id = 58 AND cod = {$row_user->role}", 'abbreviation'),
                 'last_login' => $row_user->last_login,
                 'picture' => $row_user->url_thumbnail
             );
