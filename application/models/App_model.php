@@ -70,7 +70,7 @@ class App_model extends CI_Model{
         return $data;
     }
 
-//Resumen para dashboard
+    //Resumen para dashboard
     function summary()
     {
         $summary = array();

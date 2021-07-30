@@ -3,7 +3,7 @@
     
     $cl_nav_2['calendar_calendar'] = '';
     $cl_nav_2['calendar_programacion_automatica'] = '';
-    $cl_nav_2['calendar_sesiones'] = '';
+    $cl_nav_2['calendar_trainings'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
     //if ( $app_cf_index == 'calendar_import_e' ) { $cl_nav_2['calendar_import'] = 'active'; }
@@ -28,16 +28,16 @@
         cf: 'calendar/programacion_automatica'
     };
 
-    sections.sesiones = {
+    sections.trainings = {
         icon: '',
-        text: 'Sesiones',
-        class: '<?= $cl_nav_2['calendar_sesiones'] ?>',
-        cf: 'calendar/sesiones'
+        text: 'Entrenamientos',
+        class: '<?= $cl_nav_2['calendar_trainings'] ?>',
+        cf: 'calendar/trainings'
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['calendar', 'programacion_automatica', 'sesiones'];
-    sections_role[2] = ['calendar', 'programacion_automatica', 'sesiones'];
+    sections_role[1] = ['calendar', 'programacion_automatica', 'trainings'];
+    sections_role[2] = ['calendar', 'programacion_automatica', 'trainings'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

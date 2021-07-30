@@ -286,7 +286,7 @@ class User_model extends CI_Model{
      */
     function validate($user_id = NULL)
     {
-        $data = array('status' => 1, 'message' => 'Los datos de usuario son válidos');
+        $data = array('status' => 1, 'error' => '');
         $this->load->model('Validation_model');
         
         $username_validation = $this->Validation_model->username($user_id);
@@ -296,14 +296,11 @@ class User_model extends CI_Model{
         $validation = array_merge($username_validation, $email_validation, $document_number_validation);
         $data['validation'] = $validation;
 
-        foreach ( $validation as $value )
-        {
-            if ( $value == FALSE )  //Si alguno de los valores no es válido
-            {
-                $data['status'] = 0;
-                $data['message'] = 'Los datos de usuario NO son válidos';
-            }
-        }
+        if ( $email_validation['email_unique'] == 0 ) $data['error'] = "El e-mail escrito lo ha tomado otro usuario";
+        if ( $username_validation['username_unique'] == 0 ) $data['error'] = "El username escrito lo ha tomado otro usuario";
+
+        //Si hay al menos un error, no se valida
+        if ( strlen($data['error']) > 0 ) $data['status'] = 0;
 
         return $data;
     }

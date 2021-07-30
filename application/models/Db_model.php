@@ -3,7 +3,7 @@ class Db_model extends CI_Model{
     
     /* Db, is abbreviation for Database
      * Functions that complement database operations with CodeIgniter
-     * Actualizada 2019-06-17
+     * Actualizada 2021-07-26
      */
       
     /**
@@ -100,16 +100,11 @@ class Db_model extends CI_Model{
      * Determina si un valor para un field es único en la table. Si se agrega
      * el ID de un row específico, lo descarta en la búsqueda, valor ya
      * existente.
-     * 
-     * @param type $table
-     * @param type $field
-     * @param type $value
-     * @param type $row_id
-     * @return boolean
+     * 2021-07-26
      */
     function is_unique($table, $field, $value, $row_id = NULL)
     {
-        $is_unique = TRUE;
+        $is_unique = 1;
         
         $this->db->select('id');
         $this->db->where("{$field} = '{$value}'");
@@ -119,7 +114,7 @@ class Db_model extends CI_Model{
         
         if ( $query->num_rows() > 0 && strlen($value) > 0 )
         {
-            $is_unique = FALSE;
+            $is_unique = 0;
         }
         
         return $is_unique;

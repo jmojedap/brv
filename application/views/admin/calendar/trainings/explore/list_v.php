@@ -7,6 +7,7 @@
         <thead>
             <th width="10px"><input type="checkbox" @change="select_all" v-model="all_selected"></th>
             <th width="10px">ID</th>
+            <th></th>
             
             <th width="200px">Zona</th>
             <th></th>
@@ -22,6 +23,11 @@
             <tr v-for="(element, key) in list" v-bind:id="`row_` + element.id" v-bind:class="{'table-info': selected.includes(element.id) }">
                 <td><input type="checkbox" v-bind:id="`check_` + element.id" v-model="selected" v-bind:value="element.id"></td>
                 <td class="text-muted">{{ element.id }}</td>
+                <td>
+                    <a v-bind:href="`<?= URL_ADMIN . "calendar/sesion/" ?>` + element.id" class="btn btn-light btn-sm">
+                        Abrir
+                    </a>
+                </td>
                 
                 <td>
                     <a v-bind:href="`<?= URL_ADMIN . "calendar/sesiones/1/?fe1=" ?>` + element.element_id">{{ element.element_id | room_name }}</a>

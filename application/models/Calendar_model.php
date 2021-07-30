@@ -35,7 +35,8 @@ class Calendar_model extends CI_Model{
     function select($format = 'general')
     {
         $arr_select['general'] = 'events.*, users.display_name AS user_display_name';
-        $arr_select['sesiones'] = 'events.id, related_1 AS day_id, start, events.status, element_id AS room_id, integer_1 AS total_spots, integer_2 AS available_spots';
+        $arr_select['trainings'] = 'events.id, related_1 AS day_id, start, events.status, element_id AS room_id, integer_1 AS total_spots, integer_2 AS available_spots';
+        $arr_select['reservations'] = 'events.id, events.status, related_1 AS day_id, start, element_id AS training_id, user_id, related_2 AS room_id, users.display_name AS user_display_name, users.url_thumbnail AS user_thumbnail';
 
         //$arr_select[''] = 'usuario.id, username, usuario.email, nombre, apellidos, sexo, rol_id, estado, no_documento, tipo_documento_id, institucion_id, grupo_id';
 
@@ -75,11 +76,11 @@ class Calendar_model extends CI_Model{
 
     /**
      * String con condición WHERE SQL para filtrar events
-     * 2020-08-01
+     * 2021-07-23
      */
     function search_condition($filters)
     {
-        $condition = 'events.type_id IN (203, 205, 213) AND ';
+        $condition = '';
 
         $condition .= $this->role_filter() . ' AND ';
 
@@ -162,9 +163,42 @@ class Calendar_model extends CI_Model{
 //-----------------------------------------------------------------------------
 
     /**
-     * Array con los datos para la vista de exploración de sesiones de entrenamiento
+     * Registro sesión de entrenamiento, tabla events.
+     * 2021-07-23
      */
-    function sesiones_data($filters, $num_page, $per_page = 100)
+    function row_training($training_id)
+    {
+        $this->db->select($this->select('trainings'));
+        $this->db->where('id', $training_id);
+        $trainings = $this->db->get('events');
+
+        if ( $trainings->num_rows() ) {
+            $row_training = $trainings->row();
+            $row_training->room_name = $this->Item_model->name(520, $row_training->room_id);
+            return $row_training;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Query con reservas hechas para una sesión de entrenamiento
+     * 2021-07-23
+     */
+    function training_reservations($training_id)
+    {
+        $this->db->select($this->select('reservations'));
+        $this->db->join('users', 'events.user_id = users.id', 'left');
+        $this->db->where('element_id', $training_id);
+        $reservations = $this->db->get('events');
+
+        return $reservations;
+    }
+
+    /**
+     * Array con los datos para la vista de exploración de trainings de entrenamiento
+     */
+    function trainings_data($filters, $num_page, $per_page = 100)
     {
         //Data inicial, de la tabla
             //$this->load->model('Event_model');
@@ -172,8 +206,8 @@ class Calendar_model extends CI_Model{
         
         //Elemento de exploración
             $data['controller'] = 'calendar';                      //Nombre del controlador
-            $data['cf'] = 'calendar/sesiones/';                      //Nombre del controlador
-            $data['views_folder'] = $this->views_folder . 'sesiones/';           //Carpeta donde están las vistas de exploración
+            $data['cf'] = 'calendar/trainings/';                      //Nombre del controlador
+            $data['views_folder'] = $this->views_folder . 'trainings/explore/';           //Carpeta donde están las vistas de exploración
             $data['num_page'] = $num_page;                      //Número de la página
             
         //Vistas
@@ -185,69 +219,84 @@ class Calendar_model extends CI_Model{
         return $data;
     }
 
-    function sesiones_days()
+    /**
+     * Query tabla periods, con días en los cuales se puede programar una reservación
+     * 2021-07-23
+     */
+    function trainings_days()
     {
         $today_id = date('Ymd');
 
         //$this->db->select('');
         $this->db->where('id >=', $today_id);
         $this->db->where('type_id', 9); //Periodo tipo día
-        $this->db->where('id IN (SELECT related_1 FROM events WHERE type_id = 203)');   //Día en los que haya sesiones
+        $this->db->where('id IN (SELECT related_1 FROM events WHERE type_id = 203)');   //Día en los que haya trainings
         $this->db->order_by('id', 'ASC');
         $periods = $this->db->get('periods', 2);
 
         return $periods;
     }
 
-    function get_sesiones($day_id, $room_id)
+    /**
+     * Array, con trainings para una fecha y zona de entrenamiento específica.
+     * 2021-07-23
+     */
+    function get_trainings($day_id, $room_id)
     {
         $now = new DateTime('now');
         $now->add(new DateInterval('PT1H'));
 
-        $this->db->select($this->select('sesiones'));
-        $this->db->where('type_id', 203);   //Sesión de entrenamiento presencial
+        $this->db->select($this->select('trainings'));
+        $this->db->where('type_id', 203);           //Sesión de entrenamiento presencial
         $this->db->where('element_id', $room_id);   //Zona de entrenamiento
-        $this->db->where('related_1', $day_id);   //Día de la sesión de entrenamiento
-        $this->db->where('start >', date('Y-m-d') . ' 00:00:00');   //Sesión de entrenamiento presencial
+        $this->db->where('related_1', $day_id);     //Día de la sesión de entrenamiento
+        $this->db->where('start >', date('Y-m-d') . ' 00:00:00');   //Posteriores a la fecha de hoy
         $this->db->order_by('start', 'ASC');
         $query = $this->db->get('events');
 
-        $sesiones = array();
-        foreach ($query->result() as $sesion) {
-            $sesion->active = 1;
-            if ( $sesion->start < $now->format('Y-m-d H:i:s') ) $sesion->active = 0;
+        $trainings = array();
+        foreach ($query->result() as $training) {
+            $training->taken_spots = $training->total_spots - $training->available_spots;
+            $training->active = 1;
+            if ( $training->start < $now->format('Y-m-d H:i:s') ) $training->active = 0;
 
-            $sesiones[] = $sesion;
+            $trainings[] = $training;
         }
 
-        return $sesiones;
+        return $trainings;
     }
 
-    function programar_sesiones($start, $end)
+    /**
+     * Programar automáticamente trainings de entrenamiento entre dos fechas
+     */
+    function programar_trainings($start, $end)
     {
-        $sesiones = array();
+        $trainings = array();
 
-        $days = $this->Period_model->days($start, $end, 'business_day = 1');
-        $rooms = $this->App_model->rooms(); //Zonas de entrenamiento
-        $schedules = $this->App_model->schedules(); 
+        $days = $this->Period_model->days($start, $end, 'business_day = 1');    //Días laborales
+        $rooms = $this->App_model->rooms();             //Zonas de entrenamiento
+        $schedules = $this->App_model->schedules();     //Horarios
 
-        //$qty_rows = $days->num_rows() * $rooms->num_rows() * $schedules->num_rows();
-
+        //Recorrer cada día, zona y horario y crear registro
         foreach ($days->result() as $day) {
             foreach ($rooms->result() as $room) {
                 foreach ($schedules->result() as $schedule) {
-                    $sesiones[] = $this->programar_sesion($day, $room->room_id, $schedule->hour);
+                    $trainings[] = $this->programar_training($day, $room->room_id, $schedule->hour);
                 }
             }
         }
 
-        $data['sesiones'] = $sesiones;
-        $data['message'] = 'Sesiones programadas: ' . count($sesiones);
+        //Preparar respuesta
+        $data['trainings'] = $trainings;
+        $data['message'] = 'Sesiones programadas: ' . count($trainings);
 
         return $data;
     }
 
-    function programar_sesion($day, $room_id, $hour)
+    /**
+     * Crea un registro en la tabla events, tipo 203, sesión de entrenamiento
+     */
+    function programar_training($day, $room_id, $hour)
     {
         $arr_row['type_id'] = 203;  //Sesión de entrenamiento
         $arr_row['start'] = $day->start . ' ' . $hour;   //Día y hora
@@ -269,10 +318,10 @@ class Calendar_model extends CI_Model{
      * 2021-07-22
      * 
      */
-    function update_spots($sesion_id)
+    function update_spots($training_id)
     {
-        $qty_reservations = $this->Db_model->num_rows('events', "type_id = 213 AND element_id = {$sesion_id}");
-        $this->db->query("UPDATE events SET integer_2 = (integer_1 - $qty_reservations) WHERE id = {$sesion_id}");
+        $qty_reservations = $this->Db_model->num_rows('events', "type_id = 213 AND element_id = {$training_id}");
+        $this->db->query("UPDATE events SET integer_2 = (integer_1 - $qty_reservations) WHERE id = {$training_id}");
 
         return $this->db->affected_rows();
     }
@@ -284,44 +333,56 @@ class Calendar_model extends CI_Model{
      * Guardar una reserva de cupo en una sesión de entrenamiento por parte de un usuario
      * 2021-07-22
      */
-    function save_reservation($sesion_id, $user_id)
+    function save_reservation($training_id, $user_id)
     {
-        $reservation_id = 0;
+        $data = array('saved_id' => 0, 'error' => 'La sesión de entrenamiento no existe: ' . $training_id);
 
-        $sesion = $this->Db_model->row_id('events', $sesion_id);
+        $training = $this->Db_model->row_id('events', $training_id);
 
-        if ( ! is_null($sesion) )
+        if ( ! is_null($training) )
         {
-            $arr_row['type_id'] = 213;  //Reseva entrenamiento presencial
-            $arr_row['start'] = $sesion->start;
-            $arr_row['status'] = 0;     //Reservado
-            $arr_row['element_id'] = $sesion_id;    //ID Evento sesión de entrenamiento
-            $arr_row['user_id'] = $user_id;         //Usuario para el que se reserva la sesión
-            $arr_row['related_1'] = $sesion->related_1;     //ID día de sesión
-            $arr_row['related_2'] = $sesion->element_id;    //Cód zona de entrenamiento
-            $arr_row['created_at'] = date('Y-m-d H:i:s');
-            $arr_row['creator_id'] = $user_id;
+            //Verificar que haya cupos
+            if ( $training->integer_2 > 0 )
+            {
+                $arr_row['type_id'] = 213;  //Reseva entrenamiento presencial
+                $arr_row['start'] = $training->start;
+                $arr_row['status'] = 0;     //Reservado
+                $arr_row['element_id'] = $training_id;    //ID Evento sesión de entrenamiento
+                $arr_row['user_id'] = $user_id;         //Usuario para el que se reserva la sesión
+                $arr_row['related_1'] = $training->related_1;     //ID día de sesión
+                $arr_row['related_2'] = $training->element_id;    //Cód zona de entrenamiento
+                $arr_row['created_at'] = date('Y-m-d H:i:s');
+                $arr_row['creator_id'] = $user_id;
+    
+                $condition = "type_id = 213 AND element_id = {$arr_row['element_id']} AND user_id = {$arr_row['user_id']}";
+    
+                $reservation_id = $this->Db_model->insert_if('events', $condition, $arr_row);
+    
+                if ( $reservation_id > 0 ) {
+                    //Actualizar número de cupos disponibles
+                    $this->update_spots($training_id);
 
-            $condition = "type_id = 213 AND element_id = {$arr_row['element_id']} AND user_id = {$arr_row['user_id']}";
+                    $data['saved_id'] = $reservation_id;
+                    $data['error'] = '';
+                }
+            } else {
+                $data['error'] = 'No hay cupos disponibles para la sesión ID: ' . $training_id;
+            }
 
-            $reservation_id = $this->Db_model->insert_if('events', $condition, $arr_row);
-
-            //Actualizar número de cupos disponibles
-            if ( $reservation_id > 0 ) $this->update_spots($sesion_id);
         }
 
-        return $reservation_id;
+        return $data;
     }
 
     /**
      * Elimina una reserva de cupo de entrenamiento, tabla events.
      * 2021-07-01
      */
-    function delete_reservation($reservation_id, $sesion_id)
+    function delete_reservation($reservation_id, $training_id)
     {
         $data = array('qty_deleted' => 0, 'error' => '');
 
-        $reservation = $this->Db_model->row('events', "id = {$reservation_id} AND element_id = {$sesion_id}");
+        $reservation = $this->Db_model->row('events', "id = {$reservation_id} AND element_id = {$training_id}");
 
         //Si existe reserva
         if ( ! is_null($reservation) )
@@ -333,13 +394,13 @@ class Calendar_model extends CI_Model{
             if ( strlen($data['error']) == 0 )
             {
                 $this->db->where('id', $reservation_id);
-                $this->db->where('element_id', $sesion_id);
+                $this->db->where('element_id', $training_id);
                 $this->db->delete('events');
                 
                 $data['qty_deleted'] = $this->db->affected_rows();
         
                 //Actualizar número de cupos disponibles
-                if ( $data['qty_deleted'] > 0 ) $this->update_spots($sesion_id);
+                if ( $data['qty_deleted'] > 0 ) $this->update_spots($training_id);
             }
         } else {
             $data['error'] = 'No existe reserva con ID: ' . $reservation_id;

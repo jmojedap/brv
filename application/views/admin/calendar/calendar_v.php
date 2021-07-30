@@ -3,6 +3,9 @@
 ?>
 
 <style>
+    .taken-spot{ color: #DDD; }
+    .available-spot{ color: #60c83c; }
+
     .day {
         cursor: pointer;
     }
@@ -44,7 +47,7 @@
 
 <div id="calendar_app">
     <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-4">
             <div class="d-flex mb-2 justify-content-between">
                 <button class="btn btn-light w75p" v-on:click="sum_month(parseInt(month) - 1)">
                     <i class="fa fa-chevron-left"></i>
@@ -80,20 +83,63 @@
                     </tr>
                 </tbody>
             </table>
+            <hr>
+            <div class="form-group">
+                <div class="form-group row">
+                    <label for="room_id" class="col-md-4 col-form-label text-right">Zona</label>
+                    <div class="col-md-8">
+                        <select name="room_id" v-model="room_id" class="form-control" v-on:change="get_trainings">
+                            <option v-for="(option_room, key_room) in options_room" v-bind:value="key_room">{{ option_room }}</option>
+                        </select>        
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-7">
+        <div class="col-md-8">
             <div v-show="active_day.id > 0">
-                <h3>{{ active_day.start | date_format }}</h3>
-                <h3 class="text-muted">{{ active_day.start | ago }}</h4>
-                <button class="btn btn-success" v-on:click="toggle_business_day">
-                    Marcar como festivo
-                </button>
+                <div class="text-center">
+                    <h3>{{ active_day.start | date_format }}</h3>
+                    <h4 class="text-muted">{{ active_day.start | ago }}</h4>
+                    <h5>{{ parseInt(room_id) | room_name }}</h5>
+                </div>
+                
+                <table class="table bg-white">
+                    <thead>
+                        <th>Hora</th>
+                        <th>Cupos</th>
+                        <th>Disponibles</th>
+                        <th></th>
+                        <th></th>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(training, key_training) in trainings">
+                            <td>{{ training.start | hour }}</td>
+                            <td>{{ training.total_spots }}</td>
+                            <td>
+                                {{ training.available_spots }}
+                            </td>
+                            <td>
+                                <i class="fa fa-circle"
+                                    v-for="n in parseInt(training.total_spots)"
+                                    v-bind:class="{'available-spot': n > training.taken_spots, 'taken-spot': n <= training.taken_spots}"
+                                    >
+                            </td>
+                            <td>
+                                <a v-bind:href="`<?= URL_ADMIN . "calendar/training/" ?>` + training.id" class="btn btn-sm btn-light">Detalle</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+// Variables
+//-----------------------------------------------------------------------------
+var room_names = <?= json_encode($arr_rooms) ?>;
+
 // Filters
 //-----------------------------------------------------------------------------
 Vue.filter('month_name', function (date) {
@@ -109,6 +155,22 @@ Vue.filter('date_format', function (date) {
 Vue.filter('ago', function (date) {
     if (!date) return ''
     return moment(date, 'YYYY-MM-DD HH:mm:ss').fromNow()
+});
+
+Vue.filter('hour', function (date) {
+    if (!date) return ''
+    return moment(date).format('hh:mm a')
+});
+
+Vue.filter('day', function (date) {
+    if (!date) return ''
+    return moment(date).format('dddd, D / MMM')
+});
+
+Vue.filter('room_name', function (value) {
+    if (!value) return ''
+    value = room_names[value]
+    return value
 });
 
 // VueApp
@@ -140,12 +202,18 @@ var calendar_app = new Vue({
         ],
         year: <?= $year ?>,
         month: <?= $month ?>,
-        day_start: '<?= $day_start ?>'
+        day_start: '<?= $day_start ?>',
+        options_room: <?= json_encode($options_room) ?>,
+        room_id: 10,
+        trainings: []
     },
     methods: {
         set_day: function(day){
             this.active_day = day
+            console.log(day)
+            this.get_trainings()
         },
+        //Clase HTML de la casilla día
         day_class: function(day){
             var day_class = 'day'
             if ( day.id == this.active_day.id ) day_class += ' active'
@@ -154,15 +222,6 @@ var calendar_app = new Vue({
             if ( day.start == '<?= date('Y-m-d') ?>' ) day_class += ' today'
             day_class += ' wd_' + day.week_day
             return day_class
-        },
-        toggle_business_day: function(){
-            axios.get(url_api + 'calendar/toggle_business_day/' + this.active_day.id)
-            .then(response => {
-                if ( response.data.saved_id > 0 ) {
-                    this.active_day.qty_business_day = response.data.qty_bussines_day
-                }
-            })
-            .catch(function(error) { console.log(error) })
         },
         set_month: function(){
             window.location = url_app + 'calendar/calendar/' + this.year + '/' + this.month
@@ -179,12 +238,14 @@ var calendar_app = new Vue({
             }
             console.log(this.year, this.month)
             this.set_month()
-        }
+        },
+        get_trainings: function(){
+            axios.get(url_api + 'calendar/get_trainings/' + this.active_day.id + '/' + this.room_id)
+            .then(response => {
+                this.trainings = response.data.list
+            })
+            .catch(function(error) { console.log(error) })
+        },
     },
-    /*computed: {
-        day_class: function(day){
-            return 'wd_' + day.week_day 
-        }
-    }*/
 })
 </script>

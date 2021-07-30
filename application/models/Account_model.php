@@ -157,16 +157,15 @@ class Account_model extends CI_Model{
         $this->load->model('Validation_model');
         $email_validation = $this->Validation_model->email($user_id);
 
-        $this->load->model('Validation_model');
-        $document_number_validation = $this->Validation_model->document_number($user_id);
+        //$document_number_validation = $this->Validation_model->document_number($user_id);
 
-        $validation = array_merge($email_validation, $document_number_validation);
+        $validation = array_merge($email_validation);
         $data['validation'] = $validation;
 
         //Verificar cada condición
         foreach ( $validation as $value )
         {
-            if ( $value == FALSE ) { $data['status'] = 0; } //Si algún valor es false, todo se invalida
+            if ( $value != 1 ) { $data['status'] = 0; } //Si algún valor NO es 1, todo se invalida
         }
 
         return $data;

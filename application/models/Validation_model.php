@@ -45,6 +45,7 @@ class Validation_model extends CI_Model{
     function email($user_id = null)
     {
         $validation['email_unique'] = -1;   //Indeterminado
+        //$validation['email_unique'] = FALSE;   //Indeterminado
 
         if ( strlen($this->input->post('email')) > 0 ) {
             $validation['email_unique'] = $this->Db_model->is_unique('users', 'email', $this->input->post('email'), $user_id);

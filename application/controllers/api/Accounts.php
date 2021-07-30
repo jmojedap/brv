@@ -33,4 +33,66 @@ class Accounts extends CI_Controller{
         //Salida
             $this->output->set_content_type('application/json')->set_output(json_encode($data));      
     }
+
+    function register()
+    {
+        $data = array('status' => 0, 'message' => 'La cuenta no fue creada');  //Initial result values
+        $data['validation_data'] = $this->Account_model->validate_form();
+        $this->load->model('Validation_model');
+            
+        if ( $data['validation_data']['status'] == 1 )
+        {
+            //Construir registro de usuarios
+                $arr_row['display_name'] = $this->input->post('display_name');
+                $arr_row['email'] = $this->input->post('email');
+                $arr_row['username'] = explode('@', $this->input->post('email'))[0] . rand(10,99);
+                $arr_row['password'] = $this->Account_model->crypt_pw($this->input->post('new_password'));
+                $arr_row['status'] = 2;     //Registrado sin confirmar email
+                $arr_row['role'] = 21;      //21: Rol por defecto
+
+            //Insert user
+                $insert_data = $this->User_model->save($arr_row);
+            
+            //Cargar datos de usuario
+                if ( $insert_data['saved_id'] > 0 ) {
+                    $data['user_info'] = $this->Account_model->session_data($this->input->post('email'));
+                    $data['status'] = 1;
+                    $data['message'] = 'Usuario creado';
+                }
+                
+            //Enviar email con código de activación
+                //$this->Account_model->activation_key($data['saved_id']);
+                //if ( ENV == 'production' ) $this->Account_model->email_activation($data['saved_id']);                
+        }
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * POST JSON
+     * Actualiza los datos del usuario.
+     */
+    function update($user_id)
+    {
+        
+        $data = array('status' => 0, 'message' => 'Los datos no se guardaron');  //Initial result values
+        $data['validation_data'] = $this->User_model->validate($user_id);
+        
+        if ( $data['validation_data']['status'] == 1 ) 
+        {
+            $arr_row = $this->input->post();
+            $arr_row['id'] = $user_id;
+
+            $saved_id = $this->User_model->save($arr_row);
+            
+            if ( $saved_id ) {
+                $data['status'] = 1;
+                $data['message'] = 'Los cambios fueron guardados';
+            }
+        } else {
+            $data['message'] = $data['validation_data']['error'];
+        }
+        
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
 }
