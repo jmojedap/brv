@@ -34,36 +34,30 @@ class Calendar extends CI_Controller{
 // Calendario
 //-----------------------------------------------------------------------------
 
-function calendar($year = null, $month = null)
-{
-    if ( is_null($year) ) $year = date('Y');
-    if ( is_null($month) ) $month = date('m');
-    $row_month = $this->Db_model->row('periods', "year = {$year} AND month = {$month}");
+    function calendar($day_id = NULL, $room_id = 10)
+    {
+        if ( is_null($day_id) ) $day_id = date('Ymd');
+        $day = $this->Db_model->row('periods', "type_id = 9 AND id = {$day_id}");
+        $row_month = $this->Db_model->row('periods', "year = {$day->year} AND month = {$day->month}");
 
-    $calendar_prefs = $this->Period_model->calendar_prefs();
-    $calendar_prefs['template'] = $this->Period_model->calendar_template();
-    $calendar_prefs['next_prev_url'] = URL_ADMIN . 'calendar/calendar';
+        $data['weeks'] = $this->Period_model->weeks($row_month->start, $row_month->end);
 
-    $this->load->library('calendar', $calendar_prefs);
+        //Opciones de filtros de búsqueda
+            $data['rooms'] = $this->App_model->rooms();
 
-    $data['weeks'] = $this->Period_model->weeks($row_month->start, $row_month->end);
+        //Detalle periodos
+            $data['day_start'] = $row_month->start;
+            $data['day'] = $day;
+            $data['room_id'] = $room_id;
+            $data['options_year'] = range(date('Y') - 1, date('Y') + 2);
 
-    //Opciones de filtros de búsqueda
-        $data['options_room'] = $this->Item_model->options('category_id = 520');
-        $data['arr_rooms'] = $this->Item_model->arr_cod('category_id = 520');
+        //Vista
+            $data['head_title'] = 'Calendario';
+            $data['nav_2'] = $this->views_folder . 'menu_v';
+            $data['view_a'] = $this->views_folder . 'calendar/calendar_v';
 
-    //Detalle periodos
-        $data['day_start'] = $row_month->start;
-        $data['year'] = $year;
-        $data['month'] = $month;
-
-    //Vista
-        $data['head_title'] = 'Calendario';
-        $data['nav_2'] = $this->views_folder . 'menu_v';
-        $data['view_a'] = $this->views_folder . 'calendar_v';
-
-    $this->App_model->view(TPL_ADMIN, $data);
-}
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
 
 
 // Sesiones de entrenamiento presencial
@@ -124,11 +118,14 @@ function calendar($year = null, $month = null)
      */
     function training($training_id)
     {
-        $data['training'] = $this->Calendar_model->row_training($training_id);
-        $data['head_title'] = 'Sesión ' . $data['training']->id;
+        $training = $this->Calendar_model->row_training($training_id);
+
+        $data['training'] = $training;
+        $data['head_title'] = 'Entrenamiento ' . $data['training']->id;
         $data['view_a'] = $this->views_folder. 'trainings/training_v';
         $data['nav_2'] = $this->views_folder . 'trainings/menu_v';
-        $data['back_link'] = $this->url_controller . 'trainings/';
+
+        $data['back_link'] = $this->url_controller . 'calendar/' . $training->day_id . '/' . $training->room_id;
 
         //Salida JSON
         $this->App_model->view(TPL_ADMIN, $data);

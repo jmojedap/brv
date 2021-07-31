@@ -207,7 +207,8 @@ class App_model extends CI_Model{
      */
     function rooms()
     {
-        $this->db->select('cod AS room_id');
+        $this->db->select('cod AS room_id, item_name AS name, short_name, color');
+        $this->db->order_by('cod', 'ASC');
         $this->db->where('category_id', 520);
         $rooms = $this->db->get('items');
 

@@ -173,4 +173,16 @@
                 >
         </div>
     </div>
+    <div class="form-group row">
+        <label for="color" class="col-md-4 col-form-label text-right">
+            <span class="float-rigth">Color</span>
+        </label>
+        <div class="col-md-8">
+            <input
+                name="color" class="form-control" 
+                title="Color"
+                v-model="form_values.color"
+                >
+        </div>
+    </div>
 </form>
