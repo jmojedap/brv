@@ -70,7 +70,9 @@ class User_model extends CI_Model{
      */
     function select($format = 'general')
     {
-        $arr_select['general'] = 'users.id, username, display_name, first_name, last_name, email, role, image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login';
+        $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, first_name, last_name, email, role, image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login, expiration_at';
+        $arr_select['follow'] = 'users.id, username, qty_followers, qty_following';
+
 
         //$arr_select['export'] = 'usuario.id, username, usuario.email, nombre, apellidos, sexo, rol_id, estado, no_documento, tipo_documento_id, institucion_id, grupo_id';
 
@@ -176,12 +178,12 @@ class User_model extends CI_Model{
     function role_filter()
     {
         $role = $this->session->userdata('role');
-        $condition = 'id = 0';  //Valor por defecto, ningún user, se obtendrían cero users.
+        $condition = 'users.role  >= ' . $role;  //Valor por defecto, ningún user, se obtendrían cero users.
         
-        if ( $role <= 2 ) 
+        /*if ( $role <= 2 ) 
         {   //Desarrollador, todos los user
             $condition = 'users.id > 0';
-        }
+        }*/
         
         return $condition;
     }

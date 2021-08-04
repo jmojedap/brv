@@ -31,6 +31,11 @@ class Follow extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
+    /*function follow_summary($user_id)
+    {
+        $data['indice'] = ;
+    }*/
+
     /**
      * AJAX JSON
      * Listado de usuarios seguidos por un usuario

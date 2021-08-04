@@ -10,19 +10,11 @@ var nav_1_elements = [
         subelements: []
     },
     {
-        text: 'Publicaciones',
+        text: 'Calendario',
         active: false,
-        icon: 'far fa-file-alt',
-        cf: 'posts/explore',
-        sections: ['posts/explore', 'posts/add', 'posts/import', 'posts/info', 'posts/edit', 'posts/image', 'posts/details', 'posts/comments'],
-        subelements: []
-    },
-    {
-        text: 'Comentarios',
-        active: false,
-        icon: 'far fa-comment',
-        cf: 'comments/explore',
-        sections: ['comments/explore', 'comments/add', 'comments/info'],
+        icon: 'far fa-calendar',
+        cf: 'calendar/calendar',
+        sections: ['calendar/calendar', 'calendar/programacion_automatica'],
         subelements: []
     },
     {
@@ -47,7 +39,23 @@ var nav_1_elements = [
                 sections: ['products/explore', 'products/import', 'products/add', 'products/edit', 'products/edit', 'products/posts', 'products/info']
             }
         ]
-    },    
+    },
+    {
+        text: 'Publicaciones',
+        active: false,
+        icon: 'far fa-file-alt',
+        cf: 'posts/explore',
+        sections: ['posts/explore', 'posts/add', 'posts/import', 'posts/info', 'posts/edit', 'posts/image', 'posts/details', 'posts/comments'],
+        subelements: []
+    },
+    {
+        text: 'Comentarios',
+        active: false,
+        icon: 'far fa-comment',
+        cf: 'comments/explore',
+        sections: ['comments/explore', 'comments/add', 'comments/info'],
+        subelements: []
+    },
     {
         text: 'Datos',
         active: false,
@@ -63,10 +71,6 @@ var nav_1_elements = [
             {
                 text: 'Eventos', active: false, icon: 'far fa-clock', cf: 'events/summary', anchor: false,
                 sections: ['events/explore', 'events/summary']
-            },
-            {
-                text: 'Periodos', active: false, icon: 'far fa-calendar', cf: 'periods/explore', anchor: false,
-                sections: ['periods/explore', 'periods/add']
             },
         ]
     },

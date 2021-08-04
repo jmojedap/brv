@@ -79,6 +79,15 @@ class App_model extends CI_Model{
         $summary['orders']['num_rows'] = $this->db->count_all('orders');
         $summary['products']['num_rows'] = $this->db->count_all('products');
         $summary['posts']['num_rows'] = $this->db->count_all('posts');
+
+        //Lapso próxima semana
+        $today = date('Y-m-d') . ' 00:00:00';
+        $one_week_time = strtotime($today . ' +6 days');
+        $one_week = date('Y-m-d',$one_week_time);
+
+        $summary['trainings']['num_rows'] = $this->Db_model->num_rows('events', "type_id = 203 AND start >='{$today}' AND start <='{$one_week}'");
+        $summary['reservations']['num_rows'] = $this->Db_model->num_rows('events', "type_id = 213 AND start >='{$today}' AND start <='{$one_week}'");
+        $summary['reservations']['lapse'] = $one_week;
     
         return $summary;
     }

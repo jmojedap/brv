@@ -131,10 +131,10 @@ class Calendar extends CI_Controller{
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
-    function get_trainings_days()
+    function get_training_days()
     {
         $days = $this->Calendar_model->trainings_days();
-        $data['days'] = $days->result();
+        $data['days'] = $days;
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
@@ -248,6 +248,49 @@ class Calendar extends CI_Controller{
 
         $data['messages'][] = 'Reservas eliminadas:' . $qty_deleted;
         $data['messages'][] = 'Cupos restaurados:' . $qty_restored_spots;
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Simula fechas de expiración de suscripción
+     */
+    function simular_expiration_date()
+    {
+        //Limpiar
+        $this->db->query('UPDATE users SET expiration_at = NULL WHERE role = 21');
+
+        //Seleccionar
+        $this->db->select('id');
+        $this->db->where('role', 21);
+        $users = $this->db->get('users');
+
+        $updated = array();
+
+        //Recorrer usuarios
+        foreach ($users->result() as $user) {
+            $random = rand(0,99);   //Para determinar que actualización se hace
+            $random_days = rand(0, 56); //Número de días a sumar o restar
+
+            if ( $random >= 10 ) {
+               if ( $random <= 80 ) {
+                //En el futuro
+                    $time = strtotime(date('Y-m-d') . " +{$random_days} days");
+               } else {
+                $time = strtotime(date('Y-m-d') . " -{$random_days} days");
+               }
+
+               $arr_row['expiration_at'] = date('Y-m-d', $time);
+
+               $this->db->where('id', $user->id);
+               $this->db->update('users', $arr_row);
+
+               $updated[] = $user->id;
+            }
+        }
+
+        $data['updated'] = $updated;
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));

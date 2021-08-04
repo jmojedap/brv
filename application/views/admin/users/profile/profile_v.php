@@ -13,12 +13,11 @@
                     <h4 class="profile-user"><?= $this->Item_model->name(58, $row->role) ?></h4>
 
                     <?php if ($this->session->userdata('rol_id') <= 1) { ?>
-                        <a href="<?= URL_ADMIN . "config/ml/{$row->id}" ?>" role="button" class="btn btn-primary" title="Ingresar como este usuario">
+                        <a href="<?= URL_ADMIN . "accounts/ml/{$row->id}" ?>" role="button" class="btn btn-primary" title="Ingresar como este usuario">
                             <i class="fa fa-sign-in"></i>
                             Acceder
                         </a>
                     <?php } ?>
-
                 </div>
             </div>
             <!-- End Page Widget -->
@@ -44,6 +43,17 @@
                     <tr>
                         <td class="td-title">Rol de usuario</td>
                         <td><?= $this->Item_model->name(58, $row->role) ?></td>
+                    </tr>
+                    <tr>
+                        <td class="td-title">Documento</td>
+                        <td><?= $this->Item_model->name(53, $row->document_type, 'abbreviation') ?> &middot; <?= $row->document_number ?></td>
+                    </tr>
+                    <tr>
+                        <td class="td-title">Suscripción hasta</td>
+                        <td>
+                            {{ user.expiration_at }} &middot;
+                            {{ user.expiration_at | ago }} 
+                        </td>
                     </tr>
                     <tr>
                         <td class="td-title">Seguidores / Seguidos</td>
@@ -99,15 +109,44 @@
 </div>
 
 <script>
+// Variables
+//-----------------------------------------------------------------------------
+    var user = {
+        id: '<?= $row->id ?>',
+        first_name: '<?= $row->first_name ?>',
+        last_name: '<?= $row->last_name ?>',
+        display_name: '<?= $row->display_name ?>',
+        username: '<?= $row->username ?>',
+        email: '<?= $row->email ?>',
+        role: '0<?= $row->role ?>',
+        document_number: '<?= $row->document_number ?>',
+        document_type: '0<?= $row->document_type ?>',
+        city_id: '0<?= $row->city_id ?>',
+        birth_date: '<?= $row->birth_date ?>',
+        gender: '0<?= $row->gender ?>',
+        phone_number: '<?= $row->phone_number ?>',
+        expiration_at: '<?= $row->expiration_at ?>',
+        admin_notes: '<?= $row->admin_notes ?>',
+    };
+
+// Filtros
+//-----------------------------------------------------------------------------
+Vue.filter('ago', function (date) {
+    if (!date) return ''
+    return moment(date, 'YYYY-MM-DD HH:mm:ss').fromNow()
+});
+
+// VueApp
+//-----------------------------------------------------------------------------
 var profile_app = new Vue({
     el: '#profile_app',
     data: {
-        user_id: <?= $row->id ?>,
+        user: user,
         activation_link: 'Restaurar contraseña'
     },
     methods: {
         setActivationKey: function(){
-            axios.get(url_api + 'users/set_activation_key/' + this.user_id)
+            axios.get(url_api + 'users/set_activation_key/' + this.user.id)
             .then(response => {
                 this.activation_link = '<?= URL_APP ?>accounts/recover/' + response.data
                 toastr['success']('Copie el link y ábralo en otro navegador para establecer una nueva contraseña')

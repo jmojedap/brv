@@ -24,7 +24,18 @@ Vue.filter('role_name', function (value) {
     return value
 })
 
+Vue.filter('document_type_name', function (value) {
+    if (!value) return ''
+    value = document_type_names['0' + value]
+    return value
+})
+
 Vue.filter('ago', function (date) {
+    if (!date) return ''
+    return moment(date, "YYYY-MM-DD HH:mm:ss").fromNow()
+})
+
+Vue.filter('expiration', function (date) {
     if (!date) return ''
     return moment(date, "YYYY-MM-DD HH:mm:ss").fromNow()
 })
@@ -51,7 +62,8 @@ var app_explore = new Vue({
         display_filters: false,
         loading: false,
         options_role: <?= json_encode($options_role) ?>,
-        active_filters: false
+        active_filters: false,
+        today: '<?= date('Y-m-d') ?>'
     },
     methods: {
         get_list: function(e, num_page = 1){
@@ -126,6 +138,22 @@ var app_explore = new Vue({
             if ( this.filters.role ) calculated_active_filters = true
 
             this.active_filters = calculated_active_filters
+        },
+        // Especiales Brave
+        //-----------------------------------------------------------------------------
+        expiration_icon: function(date){
+            var date_user = new Date(date)
+            var date_today = new Date(this.today)
+
+            var expiration_icon = '<i class="far fa-circle text-muted mr-2"></i>'
+            if ( date != null ) {
+                if ( date_user >= date_today ) {
+                    expiration_icon = '<i class="fa fa-check-circle text-success mr-2"></i>'
+                } else {
+                    expiration_icon = '<i class="fa fa-exclamation-triangle text-warning mr-2"></i>'
+                }
+            }
+            return expiration_icon
         },
     }
 })

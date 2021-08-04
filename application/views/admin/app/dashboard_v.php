@@ -77,6 +77,48 @@
                     </a>
                 </div>
             </div>
+            <!-- ENTRENAMIENTOS -->
+            <div class="col-md-6">
+                <div class="card mb-2">
+                    <a href="<?= URL_ADMIN . "calendar/calendar" ?>">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media">
+                                    <div class="media-body text-left w-100">
+                                        <h3 class="text-color-2">{{ summary.trainings.num_rows }}</h3>
+                                        <span>Sesiones de entrenamiento</span>
+                                        <p class="text-muted">Programados en los próximos 7 días</p>
+                                    </div>
+                                    <div class="media-right media-middle">
+                                        <i class="fas fa-dumbbell fa-3x float-right text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <!-- RESERVACIONES -->
+            <div class="col-md-6">
+                <div class="card mb-2">
+                    <a href="<?= URL_ADMIN . "calendar/calendar" ?>">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media">
+                                    <div class="media-body text-left w-100">
+                                        <h3 class="text-color-2">{{ summary.reservations.num_rows }}</h3>
+                                        <span>Reservas de entrenamiento</span>
+                                        <p class="text-muted">En los próximos 7 días</p>
+                                    </div>
+                                    <div class="media-right media-middle">
+                                        <i class="far fa-calendar-check fa-3x float-right text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>    
 </div>

@@ -34,6 +34,10 @@ class Accounts extends CI_Controller{
             $this->output->set_content_type('application/json')->set_output(json_encode($data));      
     }
 
+    /**
+     * Crear una cuenta de usuario
+     * 2021-08-03
+     */
     function register()
     {
         $data = array('status' => 0, 'message' => 'La cuenta no fue creada');  //Initial result values
@@ -93,6 +97,32 @@ class Accounts extends CI_Controller{
             $data['message'] = $data['validation_data']['error'];
         }
         
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Información de un usuario en un formato específico
+     * 2021-08-03
+     */
+    function profile_info($user_id, $format)
+    {
+        //$user_id = $this->input->post('user_id');
+        //Resultado por defecto
+        $data['user'] = array('id' => '0');
+
+        //Buscar usuario
+        $this->db->select($this->User_model->select($format));
+        $this->db->where('id', $user_id);
+        $users = $this->db->get('users');
+
+        if ( $users->num_rows() ) $data['user'] = $users->row();
+
+        if ( ! is_null($data['user']) ) {
+            //$condition = ""
+            $data['user']->qty_posts = '150';
+        }
+
+        //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 }

@@ -227,7 +227,7 @@ class Calendar_model extends CI_Model{
     {
         $today_id = date('Ymd');
 
-        //$this->db->select('');
+        $this->db->select('id, period_name, start');
         $this->db->where('id >=', $today_id);
         $this->db->where('type_id', 9); //Periodo tipo día
         $this->db->where('id IN (SELECT related_1 FROM events WHERE type_id = 203)');   //Día en los que haya trainings
@@ -235,6 +235,38 @@ class Calendar_model extends CI_Model{
         $periods = $this->db->get('periods', 2);
 
         return $periods;
+    }
+
+    /**
+     * Zonas de entrenamiento, marcadas activas o inactivas según el usuario
+     * 2021-08-04
+     * 
+     */
+    function available_rooms($day_id, $user_id)
+    {
+        $query = $this->App_model->rooms();
+
+        $rooms = array();
+        foreach ($query->result() as $room) {
+            $room->active = 1;
+            $rooms[] = $room;
+        }
+
+        return $rooms;
+    }
+
+    /**
+     * Boolean, si una zona de entrenamiento está activa o no para un usuario en una fecha
+     */
+    function available_room($day_id, $room_id, $user_id)
+    {
+        $available = 1;
+        $day = $this->Db_model->row_id('periods', $day_id);
+    
+        //Buscar otras reservas de la misma zona en la misma semana, sin que sea sábado
+        $condition = "type_id = 213 AND related_2 = {$room_id} AND related_1 IN (SELECT id FROM periods WHERE week_number = {$day->week_number})";
+
+        return $available;
     }
 
     /**
@@ -331,47 +363,70 @@ class Calendar_model extends CI_Model{
 
     /**
      * Guardar una reserva de cupo en una sesión de entrenamiento por parte de un usuario
-     * 2021-07-22
+     * 2021-08-04
      */
     function save_reservation($training_id, $user_id)
     {
-        $data = array('saved_id' => 0, 'error' => 'La sesión de entrenamiento no existe: ' . $training_id);
+        //Resultado por defecto
+        $data = array('saved_id' => 0, 'error' => '');
 
+        //Variables referencua
         $training = $this->Db_model->row_id('events', $training_id);
+        $user = $this->Db_model->row_id('users', $user_id);
 
-        if ( ! is_null($training) )
-        {
-            //Verificar que haya cupos
-            if ( $training->integer_2 > 0 )
-            {
-                $arr_row['type_id'] = 213;  //Reseva entrenamiento presencial
-                $arr_row['start'] = $training->start;
-                $arr_row['status'] = 0;     //Reservado
-                $arr_row['element_id'] = $training_id;    //ID Evento sesión de entrenamiento
-                $arr_row['user_id'] = $user_id;         //Usuario para el que se reserva la sesión
-                $arr_row['related_1'] = $training->related_1;     //ID día de sesión
-                $arr_row['related_2'] = $training->element_id;    //Cód zona de entrenamiento
-                $arr_row['created_at'] = date('Y-m-d H:i:s');
-                $arr_row['creator_id'] = $user_id;
-    
-                $condition = "type_id = 213 AND element_id = {$arr_row['element_id']} AND user_id = {$arr_row['user_id']}";
-    
-                $reservation_id = $this->Db_model->insert_if('events', $condition, $arr_row);
-    
-                if ( $reservation_id > 0 ) {
-                    //Actualizar número de cupos disponibles
-                    $this->update_spots($training_id);
+        //Verificación de entrenamiento y cupos
+        if ( is_null($training) ) {
+            $data['error'] = 'La sesión de entrenamiento no existe: ' . $training_id;
+        } else {
+            if ( $training->integer_2 <= 0 ) $data['error'] = 'No hay cupos disponibles en este entrenamiento';
+        }
 
-                    $data['saved_id'] = $reservation_id;
-                    $data['error'] = '';
-                }
-            } else {
-                $data['error'] = 'No hay cupos disponibles para la sesión ID: ' . $training_id;
+        //Verificación de usuario
+        if ( is_null($user->expiration_at) ) {
+            $data['error'] = 'El usuario no tiene suscripción activa';
+        } else {
+            if ( $training->start > $user->expiration_at . ' 23:59:59' ) {
+                $data['error'] = 'La suscripción del usuario está vencida: ' . $user->expiration_at;
             }
+        }
 
+        //Si no hay errores, se guarda
+        if ( strlen($data['error']) == 0 )
+        {
+            $arr_row = $this->arr_row_reservation($training, $user);
+            $condition = "type_id = 213 AND element_id = {$arr_row['element_id']} AND user_id = {$arr_row['user_id']}";
+
+            $reservation_id = $this->Db_model->insert_if('events', $condition, $arr_row);
+
+            if ( $reservation_id > 0 ) {
+                //Actualizar número de cupos disponibles
+                $this->update_spots($training_id);
+
+                $data['saved_id'] = $reservation_id;
+            }
         }
 
         return $data;
+    }
+
+    /**
+     * Array para guardar reservation en tabla events
+     * 2021-08-04
+     */
+    function arr_row_reservation($training, $user)
+    {
+        $arr_row['title'] = $this->Item_model->name(520, $training->element_id);  //Nombre zona de entrenamiento
+        $arr_row['type_id'] = 213;  //Reseva entrenamiento presencial
+        $arr_row['start'] = $training->start;
+        $arr_row['status'] = 0;     //Reservado
+        $arr_row['element_id'] = $training->id;    //ID Evento sesión de entrenamiento
+        $arr_row['user_id'] = $user->id;         //Usuario para el que se reserva la sesión
+        $arr_row['related_1'] = $training->related_1;     //ID día de sesión
+        $arr_row['related_2'] = $training->element_id;    //Cód zona de entrenamiento
+        $arr_row['created_at'] = date('Y-m-d H:i:s');
+        $arr_row['creator_id'] = $user->id;
+
+        return $arr_row;
     }
 
     /**
@@ -408,6 +463,4 @@ class Calendar_model extends CI_Model{
 
         return $data;
     }
-
-
 }

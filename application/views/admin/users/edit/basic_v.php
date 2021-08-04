@@ -156,15 +156,16 @@
                         </div>
                     </div>
 
+                    <hr>
+
                     <div class="form-group row">
-                        <label for="notes" class="col-md-4 col-form-label text-right">Notas</label>
+                        <label for="expiration_at" class="col-md-4 col-form-label text-right">Suscripción hasta</label>
                         <div class="col-md-8">
-                            <textarea
-                                name="notes"
-                                class="form-control"
-                                title="Notas"
-                                v-model="form_values.notes"
-                                ></textarea>
+                            <input
+                                name="expiration_at" class="form-control" type="date"
+                                v-model="form_values.expiration_at"
+                                >
+                                <small class="form-text text-muted">Fecha hasta la cual el usuario puede reservar entrenamientos</small>
                         </div>
                     </div>
 
@@ -208,9 +209,8 @@
         birth_date: '<?= $row->birth_date ?>',
         gender: '0<?= $row->gender ?>',
         phone_number: '<?= $row->phone_number ?>',
-        notes: '<?= $row->notes ?>',
+        expiration_at: '<?= $row->expiration_at ?>',
         admin_notes: '<?= $row->admin_notes ?>',
-        about: '<?= $row->about ?>',
     };
 
 // Vue App

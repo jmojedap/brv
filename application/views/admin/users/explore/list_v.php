@@ -8,8 +8,9 @@
             <th width="10px"><input type="checkbox" @change="select_all" v-model="all_selected"></th>
             <th width="50px"></th>
             <th>Nombre</th>
+            <th>No. Documento</th>
             <th>Rol</th>
-            <th class="only-lg"></th>
+            <th>Suscripción hasta</th>
             <th width="50px"></th>
         </thead>
         <tbody>
@@ -36,15 +37,25 @@
                     </span>
                 </td>
                 <td>
+                    {{ element.document_type | document_type_name }} &middot;
+                    {{ element.document_number }}
+                </td>
+                <td>
                     <i class="fa fa-check-circle text-success" v-if="element.status == 1"></i>
                     <i class="fa fa-check-circle text-warning" v-if="element.status == 2"></i>
                     <i class="far fa-circle text-danger" v-if="element.status == 0"></i>
                     {{ element.role | role_name }}
                 </td>
-                <td class="only-lg">
-                    <b>L</b> <span v-bind:title="`Último login ` + element.last_login">{{ element.last_login | ago }}</span>
+                <td>
+                    <span v-html="expiration_icon(element.expiration_at)"></span>
+                    
+                    <span>
+                        {{ element.expiration_at | expiration }}
+                    </span>
                     <br>
-                    <b>C</b> <span v-bind:title="`Creado en ` + element.created_at"> {{ element.created_at | ago }}</span>
+                    <span class="text-muted">
+                        {{ element.expiration_at }}
+                    </span>
                 </td>
                 
                 <td>
