@@ -59,154 +59,10 @@ class Calendar extends CI_Controller{
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
-
-// Sesiones de entrenamiento presencial
-//-----------------------------------------------------------------------------
-
-    /**
-     * Exploración y búsqueda de trainings de entrenamiento
-     * 2020-08-01
-     */
-    function trainings($num_page = 1)
-    {        
-        //Identificar filtros de búsqueda
-            $this->load->model('Search_model');
-            $filters = $this->Search_model->filters();
-            $filters['type'] = 203;
-
-        //Datos básicos de la exploración
-            $data = $this->Calendar_model->trainings_data($filters, $num_page);
-        
-        //Opciones de filtros de búsqueda
-            $data['options_room'] = $this->Item_model->options('category_id = 520', 'Todos');
-            
-        //Arrays con valores para contenido en lista
-            $data['arr_rooms'] = $this->Item_model->arr_cod('category_id = 520');
-            
-        //Cargar vista
-            $this->App_model->view(TPL_ADMIN, $data);
-    }
-
-    /**
-     * JSON
-     * Listado de eventos programados en calendario, según filtros de búsqueda
-     */
-    function get($num_page = 1, $per_page = 100)
-    {
-        $this->load->model('Search_model');
-        $filters = $this->Search_model->filters();
-        $filters['type'] = 203;
-        $data = $this->Calendar_model->get($filters, $num_page, $per_page);
-
-        //Salida JSON
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-    function get_training_reservations($training_id)
-    {
-        $reservations = $this->Calendar_model->training_reservations($training_id);
-        $data['reservations'] = $reservations->result();
-
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-// Sesiones
-//-----------------------------------------------------------------------------
-
-    /**
-     * Vista, información sobre la sesión de entrenamiento
-     */
-    function training($training_id)
-    {
-        $training = $this->Calendar_model->row_training($training_id);
-
-        $data['training'] = $training;
-        $data['head_title'] = 'Entrenamiento ' . $data['training']->id;
-        $data['view_a'] = $this->views_folder. 'trainings/training_v';
-        $data['nav_2'] = $this->views_folder . 'trainings/menu_v';
-
-        $data['back_link'] = $this->url_controller . 'calendar/' . $training->day_id . '/' . $training->room_id;
-
-        //Salida JSON
-        $this->App_model->view(TPL_ADMIN, $data);
-    }
-
-    function get_training_days()
-    {
-        $days = $this->Calendar_model->trainings_days();
-        $data['days'] = $days;
-
-        //Salida JSON
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-    /**
-     * JSON
-     * Array listado de entrenamientos para un día y una zona determinada
-     * 2021-07-30
-     */
-    function get_trainings($day_id, $room_id)
-    {        
-        $trainings = $this->Calendar_model->get_trainings($day_id, $room_id);
-        $data['list'] = $trainings;
-
-        //Salida JSON
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-// Programación automática de trainings de entrenamiento
-//-----------------------------------------------------------------------------
-
-    /**
-     * Formulario para crear programación automático de trainings de entrenamiento presencial
-     * 2021-07-19
-     */
-    function programacion_automatica()
-    {
-        $data['head_title'] = 'Programar';
-        $data['nav_2'] = $this->views_folder . 'menu_v';
-        $data['view_a'] = $this->views_folder . 'programacion_automatica_v';
-
-        $this->App_model->view(TPL_ADMIN, $data);
-    }
-
-    /**
-     * AJAX JSON
-     * Ejecuta la programación automática de trainings de entrenamiento
-     */
-    function programar_trainings()
-    {
-        $date_start = $this->input->post('date_start');
-        $date_end = $this->input->post('date_end');
-        $data = $this->Calendar_model->programar_trainings($date_start, $date_end);
-
-        //Salida JSON
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
 // Reservaciones
 //-----------------------------------------------------------------------------
 
-    /**
-     * Insertar una reservación a una sesión de entrenamiento, tabla events tipo 213
-     */
-    function save_reservation($training_id, $user_id)
-    {
-        $data = $this->Calendar_model->save_reservation($training_id, $user_id);
-
-        //Salida JSON
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-    /**
-     * Eliminar reservación, recalcular cupos disponibles
-     * 2021-07-23
-     */
-    function delete_reservation($reservation_id, $training_id)
-    {
-        $data = $this->Calendar_model->delete_reservation($reservation_id, $training_id);
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
+    
 
 // Testing
 //-----------------------------------------------------------------------------
@@ -231,7 +87,7 @@ class Calendar extends CI_Controller{
         $data['trainings'] = $this->db->get_where('events', "type_id = 203 AND start >= '{$fecha_desde}'");
 
         $data['head_title'] = 'Simulación reservas';
-        $data['view_a'] = $this->views_folder . 'trainings/simular_reservas_v';
+        $data['view_a'] = $this->views_folder . 'simular_reservas_v';
 
         $this->App_model->view(TPL_ADMIN, $data);
     }

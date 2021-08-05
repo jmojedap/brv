@@ -1,0 +1,16 @@
+/*
+Estilos para herramientas administrador BraveBackEnd
+2021-08-05
+-----------------------------------------------------------------------------
+*/
+
+.taken-spot{ color: #DDD; }
+.available-spot{ color: #60c83c; }
+
+/* Zonas de entrenamiento */
+/*-----------------------------------------------------------------------------*/
+.text_z10 {color: #FFC400;}
+.text_z20 {color: #F02555;}
+.text_z30 {color: #3080FF;}
+.text_z40 {color: #BB15EE;}
+.text_z50 {color: #39B44A;}

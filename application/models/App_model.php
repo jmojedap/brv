@@ -230,7 +230,7 @@ class App_model extends CI_Model{
      */
     function schedules()
     {
-        $this->db->select('id AS horario_id, short_name AS hour');
+        $this->db->select('id AS schedule_id, item_name AS title, short_name AS hour, long_name AS hour_end');
         $this->db->where('category_id', 510);
         $schedules = $this->db->get('items');
 

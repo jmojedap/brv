@@ -1,7 +1,7 @@
 <?php
     $app_cf_index = $this->uri->segment(2) . '_' . $this->uri->segment(3);
     
-    $cl_nav_2['calendar_sesion'] = '';
+    $cl_nav_2['trainings_info'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
     //if ( $app_cf == 'files/explore' ) { $cl_nav_2['files_explore'] = 'active'; }
@@ -16,7 +16,7 @@
     sections.info = {
         icon: '',
         text: 'Información',
-        class: '<?= $cl_nav_2['calendar_sesion'] ?>',
+        class: '<?= $cl_nav_2['trainings_info'] ?>',
         cf: 'calendar/sesion/' + element_id
     };
     

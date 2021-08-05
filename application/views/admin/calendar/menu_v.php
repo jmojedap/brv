@@ -2,8 +2,7 @@
     $app_cf_index = $this->uri->segment(2) . '_' . $this->uri->segment(3);
     
     $cl_nav_2['calendar_calendar'] = '';
-    $cl_nav_2['calendar_programacion_automatica'] = '';
-    $cl_nav_2['calendar_trainings'] = '';
+    $cl_nav_2['trainings_schedule_generator'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
     //if ( $app_cf_index == 'calendar_import_e' ) { $cl_nav_2['calendar_import'] = 'active'; }
@@ -21,23 +20,16 @@
         cf: 'calendar/calendar'
     };
 
-    sections.programacion_automatica = {
+    sections.schedule_generator = {
         icon: '',
         text: 'Programar',
-        class: '<?= $cl_nav_2['calendar_programacion_automatica'] ?>',
-        cf: 'calendar/programacion_automatica'
-    };
-
-    sections.trainings = {
-        icon: '',
-        text: 'Entrenamientos',
-        class: '<?= $cl_nav_2['calendar_trainings'] ?>',
-        cf: 'calendar/trainings'
+        class: '<?= $cl_nav_2['trainings_schedule_generator'] ?>',
+        cf: 'trainings/schedule_generator'
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['calendar', 'programacion_automatica', 'trainings'];
-    sections_role[2] = ['calendar', 'programacion_automatica', 'trainings'];
+    sections_role[1] = ['calendar', 'schedule_generator'];
+    sections_role[2] = ['calendar', 'schedule_generator'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

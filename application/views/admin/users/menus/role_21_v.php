@@ -3,6 +3,7 @@
     
     $cl_nav_2['users_explore'] = '';
     $cl_nav_2['users_profile'] = '';
+    $cl_nav_2['users_reservations'] = '';
     $cl_nav_2['follow_following'] = '';
     $cl_nav_2['follow_followers'] = '';
     $cl_nav_2['users_edit'] = '';
@@ -22,6 +23,13 @@
         text: 'Información',
         class: '<?= $cl_nav_2['users_profile'] ?>',
         cf: 'users/profile/' + element_id
+    };
+
+    sections.reservations = {
+        icon: '',
+        text: 'Reservaciones',
+        class: '<?= $cl_nav_2['users_reservations'] ?>',
+        cf: 'users/reservations/' + element_id
     };
 
     sections.followers = {
@@ -46,8 +54,8 @@
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['profile', 'followers', 'following', 'edit'];
-    sections_role[2] = ['profile', 'followers', 'following', 'edit'];
+    sections_role[1] = ['profile', 'reservations', 'followers', 'following', 'edit'];
+    sections_role[2] = ['profile', 'reservations', 'followers', 'following', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

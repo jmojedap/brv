@@ -71,7 +71,7 @@ var simular_reservas_app = new Vue({
         save_reservation: function(){
             var intento = this.random_intento()
 
-            axios.get(url_api + 'calendar/save_reservation/' + intento.training_id + '/' + intento.user_id)
+            axios.get(url_eapi + 'reservations/save/' + intento.training_id + '/' + intento.user_id)
             .then(response => {
                 intento.reservation_id = response.data.saved_id
                 intento.error = response.data.error

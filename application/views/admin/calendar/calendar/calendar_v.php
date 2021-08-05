@@ -1,51 +1,4 @@
-<style>
-    .taken-spot{ color: #DDD; }
-    .available-spot{ color: #60c83c; }
-
-    .day {
-        cursor: pointer;
-    }
-
-    .day:hover {
-        background-color: #03a9f4;
-        color: white;
-    }
-
-    .first_month_day {
-        border-left: 1px solid #e4e7ea;
-    }
-
-
-    .holyday{
-        background-color: #ffecb3;
-    }
-
-    .wd_6 {
-        background-color: #fff8e1;
-    }
-
-    .wd_7{
-        background-color: #ffecb3;
-        /*border-left: 2px solid #999999;*/
-    }
-
-    .day.active {
-        font-weight: bold;
-        background-color: #03a9f4;
-        color: white;
-    }
-
-    .today {
-        background-color: #e1f5fe;
-        font-weight: bold;
-    }
-
-    .text_z10 {color: #FFC400;}
-    .text_z20 {color: #F02555;}
-    .text_z30 {color: #3080FF;}
-    .text_z40 {color: #BB15EE;}
-    .text_z50 {color: #39B44A;}
-</style>
+<link type="text/css" rel="stylesheet" href="<?= URL_RESOURCES ?>css/pml_calendar.css">
 
 <div id="calendar_app">
     <div class="row">
@@ -129,7 +82,7 @@
                                     >
                             </td>
                             <td>
-                                <a v-bind:href="`<?= URL_ADMIN . "calendar/training/" ?>` + training.id" class="btn btn-sm btn-light">Detalle</a>
+                                <a v-bind:href="`<?= URL_ADMIN . "trainings/info/" ?>` + training.id" class="btn btn-sm btn-light">Detalle</a>
                             </td>
                         </tr>
                     </tbody>

@@ -36,9 +36,11 @@
 
         <!-- Recursos PML -->
         <link type="text/css" rel="stylesheet" href="<?= URL_RESOURCES ?>css/pacarina.css">
+        <link type="text/css" rel="stylesheet" href="<?= URL_RESOURCES ?>css/brave_admin.css">
         <script src="<?= URL_RESOURCES . 'js/pcrn.js' ?>"></script>
         <script>
             const url_app = '<?= URL_ADMIN ?>'; const url_admin = '<?= URL_ADMIN ?>'; const url_api = '<?= URL_API ?>'; const url_front = '<?= URL_FRONT ?>';
+            const url_eapi = '<?= URL_EAPI ?>';
             const url_base = '<?= base_url() ?>';
             var app_cf = '<?= $this->uri->segment(2) . '/' . $this->uri->segment(3); ?>';
         </script>

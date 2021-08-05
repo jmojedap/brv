@@ -3,8 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Trainings extends CI_Controller{
 
-
-
 // Constructor
 //-----------------------------------------------------------------------------
     
@@ -12,36 +10,37 @@ class Trainings extends CI_Controller{
     {
         parent::__construct();
 
-        $this->load->model('Period_model');
-        $this->load->model('Calendar_model');
+        //$this->load->model('Period_model');
+        $this->load->model('Training_model');
         
         //Para definir hora local
         date_default_timezone_set("America/Bogota");
     }
-    
+
     /**
-     * Listado de días en los que se puede reservar cupo para entrenamiento
-     * 2021-08-04
+     * JSON
+     * Array listado de entrenamientos para un día y una zona determinada
+     * 2021-07-30
      */
-    function get_training_days()
-    {
-        $days = $this->Calendar_model->trainings_days();
-        $data['days'] = $days->result();
+    function get_trainings($day_id, $room_id)
+    {        
+        $trainings = $this->Training_model->get_trainings($day_id, $room_id);
+        $data['list'] = $trainings;
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
     /**
-     * Listado de zonas o salas, marcando activas e inactivas, para reserva, según el usuario
-     * 2021-08-04
+     * JSON
+     * Listado de usuarios con reservación en un entrenamiento determinado
+     * 2021-08-05
      */
-    function get_training_rooms($day_id, $user_id)
+    function get_reservations($training_id)
     {
-        $rooms = $this->Calendar_model->available_rooms($day_id, $user_id);
-        $data['rooms'] = $rooms;
+        $reservations = $this->Training_model->reservations($training_id);
+        $data['reservations'] = $reservations->result();
 
-        //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 }

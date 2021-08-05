@@ -1,4 +1,4 @@
-<div id="programacion_automatica_app">
+<div id="schedule_generator_app">
     <div class="center_box_750">
         <div class="card">
             <div class="card-body">
@@ -39,11 +39,8 @@
 </div>
 
 <script>
-var programacion_automatica_app = new Vue({
-    el: '#programacion_automatica_app',
-    created: function(){
-        //this.get_list()
-    },
+var schedule_generator_app = new Vue({
+    el: '#schedule_generator_app',
     data: {
         form_values: {
             date_start: '<?= date('Y-m-d') ?>',
@@ -55,13 +52,10 @@ var programacion_automatica_app = new Vue({
         send_form: function(){
             this.loading = true
             var form_data = new FormData(document.getElementById('programacion_form'))
-            axios.post(url_api + 'calendar/programar_sesiones/', form_data)
+            axios.post(url_api + 'trainings/schedule/', form_data)
             .then(response => {
                 console.log(response.data)
                 toastr['info'](response.data.message)
-                /*if ( response.data.saved_id > 0 ) {
-                    toastr['success']('Guardado')
-                }*/
                 this.loading = false
             })
             .catch( function(error) {console.log(error)} )

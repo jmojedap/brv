@@ -105,7 +105,7 @@ class Users extends CI_Controller{
      * Formulario para la creación de un nuevo usuario
      * 2021-02-17
      */
-    function add($role_type = 'modelo')
+    function add($role_type = 'deportista')
     {
         //Variables específicas
             $data['role_type'] = $role_type;
@@ -328,20 +328,19 @@ class Users extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($username));
     }
     
-// ALBUMES DE USERS
+// RESERVACIONES DE ENTRENAMIENTO
 //-----------------------------------------------------------------------------
 
     /**
      * Albums de fotos
      */
-    function albums($user_id)
+    function reservations($user_id)
     {
         $data = $this->User_model->basic($user_id);
         
-        $this->load->model('Girl_model');
-        $data['albums'] = $this->Girl_model->albums($user_id);
+        //$data['reservations'] = $this->User_model->reservations($user_id);
 
-        $data['view_a'] = $this->views_folder . 'albums_v';
+        $data['view_a'] = $this->views_folder . 'reservations_v';
         $data['back_link'] = $this->url_controller . 'explore';
         $this->App_model->view(TPL_ADMIN, $data);
     }
@@ -371,58 +370,5 @@ class Users extends CI_Controller{
         }
 
         $this->App_model->view(TPL_ADMIN, $data);
-    }
-
-// PRODUCTOS DE UN USUARIO
-//-----------------------------------------------------------------------------
-
-    /**
-     * Contenidos digitales asignados a un producto
-     * 2020-04-18
-     */
-    function products($user_id)
-    {
-        $data = $this->User_model->basic($user_id);
-
-        $data['products'] = $this->User_model->assigned_products($user_id);
-
-        $data['view_a'] = $this->views_folder . 'products_v';
-
-        $this->App_model->view(TPL_ADMIN, $data);
-    }
-
-    /**
-     * Agrega un producto a un usuario
-     * 2020-06-17
-     */
-    function add_product($user_id, $product_id)
-    {
-        $data = $this->User_model->add_product($user_id, $product_id);
-
-        //Salida JSON
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
-    }
-
-// PROCESOS MASIVOS
-//-----------------------------------------------------------------------------
-
-    function ajustar_image()
-    {
-        $this->db->where('image_id > 0');
-        $users = $this->db->get('users');
-
-        $data['actualizados'] = array();
-
-        foreach ($users->result() as $row_user) {
-            $arr_row['url_image'] = $row_user->url_image . $row_user->url_thumbnail;
-            $arr_row['url_thumbnail'] = $row_user->url_image . 'sm_' . $row_user->url_thumbnail;
-
-            $this->db->where('id', $row_user->id);
-            $this->db->update('users', $arr_row);
-            
-            $data['actualizados'][] = $row_user->id;
-        }
-
-        $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 }

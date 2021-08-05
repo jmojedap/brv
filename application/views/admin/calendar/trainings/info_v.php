@@ -43,7 +43,7 @@
                     <tbody>
                         <tr v-for="(reservation, key_reservation) in reservations">
                             <td>
-                                <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + reservation.user_id" class="">
+                                <a v-bind:href="`<?= URL_ADMIN . "users/reservations/" ?>` + reservation.user_id" class="">
                                     <img
                                         v-bind:src="reservation.user_thumbnail"
                                         class="rounded rounded-circle w40p"
@@ -53,7 +53,7 @@
                                 </a>
                             </td>
                             <td>
-                                <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + reservation.user_id" class="">
+                                <a v-bind:href="`<?= URL_ADMIN . "users/reservations/" ?>` + reservation.user_id" class="">
                                     {{ reservation.user_display_name }}
                                 </a>
                             </td>
@@ -87,7 +87,7 @@ var training_app = new Vue({
     },
     methods: {
         get_list: function(){
-            axios.get(url_api + 'calendar/get_training_reservations/' + this.training.id)
+            axios.get(url_eapi + 'trainings/get_reservations/' + this.training.id)
             .then(response => {
                 this.reservations = response.data.reservations
                 this.loading = false

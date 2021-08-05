@@ -111,7 +111,7 @@ var calendar_app = new Vue({
             this.get_trainings()
         },
         get_trainings: function(){
-            axios.get(url_api + 'calendar/get_trainings/' + this.active_day.id + '/' + this.room_id)
+            axios.get(url_api + 'trainings/get_trainings/' + this.active_day.id + '/' + this.room_id)
             .then(response => {
                 this.trainings = response.data.list
             })
