@@ -158,4 +158,55 @@ class Calendar_model extends CI_Model{
         
         return $condition;
     }
+
+// Info
+//-----------------------------------------------------------------------------
+
+    /**
+     * Eventos de un usuario para mostrarse en el calendario
+     */
+    function user_events($user_id)
+    {
+        $this->db->select('id, title, type_id, start, end, period_id AS day_id, related_2');
+        $this->db->where('type_id IN (213)');
+        $this->db->where('user_id', $user_id);
+        $this->db->order_by('period_id', 'ASC');
+        $events = $this->db->get('events');
+
+        return $events;
+    }
+
+    /**
+     * Array con días y subarray de eventos de calendario de cada día.
+     * 2021-08-11
+     */
+    function user_events_per_day($user_id)
+    {   
+        $user_events_index = array();
+        $user_events = array();
+
+        $events = $this->user_events($user_id);
+
+        //Crear lista de días, con índice específico (YYYYMMDD)
+        foreach ( $events->result() as $event ) {
+            $user_events_index[$event->day_id] = array(
+                'id' => $event->day_id,
+                'date' => substr($event->start,0,10),
+                'events' => array()
+            );
+        }
+
+        //Llenar los eventos en el array de eventos de cada día corresponidente
+        foreach ( $events->result() as $event ) {
+            $user_events_index[$event->day_id]['events'][] = $event;
+        }
+
+        //Crear nuevo array de días, sin índice específico
+        foreach ($user_events_index as $day) {
+            $user_events[] = $day;
+        }
+
+        return $user_events;
+    }
+
 }

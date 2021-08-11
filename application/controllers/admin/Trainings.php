@@ -34,6 +34,22 @@ class Trainings extends CI_Controller{
         }
     }
 
+// CRUD
+//-----------------------------------------------------------------------------
+
+    /**
+     * Eliminar un entrenamiento
+     * 2021-08-01
+     */
+    function delete($training_id)
+    {
+        $data['qty_deleted'] = $this->Training_model->delete($training_id);
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+
 // Información y procesos
 //-----------------------------------------------------------------------------
 
@@ -94,6 +110,7 @@ class Trainings extends CI_Controller{
     {
         $data['head_title'] = 'Programar';
         $data['nav_2'] = 'admin/calendar/menu_v';
+        $data['rooms'] = $this->App_model->rooms();
         $data['view_a'] = $this->views_folder . 'schedule_generator_v';
 
         $this->App_model->view(TPL_ADMIN, $data);
@@ -102,12 +119,15 @@ class Trainings extends CI_Controller{
     /**
      * AJAX JSON
      * Ejecuta la programación automática de trainings de entrenamiento
+     * 2021-08-10
      */
     function schedule()
     {
         $date_start = $this->input->post('date_start');
-        $date_end = $this->input->post('date_end');
-        $data = $this->Training_model->schedule_trainings($date_start, $date_end);
+        $date_end = $this->input->post('date_start');       //Modificado temporalmente date_start
+        $room_id = $this->input->post('room_id');
+        $total_spots = $this->input->post('total_spots');
+        $data = $this->Training_model->schedule_trainings($date_start, $date_end, $room_id, $total_spots);
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));

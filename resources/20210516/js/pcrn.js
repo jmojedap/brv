@@ -65,4 +65,15 @@ var Pcrn = new function()
         num = num.toString().split('e');
         return sign * (num[0] + 'e' + (num[1] ? (+num[1] - decimals) : -decimals));
     }
+
+    /**
+     * Redondea un número con cierto número de decimales
+     * 
+     * @param {number} num 
+     * @param {number} total
+     */
+    this.intPercent = function intPercent(num, total = 100) {
+        var intPercent = this.round(100 * num / total, 0)
+        return intPercent
+    }
 };

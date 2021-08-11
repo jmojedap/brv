@@ -39,6 +39,7 @@
                     <thead>
                         <th width="40px"></th>
                         <th>Usuario</th>
+                        <th width="10px"></th>
                     </thead>
                     <tbody>
                         <tr v-for="(reservation, key_reservation) in reservations">
@@ -57,12 +58,18 @@
                                     {{ reservation.user_display_name }}
                                 </a>
                             </td>
+                            <td>
+                                <button class="a4" data-toggle="modal" data-target="#delete_modal" v-on:click="set_element(key_reservation)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>    
+    <?php $this->load->view('common/modal_single_delete_v') ?>
 </div>
 
 <script>
@@ -83,6 +90,7 @@ var training_app = new Vue({
     data: {
         training: <?= json_encode($training) ?>,
         reservations: [],
+        current_key: -1,
         loading: true,
     },
     methods: {
@@ -91,6 +99,21 @@ var training_app = new Vue({
             .then(response => {
                 this.reservations = response.data.reservations
                 this.loading = false
+            })
+            .catch(function(error) { console.log(error) })
+        },
+        set_element: function(key){
+            this.current_key = key
+        },
+        delete_element: function(){
+            var reservation = this.reservations[this.current_key];
+            axios.get(url_eapi + 'reservations/delete/' + reservation.id + '/' + reservation.training_id)
+            .then(response => {
+                if ( response.data.qty_deleted > 0 ) {
+                    this.reservations.splice(this.current_key,1)
+                    this.current_key = -1
+                    toastr['info']('Reservación eliminada')
+                }
             })
             .catch(function(error) { console.log(error) })
         },

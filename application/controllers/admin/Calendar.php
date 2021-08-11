@@ -34,7 +34,7 @@ class Calendar extends CI_Controller{
 // Calendario
 //-----------------------------------------------------------------------------
 
-    function calendar($day_id = NULL, $room_id = 10)
+    function calendar($day_id = NULL, $room_id = 0)
     {
         if ( is_null($day_id) ) $day_id = date('Ymd');
         $day = $this->Db_model->row('periods', "type_id = 9 AND id = {$day_id}");

@@ -35,8 +35,8 @@ class Training_model extends CI_Model{
     function select($format = 'general')
     {
         $arr_select['general'] = 'events.*, users.display_name AS user_display_name';
-        $arr_select['trainings'] = 'events.id, title, related_1 AS day_id, start, events.status, element_id AS room_id, integer_1 AS total_spots, integer_2 AS available_spots';
-        $arr_select['reservations'] = 'events.id, events.status, related_1 AS day_id, start, element_id AS training_id, user_id, related_2 AS room_id, users.display_name AS user_display_name, users.url_thumbnail AS user_thumbnail';
+        $arr_select['trainings'] = 'events.id, title, period_id AS day_id, start, events.status, element_id AS room_id, integer_1 AS total_spots, integer_2 AS available_spots';
+        $arr_select['reservations'] = 'events.id, events.status, period_id AS day_id, start, element_id AS training_id, user_id, related_2 AS room_id, users.display_name AS user_display_name, users.url_thumbnail AS user_thumbnail';
 
         //$arr_select[''] = 'usuario.id, username, usuario.email, nombre, apellidos, sexo, rol_id, estado, no_documento, tipo_documento_id, institucion_id, grupo_id';
 
@@ -152,6 +152,28 @@ class Training_model extends CI_Model{
         return $condition;
     }
 
+// CRUD
+//-----------------------------------------------------------------------------
+
+    /**
+     * Eliminar un entrenamiento presencial
+     * 2021-08-11
+     */
+    function delete($training_id)
+    {
+        $this->db->where('id', $training_id);
+        $this->db->delete('events');
+        
+        $qty_deleted = $this->db->affected_rows();
+
+        //Eliminar reservaciones asociadas
+        if ( $qty_deleted > 0 ) {
+            $this->db->query("DELETE FROM events WHERE type_id = 213 AND element_id = {$training_id}");
+        }
+
+        return $qty_deleted;
+    }
+
 // Sesiones de entrenamiento
 //-----------------------------------------------------------------------------
 
@@ -216,14 +238,14 @@ class Training_model extends CI_Model{
      * Array, con trainings para una fecha y zona de entrenamiento específica.
      * 2021-07-23
      */
-    function get_trainings($day_id, $room_id)
+    function get_trainings($day_id, $room_id = 0)
     {
         $now = new DateTime('now');
         $now->add(new DateInterval('PT1H'));
 
         $this->db->select($this->select('trainings'));
         $this->db->where('type_id', 203);           //Sesión de entrenamiento presencial
-        $this->db->where('element_id', $room_id);   //Zona de entrenamiento
+        if ( $room_id > 0 ) $this->db->where('element_id', $room_id);   //Zona de entrenamiento
         $this->db->where('related_1', $day_id);     //Día de la sesión de entrenamiento
         $this->db->where('start >', date('Y-m-d') . ' 00:00:00');   //Posteriores a la fecha de hoy
         $this->db->order_by('start', 'ASC');
@@ -232,9 +254,12 @@ class Training_model extends CI_Model{
 
         $trainings = array();
         foreach ($query->result() as $training) {
+            $training->total_spots = intval($training->total_spots);            //Convertir en entero para cálculos
+            $training->available_spots = intval($training->available_spots);    //Convertir en entero para cálculos
             $training->taken_spots = $training->total_spots - $training->available_spots;
             $training->active = 1;
             if ( $training->start < $now->format('Y-m-d H:i:s') ) $training->active = 0;
+            if ( $training->available_spots <= 0 ) $training->active = 0;
 
             $trainings[] = $training;
         }
@@ -245,21 +270,20 @@ class Training_model extends CI_Model{
     /**
      * Programar automáticamente varios trainings de entrenamiento entre dos fechas
      */
-    function schedule_trainings($start, $end)
+    function schedule_trainings($start, $end, $room_id, $total_spots)
     {
         $trainings = array();
 
         $days = $this->Period_model->days($start, $end, 'business_day = 1');    //Días laborales
-        $rooms = $this->App_model->rooms();             //Zonas de entrenamiento
+        //$rooms = $this->App_model->rooms();             //Zonas de entrenamiento
         $schedules = $this->App_model->schedules();     //Horarios
 
         //Recorrer cada día, zona y horario y crear registro
         foreach ($days->result() as $day) {
-            foreach ($rooms->result() as $room) {
-                foreach ($schedules->result() as $schedule) {
-                    $trainings[] = $this->schedule($day, $room->room_id, $schedule);
-                }
+            foreach ($schedules->result() as $schedule) {
+                $trainings[] = $this->schedule($day, $room_id, $schedule, $total_spots);
             }
+            //foreach ($rooms->result() as $room) {}    //Desactivado 2021-08-10
         }
 
         //Preparar respuesta
@@ -274,16 +298,16 @@ class Training_model extends CI_Model{
      * Crea un registro en la tabla events, tipo 203, sesión de entrenamiento
      * 2021-08-05
      */
-    function schedule($day, $room_id, $schedule)
+    function schedule($day, $room_id, $schedule, $total_spots)
     {
         $arr_row['type_id'] = 203;  //Sesión de entrenamiento
         $arr_row['title'] = $schedule->title;
+        $arr_row['period_id'] = $day->id;
         $arr_row['start'] = $day->start . ' ' . $schedule->hour;   //Día y hora
         $arr_row['end'] = $day->start . ' ' . $schedule->hour_end;   //Día y hora
         $arr_row['element_id'] = $room_id;                  //Zona de entrenamiento
-        $arr_row['related_1'] = $day->id;
-        $arr_row['integer_1'] = 10;     //Cupos totales
-        $arr_row['integer_2'] = 10;      //Cupos disponibles
+        $arr_row['integer_1'] = $total_spots;      //Cupos totales
+        $arr_row['integer_2'] = $total_spots;      //Cupos disponibles
 
         $this->load->model('Event_model');
 

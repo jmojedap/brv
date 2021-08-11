@@ -69,7 +69,8 @@ var calendar_app = new Vue({
         day_start: '<?= $day_start ?>',
         rooms: <?= json_encode($rooms->result()) ?>,
         room_id: <?= $room_id ?>,
-        trainings: []
+        trainings: [],
+        key_training: -1,
     },
     methods: {
         set_day: function(day){
@@ -114,6 +115,22 @@ var calendar_app = new Vue({
             axios.get(url_api + 'trainings/get_trainings/' + this.active_day.id + '/' + this.room_id)
             .then(response => {
                 this.trainings = response.data.list
+            })
+            .catch(function(error) { console.log(error) })
+        },
+        set_training: function(key_training){
+            this.key_training = key_training
+        },
+        delete_element: function(){
+            var training = this.trainings[this.key_training]
+            axios.get(url_api + 'trainings/delete/' + training.id)
+            .then(response => {
+                if ( response.data.qty_deleted > 0 ) {
+                    this.trainings.splice(this.key_training,1)
+                    toastr['info']('Entrenamiento eliminado')
+                } else {
+                    toastr['danger']('Ocurrió un error al eliminar')
+                }
             })
             .catch(function(error) { console.log(error) })
         },

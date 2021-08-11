@@ -10,6 +10,7 @@
                 <th>Fecha</th>
                 <th>Hora</th>
                 <th></th>
+                <th></th>
             </thead>
             <tbody>
                 <tr v-for="(reservation, key_reservation) in reservations">
@@ -30,10 +31,16 @@
                     <td>
                         {{ reservation.start | ago }}
                     </td>
+                    <td>
+                        <button class="a4" data-toggle="modal" data-target="#delete_modal" v-on:click="set_element(key_reservation)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
+    <?php $this->load->view('common/modal_single_delete_v') ?>
 </div>
 
 <script>
@@ -65,6 +72,8 @@ var reservations_app = new Vue({
         user: <?= json_encode($row) ?>,
         reservations: [],
         loading: true,
+        reservations: [],
+        current_key: -1,
     },
     methods: {
         get_list: function(){
@@ -72,6 +81,23 @@ var reservations_app = new Vue({
             .then(response => {
                 this.reservations = response.data.reservations
                 this.loading = false
+            })
+            .catch(function(error) { console.log(error) })
+        },
+        set_element: function(key){
+            this.current_key = key
+        },
+        delete_element: function(){
+            var reservation = this.reservations[this.current_key];
+            axios.get(url_eapi + 'reservations/delete/' + reservation.id + '/' + reservation.training_id)
+            .then(response => {
+                if ( response.data.qty_deleted > 0 ) {
+                    this.reservations.splice(this.current_key,1)
+                    this.current_key = -1
+                    toastr['info']('Reservación eliminada')
+                } else {
+                    toastr['error'](response.data.error)
+                }
             })
             .catch(function(error) { console.log(error) })
         },

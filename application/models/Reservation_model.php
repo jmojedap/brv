@@ -10,7 +10,7 @@ class Reservation_model extends CI_Model{
      */
     function select($format = 'reservations')
     {
-        $arr_select['reservations'] = 'events.id, events.title, events.status, related_1 AS day_id, start, end, element_id AS training_id, user_id, related_2 AS room_id, users.display_name AS user_display_name, users.url_thumbnail AS user_thumbnail';
+        $arr_select['reservations'] = 'events.id, events.title, events.status, period_id AS day_id, start, end, element_id AS training_id, user_id, related_2 AS room_id, users.display_name AS user_display_name, users.url_thumbnail AS user_thumbnail';
 
         return $arr_select[$format];
     }
@@ -144,12 +144,12 @@ class Reservation_model extends CI_Model{
     {
         $arr_row['title'] = $this->Item_model->name(520, $training->element_id);  //Nombre zona de entrenamiento
         $arr_row['type_id'] = 213;  //Reseva entrenamiento presencial
+        $arr_row['period_id'] = $training->period_id;     //ID día de sesión
         $arr_row['start'] = $training->start;
         $arr_row['end'] = $training->end;
         $arr_row['status'] = 0;     //Reservado
         $arr_row['element_id'] = $training->id;    //ID Evento sesión de entrenamiento
         $arr_row['user_id'] = $user->id;         //Usuario para el que se reserva la sesión
-        $arr_row['related_1'] = $training->related_1;     //ID día de sesión
         $arr_row['related_2'] = $training->element_id;    //Cód zona de entrenamiento
         $arr_row['created_at'] = date('Y-m-d H:i:s');
         $arr_row['creator_id'] = $user->id;
@@ -168,25 +168,22 @@ class Reservation_model extends CI_Model{
         $reservation = $this->Db_model->row('events', "id = {$reservation_id} AND element_id = {$training_id}");
 
         //Si existe reserva
-        if ( ! is_null($reservation) )
+        if ( is_null($reservation) )
         {
-            //Revisión de condiciones
-            if ( $reservation->start < date('Y-m-d H:i:s') ) $data['error'] = 'No se puede eliminar una reserva del pasado. ';
-
-            //Verificar que no haya errores
-            if ( strlen($data['error']) == 0 )
-            {
-                $this->db->where('id', $reservation_id);
-                $this->db->where('element_id', $training_id);
-                $this->db->delete('events');
-                
-                $data['qty_deleted'] = $this->db->affected_rows();
-        
-                //Actualizar número de cupos disponibles
-                if ( $data['qty_deleted'] > 0 ) $this->Training_model->update_spots($training_id);
-            }
-        } else {
             $data['error'] = 'No existe reserva con ID: ' . $reservation_id;
+        }
+
+        //Si no hay error, eliminar
+        if ( strlen($data['error']) == 0 )
+        {
+            $this->db->where('id', $reservation_id);
+            $this->db->where('element_id', $training_id);
+            $this->db->delete('events');
+            
+            $data['qty_deleted'] = $this->db->affected_rows();
+    
+            //Actualizar número de cupos disponibles
+            if ( $data['qty_deleted'] > 0 ) $this->Training_model->update_spots($training_id);
         }
 
         return $data;
