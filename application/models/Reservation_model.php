@@ -10,7 +10,7 @@ class Reservation_model extends CI_Model{
      */
     function select($format = 'reservations')
     {
-        $arr_select['reservations'] = 'events.id, events.title, events.status, period_id AS day_id, start, end, element_id AS training_id, user_id, related_2 AS room_id, users.display_name AS user_display_name, users.url_thumbnail AS user_thumbnail';
+        $arr_select['reservations'] = 'events.id, events.title, events.status, period_id AS day_id, start, end, element_id AS training_id, user_id, related_2 AS room_id, users.display_name AS user_display_name, users.url_thumbnail AS user_thumbnail, events.created_at';
 
         return $arr_select[$format];
     }
@@ -80,6 +80,27 @@ class Reservation_model extends CI_Model{
 
 // CRUD reservas
 //-----------------------------------------------------------------------------
+
+    /**
+     * Información sobre una reservación
+     * 2021-08-13
+     */
+    function info($reservation_id, $user_id)
+    {
+        $reservation = ['id' => '0'];
+
+        $this->db->select($this->select());
+        $this->db->join('users', 'events.user_id = users.id', 'left');
+        $this->db->where('events.id', $reservation_id);
+        $this->db->where('user_id', $user_id);
+        $events = $this->db->get('events');
+
+        if ( $events->num_rows() ) {
+            $reservation = $events->row();
+        }
+
+        return $reservation;
+    }
 
     /**
      * Guardar una reserva de cupo en una sesión de entrenamiento por parte de un usuario
@@ -184,6 +205,35 @@ class Reservation_model extends CI_Model{
     
             //Actualizar número de cupos disponibles
             if ( $data['qty_deleted'] > 0 ) $this->Training_model->update_spots($training_id);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Cancela una reserva de cupo de entrenamiento, la elimina de la tabla events.
+     * 2021-07-01
+     */
+    function cancel($reservation_id, $training_id)
+    {
+        $data = array('qty_deleted' => 0, 'error' => '');
+
+        $reservation = $this->Db_model->row('events', "id = {$reservation_id} AND element_id = {$training_id}");
+
+        //Si existe reserva
+        if ( is_null($reservation) )
+        {
+            $data['error'] = 'No existe reserva con ID: ' . $reservation_id;
+        } else {
+            if ( $reservation->start < date('Y-m-d H:i:s') ) {
+                $data['error'] = 'No se puede cancelar una reservación con fecha y hora pasada';
+            }
+        }
+
+        //Si no hay error, eliminar
+        if ( strlen($data['error']) == 0 )
+        {
+            $data = $this->delete($reservation_id, $training_id);
         }
 
         return $data;

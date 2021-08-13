@@ -35,6 +35,18 @@ class Reservations extends CI_Controller{
     }
 
     /**
+     * JSON
+     * Información sobre una reservación de entrenamiento
+     * 2021-08-13
+     */
+    function get_info($reservation_id, $user_id){
+        $data['reservation'] = $this->Reservation_model->info($reservation_id, $user_id);
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
      * Insertar una reservación a una sesión de entrenamiento, tabla events tipo 213
      */
     function save($training_id, $user_id)
@@ -53,6 +65,16 @@ class Reservations extends CI_Controller{
     function delete($reservation_id, $training_id)
     {
         $data = $this->Reservation_model->delete($reservation_id, $training_id);
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Cancela reservación, recalcular cupos disponibles
+     * 2021-07-23
+     */
+    function cancel($reservation_id, $training_id)
+    {
+        $data = $this->Reservation_model->cancel($reservation_id, $training_id);
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
