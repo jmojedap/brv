@@ -66,13 +66,12 @@ class User_model extends CI_Model{
 
     /**
      * Segmento Select SQL, con diferentes formatos, consulta de usuarios
-     * 2020-12-12
+     * 2021-08-14
      */
     function select($format = 'general')
     {
-        $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, first_name, last_name, email, role, image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login, expiration_at';
+        $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, email, role, image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login, expiration_at';
         $arr_select['follow'] = 'users.id, username, qty_followers, qty_following';
-
 
         //$arr_select['export'] = 'usuario.id, username, usuario.email, nombre, apellidos, sexo, rol_id, estado, no_documento, tipo_documento_id, institucion_id, grupo_id';
 

@@ -39,12 +39,26 @@ class Users extends CI_Controller{
 
     /**
      * JSON
-     * Datos de un usero
+     * Datos de un usuario
      */
-    function get_info($user_id)
+    function get_info($user_id, $format = 'general')
     {
-        $data['user'] = $this->Db_model->row_id('users', $user_id);
-        
+        //$user_id = $this->input->post('user_id');
+        //Resultado por defecto
+        $data['user'] = array('id' => '0');
+
+        //Buscar usuario
+        $this->db->select($this->User_model->select($format));
+        $this->db->where('id', $user_id);
+        $users = $this->db->get('users');
+
+        if ( $users->num_rows() ) $data['user'] = $users->row();
+
+        /*if ( ! is_null($data['user']) ) {
+            //$condition = ""
+            $data['user']->qty_posts = '150';
+        }*/
+
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
