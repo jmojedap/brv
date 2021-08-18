@@ -246,7 +246,7 @@ class Training_model extends CI_Model{
         $this->db->select($this->select('trainings'));
         $this->db->where('type_id', 203);           //Sesión de entrenamiento presencial
         if ( $room_id > 0 ) $this->db->where('element_id', $room_id);   //Zona de entrenamiento
-        $this->db->where('related_1', $day_id);     //Día de la sesión de entrenamiento
+        $this->db->where('period_id', $day_id);     //Día de la sesión de entrenamiento
         $this->db->where('start >', date('Y-m-d') . ' 00:00:00');   //Posteriores a la fecha de hoy
         $this->db->order_by('start', 'ASC');
         

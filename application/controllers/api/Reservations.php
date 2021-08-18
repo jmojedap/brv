@@ -75,6 +75,7 @@ class Reservations extends CI_Controller{
     function cancel($reservation_id, $training_id)
     {
         $data = $this->Reservation_model->cancel($reservation_id, $training_id);
+        //$data = ['qty_deleted' => 0, 'error' => 'Ocurrió un error de prueba'];
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
@@ -85,10 +86,10 @@ class Reservations extends CI_Controller{
      * Listado de días en los que se puede reservar cupo para entrenamiento
      * 2021-08-04
      */
-    function get_training_days()
+    function get_training_days($user_id)
     {
-        $days = $this->Reservation_model->training_days();
-        $data['days'] = $days->result();
+        $days = $this->Reservation_model->training_days($user_id);
+        $data['days'] = $days;
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));

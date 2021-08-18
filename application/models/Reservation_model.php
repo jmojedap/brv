@@ -22,16 +22,22 @@ class Reservation_model extends CI_Model{
      * Query tabla periods, con días en los cuales se puede schedule una reservación
      * 2021-07-23
      */
-    function training_days()
+    function training_days($user_id)
     {
         $today_id = date('Ymd');
 
         $this->db->select('id, period_name, start');
         $this->db->where('id >=', $today_id);
         $this->db->where('type_id', 9); //Periodo tipo día
-        $this->db->where('id IN (SELECT related_1 FROM events WHERE type_id = 203)');   //Día en los que haya trainings
+        $this->db->where('id IN (SELECT period_id FROM events WHERE type_id = 203)');   //Día en los que haya trainings
         $this->db->order_by('id', 'ASC');
-        $periods = $this->db->get('periods', 2);
+        $query = $this->db->get('periods', 2);
+
+        $periods = array();
+        foreach ( $query->result() as $day ) {
+            $day->qty_user_reservations = $this->Db_model->num_rows('events', "type_id = 213 AND user_id = {$user_id} AND period_id = {$day->id}");
+            $periods[] = $day;
+        }
 
         return $periods;
     }
@@ -61,21 +67,47 @@ class Reservation_model extends CI_Model{
     function available_room($day_id, $room_id, $user_id)
     {
         $available = 1;
-        $day = $this->Db_model->row_id('periods', $day_id); //Row del día, tabla periods
-    
+
+        $qty_reservations = $this->qty_user_week_reservations($day_id, $room_id, $user_id);
+        //Si ya existen reservas, la zona no está disponible
+        if ( $qty_reservations > 0 ) $available = 0;
+
+        $qty_room_trainings = $this->qty_room_trainings($day_id, $room_id);
+        //Si no hay entrenamientos programados, la zona no está disponible
+        if ( $qty_room_trainings == 0 ) $available = 0;
+
+        return $available;
+    }
+
+    /**
+     * Cantidad de reservaciones que tiene un usuario para una zona, en una semana
+     * 2021-08-17
+     */
+    function qty_user_week_reservations($day_id, $room_id, $user_id)
+    {
+        $day = $this->Db_model->row_id('periods', $day_id);
+
         //Buscar otras reservas de la misma zona, en la misma semana, sin que sea sábado
         $condition = "type_id = 213";                   //Evento tipo reserva
         $condition .= " AND user_id = {$user_id} ";     //Reserva del mismo usuario
         $condition .= " AND related_2 = {$room_id} ";   //Reserva en la misma zona
-        //En la misma semana (related_1 => day_id) y no sea sábado (week_day 6)
-        $condition .= " AND related_1 IN (SELECT id FROM periods WHERE week_number = {$day->week_number} AND week_day <> 6)";
+        //En la misma semana (period_id => day_id) y no sea sábado (week_day 6):
+        $condition .= " AND period_id IN (SELECT id FROM periods WHERE week_number = {$day->week_number} AND week_day <> 6)";
 
         $qty_reservations = $this->Db_model->num_rows('events', $condition);
 
-        //Si ya existen reservas, la zona no está disponible
-        if ( $qty_reservations > 0 ) $available = 0;
+        return $qty_reservations;
+    }
 
-        return $available;
+    /**
+     * Cantidad de entrenamientos programados en un día específico, para una zona de entrenamiento
+     * 2021-08-17
+     */
+    function qty_room_trainings($day_id, $room_id) {
+        $condition = "type_id = 203 AND period_id = {$day_id} AND element_id = {$room_id}";
+        $qty_room_trainings = $this->Db_model->num_rows('events', $condition);
+
+        return $qty_room_trainings;
     }
 
 // CRUD reservas
@@ -127,7 +159,7 @@ class Reservation_model extends CI_Model{
             $data['error'] = 'El usuario no tiene suscripción activa';
         } else {
             //Verifcar disponibilidad de zona para usuario
-            $available_room = $this->available_room($training->related_1, $training->element_id, $user->id);
+            $available_room = $this->available_room($training->period_id, $training->element_id, $user->id);
             if ( $available_room == 0 ) {
                 $data['error'] = 'Zona no habilitada para el usuario en esta semana';
             }
@@ -251,7 +283,7 @@ class Reservation_model extends CI_Model{
         $this->db->where('user_id', $user_id);
         $this->db->where('events.type_id', 213);   //Evento tipo reservación entrenamiento presencial
         $this->db->join('users', 'events.user_id = users.id', 'left');
-        $this->db->order_by('related_1', 'DESC');
+        $this->db->order_by('period_id', 'DESC');
         $this->db->limit(100);
         $reservations = $this->db->get('events');
 

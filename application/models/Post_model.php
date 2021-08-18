@@ -246,7 +246,7 @@ class Post_model extends CI_Model{
      */
     function type_folder($type_id)
     {
-        $special_types = array(6,7);
+        $special_types = array(6,7,12);
         $type_folder = $this->views_folder;
 
         if ( in_array($type_id, $special_types) ) { $type_folder = "{$this->views_folder}/types/{$type_id}/"; }
@@ -553,35 +553,17 @@ class Post_model extends CI_Model{
 
     /**
      * ESPECIAL
-     * Asignar un contenido de la tabla post a un usuario, lo agrega como metadato
-     * en la tabla users_meta, con el tipo 100012, asignado un valor monetario pagado o descontado
-     * 2020-08-20
+     * Listado de posts de publicaciones informativas por parte de la administración
+     * de la plataforma (type_12)
      */
-    function add_to_user_payed($post_id, $user_id, $price)
+    function admin_info_posts($qty_posts)
     {
-        //Construir registro
-            $arr_row['user_id'] = $user_id;     //Usuario ID, al que se asigna
-            $arr_row['type_id'] = 100012;       //Asignación de post
-            $arr_row['related_1'] = $post_id;   //ID contenido
-            $arr_row['integer_2'] = $price;     //Precio del post
-            $arr_row['updater_id'] = $this->session->userdata('user_id');    //Usuario que asigna
-            $arr_row['creator_id'] = $this->session->userdata('user_id');    //Usuario que asigna
+        $this->db->select('id, post_name AS title, content, url_image');
+        $this->db->where('type_id', 12);    //Informativa administración
+        $this->db->order_by('updated_at', 'desc');
+        $posts = $this->db->get('posts');
 
-        //Establecer usuario que ejecuta
-        if ( $this->session->userdata('logged') )
-        {
-            $arr_row['updater_id'] = $this->session->userdata('user_id');
-            $arr_row['creator_id'] = $this->session->userdata('user_id');
-        }
-
-        $condition = "type_id = {$arr_row['type_id']} AND user_id = {$arr_row['user_id']} AND related_1 = {$arr_row['related_1']}";
-        $meta_id = $this->Db_model->insert_if('users_meta', $condition, $arr_row);
-
-        //Establecer resultado
-        $data = array('status' => 0, 'saved_id' => '0');
-        if ( $meta_id > 0) { $data = array('status' => 1, 'saved_id' => $meta_id); }
-
-        return $data;
+        return $posts;
     }
 
 // Seguimiento
