@@ -2,7 +2,7 @@
     $app_cf_index = $this->uri->segment(2) . '_' . $this->uri->segment(3);
     
     $cl_nav_2['calendar_calendar'] = '';
-    $cl_nav_2['trainings_schedule_generator'] = '';
+    $cl_nav_2['calendar_schedule_generator'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
     //if ( $app_cf_index == 'calendar_import_e' ) { $cl_nav_2['calendar_import'] = 'active'; }
@@ -23,8 +23,8 @@
     sections.schedule_generator = {
         icon: '',
         text: 'Programar',
-        class: '<?= $cl_nav_2['trainings_schedule_generator'] ?>',
-        cf: 'trainings/schedule_generator'
+        class: '<?= $cl_nav_2['calendar_schedule_generator'] ?>',
+        cf: 'calendar/schedule_generator/'
     };
     
     //Secciones para cada rol

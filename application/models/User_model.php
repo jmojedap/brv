@@ -71,9 +71,8 @@ class User_model extends CI_Model{
     function select($format = 'general')
     {
         $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, email, role, image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login, expiration_at';
+        $arr_select['export'] = 'users.id, username, document_number AS no_documento, document_type AS tipo_documento, display_name AS nombre, email, role AS rol, status, created_at AS creado, updated_at AS actualizado, expiration_at AS suscripcion_hasta';
         $arr_select['follow'] = 'users.id, username, qty_followers, qty_following';
-
-        //$arr_select['export'] = 'usuario.id, username, usuario.email, nombre, apellidos, sexo, rol_id, estado, no_documento, tipo_documento_id, institucion_id, grupo_id';
 
         return $arr_select[$format];
     }
@@ -205,6 +204,21 @@ class User_model extends CI_Model{
     }
 
     /**
+     * Query para exportar
+     * 2021-09-27
+     */
+    function query_export($filters)
+    {
+        $this->db->select($this->select('export'));
+        $search_condition = $this->search_condition($filters);
+        if ( $search_condition ) { $this->db->where($search_condition);}
+        $query = $this->db->get('users', 10000);  //Hasta 10.000 registros
+
+        return $query;
+    }
+
+
+    /**
      * Opciones de usuario en campos de autollenado, como agregar usuarios a una conversación
      * 2019-11-13
      */
@@ -297,8 +311,9 @@ class User_model extends CI_Model{
         $validation = array_merge($username_validation, $email_validation, $document_number_validation);
         $data['validation'] = $validation;
 
-        if ( $email_validation['email_unique'] == 0 ) $data['error'] = "El e-mail escrito lo ha tomado otro usuario";
+        if ( $email_validation['email_unique'] == 0 ) $data['error'] = "El e-mail escrito ya está registrado";
         if ( $username_validation['username_unique'] == 0 ) $data['error'] = "El username escrito lo ha tomado otro usuario";
+        if ( $document_number_validation['document_number_unique'] == 0 ) $data['error'] = "El número de documento ya está registrado";
 
         //Si hay al menos un error, no se valida
         if ( strlen($data['error']) > 0 ) $data['status'] = 0;
@@ -360,7 +375,8 @@ class User_model extends CI_Model{
         
         //Eliminar archivos
         $this->load->model('File_model');
-        foreach ( $files->result() as $file ) $this->File_model->delete($file->id);
+        $session_data = $this->session->userdata();
+        foreach ( $files->result() as $file ) $this->File_model->delete($file->id, $session_data);
     }
 
 //IMAGEN DE PERFIL DE USUARIO
@@ -395,9 +411,7 @@ class User_model extends CI_Model{
     /**
      * Le quita la imagen de perfil asignada a un usuario, eliminado el archivo
      * correspondiente
-     * 
-     * @param type $user_id
-     * @return int
+     * 2021-09-22: sessión_data
      */
     function remove_image($user_id)
     {
@@ -407,7 +421,8 @@ class User_model extends CI_Model{
         if ( ! is_null($row->image_id) )
         {
             $this->load->model('File_model');
-            $this->File_model->delete($row->image_id);
+            $session_data = $this->session->userdata();
+            $this->File_model->delete($row->image_id, $session_data);
             $data['status'] = 1;
         }
         

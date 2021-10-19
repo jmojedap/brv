@@ -82,6 +82,41 @@ class Users extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
+    /**
+     * Exportar resultados de búsqueda
+     * 2021-09-27
+     */
+    function export()
+    {
+        set_time_limit(120);    //120 segundos, 2 minutos para el proceso
+
+        //Identificar filtros y búsqueda
+        $this->load->model('Search_model');
+        $filters = $this->Search_model->filters();
+
+        $data['query'] = $this->User_model->query_export($filters);
+
+        if ( $data['query']->num_rows() > 0 ) {
+            //Preparar datos
+                $data['sheet_name'] = 'users';
+
+            //Objeto para generar archivo excel
+                $this->load->library('Excel');
+                $file_data['obj_writer'] = $this->excel->file_query($data);
+
+            //Nombre de archivo
+                $file_data['file_name'] = date('Ymd_His') . '_' . $data['sheet_name'];
+
+            $this->load->view('common/download_excel_file_v', $file_data);
+            //Salida JSON
+            //$this->output->set_content_type('application/json')->set_output(json_encode($file_data['obj_writer']));
+        } else {
+            $data = array('message' => 'No se encontraron registros para exportar');
+            //Salida JSON
+            $this->output->set_content_type('application/json')->set_output(json_encode($data));
+        }
+    }
+
 // DATOS
 //-----------------------------------------------------------------------------
     /**
@@ -210,7 +245,7 @@ class Users extends CI_Controller{
     {
         //Cargue
         $this->load->model('File_model');
-        $data_upload = $this->File_model->upload();
+        $data_upload = $this->File_model->upload($this->session->userdata('user_id'));
         
         $data = $data_upload;
         if ( $data_upload['status'] )
@@ -328,19 +363,51 @@ class Users extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($username));
     }
     
-// RESERVACIONES DE ENTRENAMIENTO
+// Agenda
 //-----------------------------------------------------------------------------
 
     /**
-     * Albums de fotos
+     * Reservas de entrenamiento
      */
     function reservations($user_id)
     {
         $data = $this->User_model->basic($user_id);
-        
-        //$data['reservations'] = $this->User_model->reservations($user_id);
 
-        $data['view_a'] = $this->views_folder . 'reservations_v';
+        $data['view_a'] = $this->views_folder . 'calendar/reservations_v';
+        $data['nav_3'] = $this->views_folder . 'calendar/menu_v';
+        $data['back_link'] = $this->url_controller . 'explore';
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
+    /**
+     * Citas del usuario
+     * 2021-10-15
+     */
+    function appointments($user_id)
+    {
+        $data = $this->User_model->basic($user_id);
+
+        $data['arr_types'] = $this->Item_model->arr_cod('category_id = 13');
+
+        $data['view_a'] = $this->views_folder . 'calendar/appointments_v';
+        $data['nav_3'] = $this->views_folder . 'calendar/menu_v';
+        $data['back_link'] = $this->url_controller . 'explore';
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
+// Inbody
+//-----------------------------------------------------------------------------
+
+    /**
+     * Mediciones de InBody del usuario
+     * 2021-10-17
+     */
+    function inbody($user_id, $inbody_id = 0)
+    {
+        $data = $this->User_model->basic($user_id);
+        $data['inbody_id'] = $inbody_id;
+
+        $data['view_a'] = 'admin/inbody/user_details/user_details_v';
         $data['back_link'] = $this->url_controller . 'explore';
         $this->App_model->view(TPL_ADMIN, $data);
     }

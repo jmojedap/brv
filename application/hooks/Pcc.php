@@ -15,26 +15,25 @@ class Pcc {
         //Identificar controlador/función, y allow
             $cf = $this->CI->uri->segment(2) . '/' . $this->CI->uri->segment(3);
             $allow_cf = $this->allow_cf($cf);    //Permisos de acceso al recurso controlador/función
-
-        //Si es API
-            if ( $this->CI->uri->segment(1) == 'api' ) $allow_cf = true;
-        
-        //Verificar allow
+            
+            //Verificar allow
             if ( $allow_cf )
             {
                 //$this->no_leidos();     //Actualizar variable de sesión, cant mensajes no leídos
             } else {
-                //No tiene allow
-                //header('HTTP/1.0 403 Forbidden');
-                redirect("app/app/denied/{$cf}");
-                //exit;
+                //No tiene autorización
+                if ( $this->CI->uri->segment(1) == 'api' ) {
+                    redirect("api/app/denied/{$cf}");
+                } else {
+                    redirect("app/app/denied/{$cf}");
+                }
             }
     }
     
     /**
      * Control de acceso de usuarios basado en el archivo config/acl.php
      * CF > Ruta Controller/Function
-     * 2020-12-26
+     * 2021-10-16
      */
     function allow_cf($cf)
     {
@@ -65,6 +64,17 @@ class Pcc {
             if ( in_array($role, $roles) ) $allow_cf = TRUE;
         }
 
+        //Funciones de API
+        if ( $this->CI->uri->segment(1) == 'api' ) {
+            $allow_cf = FALSE;
+            //Está en las funciones públicas
+            if ( in_array($cf, $acl['api_public_functions']) ) $allow_cf = TRUE;
+
+            //Autorizado por userkey
+            $user_request = $this->user_request();
+            if ( ! is_null($user_request) ) $allow_cf = TRUE;
+        }
+
         return $allow_cf;
     }
     
@@ -86,6 +96,31 @@ class Pcc {
         
         //Actualizar variable de sesión
             $this->CI->session->set_userdata('qty_unread', $qty_unread);
+    }
+
+    /**
+     * Row usuario que hace el request por la API
+     * 2021-10-16
+     */
+    function user_request()
+    {
+        $this->CI = &get_instance();
+
+        $user = null;   //Valor por defecto
+        
+        $arr_ik = explode('-', $this->CI->input->get('ik'));
+        if ( count($arr_ik) == 2 ) {
+            $user_id = $arr_ik[0];
+            $userkey = $arr_ik[1];
+
+            $condition = "id = '{$user_id}' AND userkey = '{$userkey}'";
+            $this->CI->db->where($condition);
+            $users = $this->CI->db->get('users', 1);
+            
+            if ( $users->num_rows() > 0 ) $user = $users->row();            
+        }
+
+        return $user;
     }
     
 }

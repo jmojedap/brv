@@ -4,12 +4,13 @@
     $cl_nav_2['users_explore'] = '';
     $cl_nav_2['users_profile'] = '';
     $cl_nav_2['users_reservations'] = '';
+    $cl_nav_2['users_inbody'] = '';
     $cl_nav_2['follow_following'] = '';
     $cl_nav_2['follow_followers'] = '';
     $cl_nav_2['users_edit'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
-    //if ( $app_cf == 'users/explore' ) { $cl_nav_2['users_explore'] = 'active'; }
+    if ( $app_cf_index == 'users_appointments' ) { $cl_nav_2['users_reservations'] = 'active'; }
 ?>
 
 <script>
@@ -25,11 +26,19 @@
         cf: 'users/profile/' + element_id
     };
 
-    sections.reservations = {
+    sections.calendar = {
         icon: '',
-        text: 'Reservaciones',
+        text: 'Calendario',
         class: '<?= $cl_nav_2['users_reservations'] ?>',
         cf: 'users/reservations/' + element_id
+    };
+
+    sections.inbody = {
+        icon: '',
+        text: 'InBody',
+        class: '<?= $cl_nav_2['users_inbody'] ?>',
+        cf: 'users/inbody/' + element_id,
+        anchor: true
     };
 
     sections.followers = {
@@ -54,8 +63,8 @@
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['profile', 'reservations', 'followers', 'following', 'edit'];
-    sections_role[2] = ['profile', 'reservations', 'followers', 'following', 'edit'];
+    sections_role[1] = ['profile', 'calendar', 'inbody', 'edit'];
+    sections_role[2] = ['profile', 'calendar', 'inbody', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

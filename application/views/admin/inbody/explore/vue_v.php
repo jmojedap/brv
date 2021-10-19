@@ -2,16 +2,32 @@
 <script>
 // Variables
 //-----------------------------------------------------------------------------
-var type_names = <?= json_encode($arr_types) ?>;
+var gender_names = <?= json_encode($arr_gender) ?>;
 
 // Filters
 //-----------------------------------------------------------------------------
 
-Vue.filter('type_name', function (value) {
+Vue.filter('gender_name', function (value) {
     if (!value) return ''
-    value = type_names[value]
+    value = gender_names[value]
     return value
 })
+
+Vue.filter('number_format', function (value) {
+    if (!value) return ''
+    value = new Intl.NumberFormat().format(value)
+    return value
+})
+
+Vue.filter('ago', function (date) {
+    if (!date) return ''
+    return moment(date, 'YYYY-MM-DD HH:mm:ss').fromNow()
+});
+
+Vue.filter('date_format', function (date) {
+    if (!date) return ''
+    return moment(date, 'YYYY-MM-DD HH:mm:ss').format('MMM DD / YYYY')
+});
 
 // App
 //-----------------------------------------------------------------------------
@@ -32,10 +48,10 @@ var app_explore = new Vue({
         selected: [],
         all_selected: false,
         filters: <?= json_encode($filters) ?>,
+        str_filters: <?= json_encode($filters) ?>,
         display_filters: false,
         loading: false,
-        options_type: <?= json_encode($options_type) ?>,
-        options_status: <?= json_encode($options_status) ?>,
+        options_gender: <?= json_encode($options_gender) ?>,
         active_filters: false
     },
     methods: {
@@ -47,7 +63,7 @@ var app_explore = new Vue({
                 this.list = response.data.list
                 this.max_page = response.data.max_page
                 this.search_num_rows = response.data.search_num_rows
-                $('#head_subtitle').html(response.data.search_num_rows)
+                this.str_filters = response.data.str_filters
                 history.pushState(null, null, url_app + this.cf + this.num_page +'/?' + response.data.str_filters)
                 this.all_selected = false
                 this.selected = []
@@ -100,8 +116,7 @@ var app_explore = new Vue({
         },
         remove_filters: function(){
             this.filters.q = ''
-            this.filters.type = ''
-            this.filters.status = ''
+            this.filters.gender = ''
             this.display_filters = false
             //$('#adv_filters').hide()
             setTimeout(() => { this.get_list() }, 100)
@@ -109,10 +124,21 @@ var app_explore = new Vue({
         calculate_active_filters: function(){
             var calculated_active_filters = false
             if ( this.filters.q ) calculated_active_filters = true
-            if ( this.filters.type ) calculated_active_filters = true            
-            if ( this.filters.status ) calculated_active_filters = true            
+            if ( this.filters.gender ) calculated_active_filters = true            
 
             this.active_filters = calculated_active_filters
+        },
+        // Especiales inbody/explore
+        //-----------------------------------------------------------------------------
+        bmi_class: function(bmi_value){
+            var bmi_class = ''
+            if ( bmi_value < 18.5 ) { bmi_class = 'bmi_1' }
+            if ( bmi_value >= 18.5 && bmi_value <= 24.9 ) { bmi_class = 'bmi_2' }
+            if ( bmi_value >= 25.0 && bmi_value <= 29.9 ) { bmi_class = 'bmi_3' }
+            if ( bmi_value >= 30.0 && bmi_value <= 34.9 ) { bmi_class = 'bmi_4' }
+            if ( bmi_value >= 35.0 && bmi_value <= 39.9 ) { bmi_class = 'bmi_5' }
+            if ( bmi_value >= 40 ) { bmi_class = 'bmi_6' }
+            return bmi_class
         },
     }
 })

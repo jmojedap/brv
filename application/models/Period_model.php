@@ -313,7 +313,6 @@ class Period_model extends CI_Model{
      */
     function days($start, $end, $condition = NULL)
     {
-        //Seleccionar días laborales
         $this->db->where('type_id', 9); //Periodo tipo día
         $this->db->where('start >=', $start);
         $this->db->where('start <=', $end);

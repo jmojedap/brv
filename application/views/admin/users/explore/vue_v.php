@@ -61,9 +61,9 @@ var app_explore = new Vue({
         filters: <?= json_encode($filters) ?>,
         display_filters: false,
         loading: false,
-        options_role: <?= json_encode($options_role) ?>,
         active_filters: false,
-        today: '<?= date('Y-m-d') ?>'
+        options_role: <?= json_encode($options_role) ?>,
+        today: '<?= date('Y-m-d') ?>',
     },
     methods: {
         get_list: function(e, num_page = 1){

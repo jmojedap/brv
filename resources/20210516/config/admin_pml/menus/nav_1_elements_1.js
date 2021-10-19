@@ -6,8 +6,24 @@ var nav_1_elements = [
     },
     {
         text: 'Usuarios', active: false, icon: 'fa fa-user', cf: 'users/explore', anchor: false,
-        sections: ['users/explore', 'users/add', 'users/import', 'users/profile', 'users/edit', 'users/assigned_contents'],
+        sections: ['users/explore', 'users/add', 'users/import', 'users/profile', 'users/edit', 'users/inbody'],
         subelements: []
+    },
+    {
+        text: 'Actividad',
+        active: false,
+        icon: 'fa fa-running',
+        cf: '',
+        sections: [],
+        subelements: [
+            {
+                text: 'InBody',
+                active: false,
+                icon: 'fa fa-weight',
+                cf: 'inbody/explore',
+                sections: ['inbody/explore', 'inbody/import', 'inbody/import_e']
+            },
+        ]
     },
     {
         text: 'Posts',
@@ -63,7 +79,7 @@ var nav_1_elements = [
                 sections: ['products/explore', 'products/import', 'products/add', 'products/edit', 'products/edit', 'products/posts', 'products/info']
             }
         ]
-    },    
+    },
     {
         text: 'Ajustes',
         active: false,
@@ -93,5 +109,13 @@ var nav_1_elements = [
                 sections: ['places/explore', 'places/add', 'places/edit'],
             }
         ]
-    }
+    },
+    {
+        text: 'Ayuda',
+        active: false,
+        icon: 'far fa-question-circle',
+        cf: 'app/help',
+        sections: ['app/help'],
+        subelements: []
+    },
 ];

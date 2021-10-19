@@ -66,7 +66,8 @@ class Files extends CI_Controller{
         
         foreach ( $selected as $row_id ) 
         {
-            $data['qty_deleted'] += $this->File_model->delete($row_id);
+            $session_data = $this->session->userdata();
+            $data['qty_deleted'] += $this->File_model->delete($row_id, $session_data);
         }
 
         //Establecer resultado
@@ -80,7 +81,8 @@ class Files extends CI_Controller{
      */
     function delete($file_id)
     {
-        $data = $this->File_model->delete($file_id);
+        $session_data = $this->session->userdata();
+        $data = $this->File_model->delete($file_id, $session_data);
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
@@ -115,7 +117,7 @@ class Files extends CI_Controller{
      */
     function upload()
     {
-        $data = $this->File_model->upload();
+        $data = $this->File_model->upload($this->session->userdata('user_id'));
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
@@ -214,7 +216,7 @@ class Files extends CI_Controller{
     {
         $row_ant = $this->Db_model->row_id('files', $file_id);   //Registro antes del cambio
 
-        $data = $this->File_model->upload($file_id);
+        $data = $this->File_model->upload($this->session->userdata('user_id'), $file_id);
         
         if ( $data['status'] )
         {

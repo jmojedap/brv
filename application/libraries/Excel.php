@@ -7,13 +7,15 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class Excel {
 
+    /** ACTUALIZADA 2021-09-27 */
+
     /**
      * Convierte un listado de una hoja de cálculo en un array
      * Desde la columna A y la fila 2
      * 
      * @param type $file
      * @param type $sheet_name
-     * @return type
+     * @return array
      */
     public function get_array($file, $sheet_name)
     {
@@ -49,7 +51,11 @@ class Excel {
         return $data;
     }
     
-    public function archivo_query($datos)
+    /**
+     * Genera un objeto excel file, a partir de un query CodeIgniter
+     * 2021-09-27
+     */
+    public function file_query($data)
     {
         $spreadsheet = new Spreadsheet();
 
@@ -57,31 +63,33 @@ class Excel {
         $spreadsheet->getProperties()
             ->setCreator('Pacarina Media Lab')
             ->setLastModifiedBy('Pacarina Media Lab')
-            ->setTitle($datos['sheet_name']);
+            ->setTitle($data['sheet_name']);
 
         //Encabezados
-            $campos = $datos['query']->list_fields();
-            foreach ( $campos as $key => $campo ) 
+            $fields = $data['query']->list_fields();
+            foreach ( $fields as $key => $field ) 
             {
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($key + 1, 1, $campo);
+                $field_title = str_replace('_',' ',$field);
+                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($key + 1, 1, $field_title);
             }
         
         //Valores
-            $fila = 2;
-            foreach ( $datos['query']->result() as $row ) 
+            $row_number = 2;
+            foreach ( $data['query']->result() as $row ) 
             {
-                foreach ( $campos as $key => $campo ) {
-                    $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($key + 1, $fila, $row->$campo);
+                foreach ( $fields as $key => $field ) {
+                    $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($key + 1, $row_number, $row->$field);
                 }
-                $fila++;
+                $row_number++;
             }
 
         // Establecer nombre a worksheet
         $spreadsheet->getActiveSheet()
-            ->setTitle($datos['sheet_name']);
+            ->setTitle($data['sheet_name']);
 
         // Objeto para crear archivo y guardar
         $writer = new Xlsx($spreadsheet);
+        
         return $writer;
     }
 }

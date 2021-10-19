@@ -44,6 +44,7 @@ var calendar_app = new Vue({
     el: '#calendar_app',
     created: function(){
         this.get_trainings()
+        this.get_appointments()
     },
     data: {
         weeks: <?= json_encode($weeks) ?>,
@@ -67,17 +68,28 @@ var calendar_app = new Vue({
         year: <?= $day->year ?>,
         month: <?= $day->month ?>,
         day_start: '<?= $day_start ?>',
+        section: '<?= $section ?>',
+        //trainings vars
         rooms: <?= json_encode($rooms->result()) ?>,
-        room_id: <?= $room_id ?>,
+        room_id: 0,
         trainings: [],
         key_training: -1,
+        //appointments vars
+        key_appointment: -1,
+        appointment_type_id: 0,
+        appointments: [],
     },
     methods: {
+        set_section: function(new_section){
+            this.section = new_section
+            history.pushState(null, null, url_admin + 'calendar/calendar/' + this.active_day.id + '/' + this.section)
+        },
         set_day: function(day){
             this.active_day = day
             console.log(day)
             this.get_trainings()
-            history.pushState(null, null, url_admin + 'calendar/calendar/' + this.active_day.id)
+            this.get_appointments()
+            history.pushState(null, null, url_admin + 'calendar/calendar/' + this.active_day.id + '/' + this.section)
         },
         //Clase HTML de la casilla día
         day_class: function(day){
@@ -111,6 +123,8 @@ var calendar_app = new Vue({
             this.room_id = room_id
             this.get_trainings()
         },
+        // Trainings Functions
+        //-----------------------------------------------------------------------------
         get_trainings: function(){
             axios.get(url_api + 'trainings/get_trainings/' + this.active_day.id + '/' + this.room_id)
             .then(response => {
@@ -128,6 +142,31 @@ var calendar_app = new Vue({
                 if ( response.data.qty_deleted > 0 ) {
                     this.trainings.splice(this.key_training,1)
                     toastr['info']('Entrenamiento eliminado')
+                } else {
+                    toastr['danger']('Ocurrió un error al eliminar')
+                }
+            })
+            .catch(function(error) { console.log(error) })
+        },
+        // Appointments Functions
+        //-----------------------------------------------------------------------------
+        get_appointments: function(){
+            axios.get(url_api + 'calendar/get_appointments/' + this.active_day.id + '/' + this.appointment_type_id)
+            .then(response => {
+                this.appointments = response.data.list
+            })
+            .catch(function(error) { console.log(error) })
+        },
+        set_appointment: function(key_appointment){
+            this.key_appointment = key_appointment
+        },
+        delete_appointment: function(){
+            var appointment = this.appointments[this.key_appointment]
+            axios.get(url_api + 'calendar/delete_appointment/' + appointment.id + '/' + appointment.type_id)
+            .then(response => {
+                if ( response.data.qty_deleted > 0 ) {
+                    this.appointments.splice(this.key_appointment,1)
+                    toastr['info']('Cita eliminada')
                 } else {
                     toastr['danger']('Ocurrió un error al eliminar')
                 }

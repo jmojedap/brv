@@ -1,6 +1,22 @@
 <?php
 class   Event_model extends CI_Model{
 
+    function basic($event_id)
+    {
+        $row = $this->Db_model->row_id('events', $event_id);
+
+        $data['row'] = $row;
+        $data['type_folder'] = $this->type_folder($row->type_id);
+        $data['head_title'] = $data['row']->title;
+        if ( strlen($row->title) == 0 ) {
+            $data['head_title'] = $this->Item_model->name(13, $row->type_id) . " ({$row->id})";
+        }
+        $data['view_a'] = $this->views_folder . 'event_v';
+        $data['nav_2'] = $data['type_folder'] . 'menu_v';
+
+        return $data;
+    }
+
 // EXPLORE FUNCTIONS - events/explore
 //-----------------------------------------------------------------------------
     
@@ -116,6 +132,7 @@ class   Event_model extends CI_Model{
         if ( $filters['fe1'] != '' ) { $condition .= "events.related_1 = {$filters['fe1']} AND "; }
         if ( $filters['d1'] != '' ) { $condition .= "events.created_at >= '{$filters['d1']} 00:00:00' AND "; }
         if ( $filters['d2'] != '' ) { $condition .= "events.created_at <= '{$filters['d2']} 23:59:59' AND "; }
+        if ( $filters['condition'] != '' ) { $condition .= " {$filters['condition']} AND "; }
         
         //Quitar cadena final de ' AND '
         if ( strlen($condition) > 0 ) { $condition = substr($condition, 0, -5);}
@@ -296,9 +313,38 @@ class   Event_model extends CI_Model{
         
         return $arr_row;
     }
+
+    /**
+     * Nombre de la carpeta con las vistas para vista y edición del event. Puede 
+     * cambiar dependiendo del tipo (type_id).
+     * 2021-10-14
+     */
+    function type_folder($type_id)
+    {
+        $special_types = array(221);
+        $type_folder = $this->views_folder;
+
+        if ( in_array($type_id, $special_types) )
+        {
+            $type_folder = "{$this->views_folder}types/{$type_id}/";
+        }
+
+        return $type_folder;
+    }
+
+    /**
+     * Actualizar un registro de un event
+     * 2021-10-14
+     */
+    function update()
+    {
+        $arr_row = $this->input->post();
+        $data['saved_id'] = $this->Db_model->save_id('events', $arr_row);
+        return $data;
+    }
     
 // DATOS
-//---------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
     
     function qty_events($filters)
     {

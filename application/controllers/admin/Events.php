@@ -92,4 +92,38 @@ class Events extends CI_Controller{
 
         $this->App_model->view(TPL_ADMIN, $data);
     }
+
+// EDICIÓN Y ACTUALIZACIÓN
+//-----------------------------------------------------------------------------
+
+    /**
+     * Guardar los datos de un event
+     * 2021-10-14
+     */
+    function update()
+    {
+        $data = $this->Event_model->update();
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Formulario para la edición de los datos de un event.
+     * 2021-10-14
+     */
+    function edit($event_id)
+    {
+        //Datos básicos
+        $data = $this->Event_model->basic($event_id);
+
+        //$data['options_type'] = $this->Item_model->options('category_id = 33', 'Todos');
+        
+        //Array data espefícicas
+            $data['back_link'] = URL_ADMIN . "calendar/calendar/{$data['row']->period_id}/appointments";
+            /*$data['back_link'] = $this->url_controller . 'explore';
+            if ( $this->input->post('back_link') == 'calendar' ) {
+            }*/
+            $data['view_a'] = $data['type_folder'] . 'edit_v';
+        
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
 }

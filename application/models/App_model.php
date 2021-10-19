@@ -70,6 +70,24 @@ class App_model extends CI_Model{
         return $data;
     }
 
+    /**
+     * Devuelve row User si se descifra del elemento ik enviado la URL por GET
+     * 2021-10-16
+     */
+    function user_request()
+    {
+        $user = null;   //Valor por defecto
+        
+        $arr_ik = explode('-', $this->input->get('ik'));
+        if ( count($arr_ik) == 2 ) {
+            $user_id = $arr_ik[0];  //Id
+            $userkey = $arr_ik[1];  //Key
+            $user = $this->Db_model->row('users', "id = {$user_id} AND userkey = {$userkey}");
+        }
+
+        return $user;
+    }
+
     //Resumen para dashboard
     function summary()
     {
@@ -88,6 +106,10 @@ class App_model extends CI_Model{
         $summary['trainings']['num_rows'] = $this->Db_model->num_rows('events', "type_id = 203 AND start >='{$today}' AND start <='{$one_week}'");
         $summary['reservations']['num_rows'] = $this->Db_model->num_rows('events', "type_id = 213 AND start >='{$today}' AND start <='{$one_week}'");
         $summary['reservations']['lapse'] = $one_week;
+        $summary['appointments']['qty_scheduled'] = $this->Db_model->num_rows('events', "type_id IN (221) AND start >='{$today}' AND start <='{$one_week}'");
+        $summary['appointments']['qty_reserved'] = $this->Db_model->num_rows('events', "type_id IN (221) AND start >='{$today}' AND start <='{$one_week}' AND user_id > 0");
+
+        $summary['inbody']['num_rows'] = $this->db->count_all('inbody');
     
         return $summary;
     }
@@ -226,12 +248,14 @@ class App_model extends CI_Model{
 
     /**
      * Query horarios de entrenamiento presencial
-     * 2021-07-19
+     * 2021-10-15
      */
-    function schedules()
+    function schedules($condition = NULL)
     {
         $this->db->select('id AS schedule_id, item_name AS title, short_name AS hour, long_name AS hour_end');
+        if ( ! is_null($condition) ) { $this->db->where($condition); }
         $this->db->where('category_id', 510);
+        $this->db->order_by('cod', 'ASC');
         $schedules = $this->db->get('items');
 
         return $schedules;

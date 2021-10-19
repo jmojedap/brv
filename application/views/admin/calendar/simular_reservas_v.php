@@ -42,7 +42,7 @@ var simular_reservas_app = new Vue({
         users: <?= json_encode($users->result()) ?>,
         trainings: <?= json_encode($trainings->result()) ?>,
         intentos: [],
-        total_intentos: 2000,
+        total_intentos: 500,
         num_intento: 0,
         loading: false
     },

@@ -34,7 +34,7 @@ class Calendar extends CI_Controller{
 // Calendario
 //-----------------------------------------------------------------------------
 
-    function calendar($day_id = NULL, $room_id = 0)
+    function calendar($day_id = NULL, $section = 'trainings')
     {
         if ( is_null($day_id) ) $day_id = date('Ymd');
         $day = $this->Db_model->row('periods', "type_id = 9 AND id = {$day_id}");
@@ -48,7 +48,7 @@ class Calendar extends CI_Controller{
         //Detalle periodos
             $data['day_start'] = $row_month->start;
             $data['day'] = $day;
-            $data['room_id'] = $room_id;
+            $data['section'] = $section;
             $data['options_year'] = range(date('Y') - 1, date('Y') + 2);
 
         //Vista
@@ -59,12 +59,92 @@ class Calendar extends CI_Controller{
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
-// Reservaciones
+// Programación
 //-----------------------------------------------------------------------------
 
+    /**
+     * Vista formulario para generar diferentes tipos de programación de eventos: 
+     * sesiones de entrenamiento, citas de nutrición
+     * 2021-10-05
+     * 
+     */
+    function schedule_generator($schedule_type = 'trainings')
+    {
+        $data['head_title'] = 'Programar';
+        $data['schedule_type'] = $schedule_type;
+        $data['nav_2'] = $this->views_folder . 'menu_v';
+        $data['nav_3'] = $this->views_folder . 'schedule_generator/menu_v';
+        $data['view_a'] = $this->views_folder . "schedule_generator/{$schedule_type}_v";
+
+        //Variables específicas
+        if ( $schedule_type == 'trainings' ) {
+            $data['rooms'] = $this->App_model->rooms();
+            $sql_query = 'SELECT * FROM items WHERE category_id = 510 ORDER BY item_group ASC, cod ASC';
+            $data['query_hours'] = $this->db->query($sql_query);
+        }
+
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
+// Citas
+//-----------------------------------------------------------------------------
+
+    function get_appointments($day_id, $event_type_id = 0)
+    {
+        $appointments = $this->Calendar_model->get_appointments($day_id, $event_type_id);
+        $data['list'] = $appointments;
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Eliminar una cita
+     * 2021-10-14
+     */
+    function delete_appointment($event_id, $type_id)
+    {
+        $data = array('qty_deleted' => 0);
+
+        //Identificar evento
+        $condition = "id = {$event_id} AND type_id = {$type_id} AND type_id IN (221)";
+        $event = $this->Db_model->row('events', $condition);
+
+        //Si existe eliminar
+        if ( ! is_null($event) ) {
+            $this->load->model('Event_model');
+            $data['qty_deleted'] = $this->Event_model->delete($event->id);
+        }
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+
+// Citas de control nutricional
+//-----------------------------------------------------------------------------
+
+    /**
+     * AJAX JSON
+     * Ejecutar la creación de citas de control nutricional, tabla events, tipo 221
+     * Recibe datos desde calendar/schedlule
+     */
+    function schedule_nutritional_control()
+    {
+        $date_start = $this->input->post('date_start');
+        $date_end = $this->input->post('date_end');
+        $hours = json_decode($this->input->post('str_hours'));
+        
+        $data = $this->Calendar_model->schedule_nutritional_control($date_start, $date_end, $hours);
+
+        $data['hours'] = $hours;
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
     
 
-// Testing
+// Testing Trainings
 //-----------------------------------------------------------------------------
 
     function reset_trainings()

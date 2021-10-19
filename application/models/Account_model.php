@@ -129,6 +129,7 @@ class Account_model extends CI_Model{
                 'display_name' => $row_user->display_name,
                 'short_name' => explode(' ', $row_user->display_name)[0],
                 'user_id' => $row_user->id,
+                'userkey' => $row_user->userkey,
                 'role' => $row_user->role,
                 'last_login' => $row_user->last_login,
                 'picture' => $row_user->url_thumbnail

@@ -41,4 +41,14 @@ class App extends CI_Controller {
 
         //$this->output->enable_profiler(TRUE);
     }
+
+// HELP
+//-----------------------------------------------------------------------------
+
+    function help($post_id = 0)
+    {
+        $data['head_title'] = 'Ayuda';
+        $data['view_a'] = $this->views_folder . 'help/help_v';
+        $this->App_model->view(TPL_ADMIN, $data);
+}
 }

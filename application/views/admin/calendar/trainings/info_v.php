@@ -21,11 +21,17 @@
                     </tr>
                     <tr>
                         <td class="td-title">Total cupos</td>
-                        <td>{{ training.total_spots }}</td>
+                        <td>
+                            <input
+                                name="integer_1" type="number" class="form-control" v-bind:min="reservations.length" max="50"
+                                required
+                                v-model="training.total_spots" v-on:change="update_training"
+                            >
+                        </td>
                     </tr>
                     <tr>
                         <td class="td-title">Cupos disponibles</td>
-                        <td>{{ training.available_spots }}</td>
+                        <td>{{ training.total_spots - reservations.length }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -116,6 +122,28 @@ var training_app = new Vue({
                 }
             })
             .catch(function(error) { console.log(error) })
+        },
+        update_training: function(){
+            this.loading = true
+
+            //Validar valor
+            /*if ( this.training.total_spots < this.reservations.length ) {
+                this.training.total_spots = this.reservations.length
+            }*/
+
+            this.training.total_spots = Pcrn.limit_between(this.training.total_spots, this.reservations.length, 50);
+            
+            var form_data = new FormData()
+            form_data.append('id', this.training.id);
+            form_data.append('integer_1', this.training.total_spots);
+            axios.post(url_api + 'trainings/update/', form_data)
+            .then(response => {
+                if ( response.data.saved_id > 0 ) {
+                    toastr['success']('Guardado')
+                }
+                this.loading = false
+            })
+            .catch( function(error) {console.log(error)} )
         },
     }
 })

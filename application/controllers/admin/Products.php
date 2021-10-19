@@ -206,7 +206,7 @@ class Products extends CI_Controller{
     {
         //Cargue
         $this->load->model('File_model');
-        $data_upload = $this->File_model->upload();
+        $data_upload = $this->File_model->upload($this->session->userdata('user_id'));
 
         $data = $data_upload;
         if ( $data_upload['status'] )

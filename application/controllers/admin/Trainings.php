@@ -38,6 +38,23 @@ class Trainings extends CI_Controller{
 //-----------------------------------------------------------------------------
 
     /**
+     * Actualizar registro de entrenamiento presencial
+     * 2021-10-14
+     */
+    function update()
+    {
+        $this->load->model('Event_model');
+        $data = $this->Event_model->update();
+        if ( $data['saved_id'] > 0 ) {
+            $this->Training_model->update_spots($data['saved_id']);
+        }
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+
+    /**
      * Eliminar un entrenamiento
      * 2021-08-01
      */
@@ -65,7 +82,7 @@ class Trainings extends CI_Controller{
         $data['view_a'] = $this->views_folder. 'info_v';
         $data['nav_2'] = $this->views_folder . 'menu_v';
 
-        $data['back_link'] = URL_ADMIN . 'calendar/calendar/' . $training->day_id . '/' . $training->room_id;
+        $data['back_link'] = URL_ADMIN . 'calendar/calendar/' . $training->day_id . '/trainings';
 
         //Salida JSON
         $this->App_model->view(TPL_ADMIN, $data);
@@ -127,7 +144,8 @@ class Trainings extends CI_Controller{
         $date_end = $this->input->post('date_start');       //Modificado temporalmente date_start
         $room_id = $this->input->post('room_id');
         $total_spots = $this->input->post('total_spots');
-        $data = $this->Training_model->schedule_trainings($date_start, $date_end, $room_id, $total_spots);
+        $str_hours = $this->input->post('str_hours');
+        $data = $this->Training_model->schedule_trainings($date_start, $date_end, $room_id, $total_spots, $str_hours);
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));

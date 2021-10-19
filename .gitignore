@@ -19,6 +19,7 @@ application/logs/*
 #pml
 /application/config/
 /application/config_server/
+/application/config_pml/
 /content/
 /system/
 /resources/*/assets/

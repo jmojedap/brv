@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Pml {
 
-    /** ACTUALIZADA 2021-04-12 */
+    /** ACTUALIZADA 2021-09-27 */
     
     /**
      * Converts codeigniter query object in an array
@@ -359,13 +359,23 @@ class Pml {
 
     /**
      * Convierte una fecha de excel en mktime de Unix
-     * @param type $date_excel
-     * @return type
+     * 2021-09-27
      */
     function dexcel_unix($date_excel)
     {
         $hours_diff = 19; //Diferencia GMT
         return (( $date_excel - 25568 ) * 86400) - ($hours_diff * 60 * 60);
+    }
+
+    /**
+     * Convierte una fecha de excel en formato fecha MySQL
+     * 2021-09-27
+     */
+    function dexcel_dmysql($date_excel)
+    {
+        $hours_diff = 19; //Diferencia GMT
+        $mktime = (( $date_excel - 25568 ) * 86400) - ($hours_diff * 60 * 60);
+        return date('Y-m-d H:i:s',$mktime);
     }
 
     /**
@@ -412,5 +422,31 @@ class Pml {
         curl_close($ch);
 
         return $content;
+    }
+
+// TABLAS DE DATOS
+//-----------------------------------------------------------------------------
+
+    /**
+     * Devuelve contenido para archivo CSV a partir de un query CodeIgniter
+     * 2021-09-15
+     */
+    function content_query_to_csv($query)
+    {
+        //Construyento archivo
+        $content = '';
+
+        //Primera fila, columnas
+            $fields = $query->list_fields();
+            $content .= implode("\t", $fields) . "\n";
+
+        //Registros
+        foreach($query->result() as $row)
+        {
+            foreach($fields as $field) $content .= $row->$field."\t";
+            $content .= "\n";
+        }
+
+        return mb_convert_encoding($content, 'UTF-16LE', 'UTF-8');
     }
 }

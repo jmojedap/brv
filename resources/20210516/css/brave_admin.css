@@ -7,6 +7,17 @@ Estilos para herramientas administrador BraveBackEnd
 .taken-spot{ color: #DDD; }
 .available-spot{ color: #60c83c; }
 
+/* Colores de texto */
+/*-----------------------------------------------------------------------------*/
+
+.color-text-1{ color: #60C83C;}
+.color-text-2{ color: #3080FF;}
+.color-text-3{ color: #F02555;}
+.color-text-4{ color: #dbbb2e;}
+.color-text-5{ color: #BB15EE;}
+.color-text-6{ color: #ff5722;}
+
+
 /* Zonas de entrenamiento */
 /*-----------------------------------------------------------------------------*/
 .text_z10 {color: #FFC400;}
@@ -14,3 +25,25 @@ Estilos para herramientas administrador BraveBackEnd
 .text_z30 {color: #3080FF;}
 .text_z40 {color: #BB15EE;}
 .text_z50 {color: #39B44A;}
+
+/* Tipos de evento */
+/*-----------------------------------------------------------------------------*/
+.text_evt221 {color: #880e4f;}
+
+/* Estados de variable en un rango */
+/*-----------------------------------------------------------------------------*/
+.value_is_lower{
+    color: #ffbc41;
+}
+.value_is_upper{
+    color: #ED2279;
+}
+
+/* Fondos niveles Índice de Masa Corporal */
+/*-----------------------------------------------------------------------------*/
+.bmi_1{ background: #54e1e6; }
+.bmi_2{ background: #c9e26c; }
+.bmi_3{ background: #ffde62; }
+.bmi_4{ background: #ffa852; }
+.bmi_5{ background: #ff9151; }
+.bmi_6{ background: #eb5b5e; }

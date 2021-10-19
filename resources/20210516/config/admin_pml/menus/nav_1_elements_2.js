@@ -6,7 +6,7 @@ var nav_1_elements = [
     },
     {
         text: 'Usuarios', active: false, icon: 'fa fa-user', cf: 'users/explore', anchor: false,
-        sections: ['users/explore', 'users/add', 'users/import', 'users/profile', 'users/edit', 'users/assigned_contents'],
+        sections: ['users/explore', 'users/add', 'users/import', 'users/profile', 'users/edit', 'users/inbody'],
         subelements: []
     },
     {
@@ -14,46 +14,15 @@ var nav_1_elements = [
         active: false,
         icon: 'far fa-calendar',
         cf: 'calendar/calendar',
-        sections: ['calendar/calendar', 'calendar/programacion_automatica'],
+        sections: ['calendar/calendar', 'calendar/schedule_generator'],
         subelements: []
     },
     {
-        text: 'Comercial',
+        text: 'InBody',
         active: false,
-        icon: 'fa fa-shopping-cart',
-        cf: '',
-        sections: [],
-        subelements: [
-            {
-                text: 'Compras',
-                active: false,
-                icon: 'fa fa-shopping-cart',
-                cf: 'orders/explore',
-                sections: ['orders/explore', 'orders/info']
-            },
-            {
-                text: 'Products',
-                active: false,
-                icon: 'fa fa-book',
-                cf: 'products/explore',
-                sections: ['products/explore', 'products/import', 'products/add', 'products/edit', 'products/edit', 'products/posts', 'products/info']
-            }
-        ]
-    },
-    {
-        text: 'Publicaciones',
-        active: false,
-        icon: 'far fa-file-alt',
-        cf: 'posts/explore',
-        sections: ['posts/explore', 'posts/add', 'posts/import', 'posts/info', 'posts/edit', 'posts/image', 'posts/details', 'posts/comments'],
-        subelements: []
-    },
-    {
-        text: 'Comentarios',
-        active: false,
-        icon: 'far fa-comment',
-        cf: 'comments/explore',
-        sections: ['comments/explore', 'comments/add', 'comments/info'],
+        icon: 'fa fa-weight',
+        cf: 'inbody/explore',
+        sections: ['inbody/explore', 'inbody/import', 'inbody/import_e'],
         subelements: []
     },
     {
@@ -95,5 +64,13 @@ var nav_1_elements = [
                 sections: ['places/explore', 'places/add', 'places/edit'],
             }
         ]
-    }
+    },
+    {
+        text: 'Ayuda',
+        active: false,
+        icon: 'far fa-question-circle',
+        cf: 'app/help',
+        sections: ['app/help'],
+        subelements: []
+    },
 ];

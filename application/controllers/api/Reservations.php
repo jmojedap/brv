@@ -75,7 +75,6 @@ class Reservations extends CI_Controller{
     function cancel($reservation_id, $training_id)
     {
         $data = $this->Reservation_model->cancel($reservation_id, $training_id);
-        //$data = ['qty_deleted' => 0, 'error' => 'Ocurrió un error de prueba'];
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 

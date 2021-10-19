@@ -1,6 +1,9 @@
 <?php
 class File_model extends CI_Model{
 
+// FILE MODEL 2021-09-20
+//-----------------------------------------------------------------------------
+
 // INFO FUNCTIONS
 //-----------------------------------------------------------------------------
 
@@ -204,10 +207,11 @@ class File_model extends CI_Model{
     /**
      * Realiza el upload de un file al servidor, crea el registro asociado en
      * la tabla "file".
+     * 2021-09-20
      */
-    function upload($file_id = NULL)
+    function upload($user_id, $file_id = NULL)
     {
-        $config_upload = $this->config_upload();
+        $config_upload = $this->config_upload($user_id);
         $this->load->library('upload', $config_upload);
 
         if ( $this->upload->do_upload('file_field') )  //Campo "file_field" del formulario
@@ -216,6 +220,7 @@ class File_model extends CI_Model{
             $this->mod_original($upload_data['full_path']);          //Modificar imagen original
 
             //Guardar registro en la tabla "file"
+                $upload_data['user_id'] = $user_id;
                 $row = $this->save($file_id, $upload_data);
                 
             //Si es imagen, se generan miniaturas y edita imagen original
@@ -238,8 +243,9 @@ class File_model extends CI_Model{
     /**
      * Configuración para cargue de files, algunas propiedades solo se aplican
      * para files de imagen.
+     * 2021-09-20
      */
-    function config_upload()
+    function config_upload($user_id)
     {
         $this->load->helper('string');  //Para activar función random_string
         
@@ -248,7 +254,7 @@ class File_model extends CI_Model{
         $config['max_size']	= '5000';       //Tamaño máximo en Kilobytes
         $config['max_width']  = '10000';     //Ancho máxima en pixeles
         $config['max_height']  = '10000';    //Altura máxima en pixeles
-        $config['file_name']  = $this->session->userdata('user_id') . '_' . date('YmdHis') . '_' . random_string('numeric', 2);
+        $config['file_name']  = $user_id . '_' . date('YmdHis') . '_' . random_string('numeric', 2);
         
         return $config;
     }
@@ -277,9 +283,9 @@ class File_model extends CI_Model{
             $arr_row['related_1'] = ( ! is_null($this->input->post('related_1')) ) ? $this->input->post('related_1') : 0;
             $arr_row['album_id'] = ( ! is_null($this->input->post('album_id')) ) ? $this->input->post('album_id') : 0;
             $arr_row['updated_at'] = date('Y-m-d H:i:s');
-            $arr_row['updater_id'] = $this->session->userdata('user_id');
+            $arr_row['updater_id'] = $upload_data['user_id'];
             $arr_row['created_at'] = date('Y-m-d H:i:s');
-            $arr_row['creator_id'] = $this->session->userdata('user_id');
+            $arr_row['creator_id'] = $upload_data['user_id'];
 
         //Obtener dimensiones
             $arr_dimensions = $this->arr_dimensions($upload_data['full_path']);
@@ -533,21 +539,21 @@ class File_model extends CI_Model{
      * Determina si un archivo puede ser o no eliminado por el usuario en sesión
      * 2021-01-27
      */
-    function deleteable($file_id)
+    function deleteable($file_id, $session_data)
     {
         $deleteable = false;
 
         //Administradores pueden eliminar
-        if ( in_array($this->session->userdata('role'), array(1,2,3)) ){
+        if ( in_array($session_data['role'], array(1,2,3)) ){
             $deleteable = true; 
         } else {
             $row = $this->Db_model->row_id('files', $file_id);
 
             //Si es el usuario creador
-            if ( $row->creator_id == $this->session->userdata('user_id') ) { $deleteable = true; }
+            if ( $row->creator_id == $session_data['user_id'] ) { $deleteable = true; }
 
             //Si es el usuario asociado
-            if ( $row->table_id == 1000 && $row->related_1 == $this->session->userdata('user_id') ) { $deleteable = true; }
+            if ( $row->table_id == 1000 && $row->related_1 == $session_data['user_id'] ) { $deleteable = true; }
         }
 
         return $deleteable;
@@ -557,11 +563,11 @@ class File_model extends CI_Model{
      * Elimina file del servidor y sus miniaturas y el el registro en la tabla files
      * 2021-02-20
      */
-    function delete($file_id)
+    function delete($file_id, $session_data)
     {   
         $qty_deleted = 0;
 
-        if ( $this->deleteable($file_id) )
+        if ( $this->deleteable($file_id, $session_data) )
         {
             //Eliminar files del servidor
                 $row_file = $this->Db_model->row_id('files', $file_id);

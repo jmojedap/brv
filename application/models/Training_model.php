@@ -269,14 +269,15 @@ class Training_model extends CI_Model{
 
     /**
      * Programar automáticamente varios trainings de entrenamiento entre dos fechas
+     * 2021-10-15
      */
-    function schedule_trainings($start, $end, $room_id, $total_spots)
+    function schedule_trainings($start, $end, $room_id, $total_spots, $str_hours)
     {
         $trainings = array();
 
-        $days = $this->Period_model->days($start, $end, 'business_day = 1');    //Días laborales
-        //$rooms = $this->App_model->rooms();             //Zonas de entrenamiento
-        $schedules = $this->App_model->schedules();     //Horarios
+        $days = $this->Period_model->days($start, $end);    //En el rango de días
+        //$rooms = $this->App_model->rooms();               //Zonas de entrenamiento
+        $schedules = $this->App_model->schedules("cod IN ({$str_hours})");     //Horarios
 
         //Recorrer cada día, zona y horario y crear registro
         foreach ($days->result() as $day) {

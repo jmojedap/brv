@@ -38,15 +38,6 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="status" class="col-md-4 col-form-label text-right">Status</label>
-                        <div class="col-md-8">
-                            <select name="status" v-model="form_values.status" class="form-control" required>
-                                <option v-for="(option_status, key_status) in options_status" v-bind:value="key_status">{{ option_status }}</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
                         <label for="full_name" class="col-md-4 col-form-label text-right">Nombre completo</label>
                         <div class="col-md-8">
                             <input name="full_name" type="text" class="form-control" v-model="form_values.full_name">
@@ -107,6 +98,9 @@
 <script>
 var add_place = new Vue({
     el: '#add_place',
+    created: function(){
+        //this.get_list()
+    },
     data: {
         row_id: 0,
         form_values: {
@@ -125,7 +119,6 @@ var add_place = new Vue({
         options_type: <?= json_encode($options_type) ?>,
         options_country: <?= json_encode($options_country) ?>,
         options_region: <?= json_encode($options_region) ?>,
-        options_status: <?= json_encode($options_status) ?>,
     },
     methods: {
         send_form: function(){

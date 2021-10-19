@@ -477,7 +477,7 @@ class Accounts extends CI_Controller {
         //Cargue
         $this->load->model('File_model');
         
-        $data_upload = $this->File_model->upload();
+        $data_upload = $this->File_model->upload($this->session->userdata('user_id'));
         
         $data = array('status' => 0, 'message' => 'La imagen no fue asignada');
         if ( $data_upload['status'] )

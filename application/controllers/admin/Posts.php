@@ -138,6 +138,13 @@ class Posts extends CI_Controller{
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
+    function get_info($post_id)
+    {
+        $data = $this->Post_model->basic($post_id);
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
 // CREACIÓN DE UN POST
 //-----------------------------------------------------------------------------
 

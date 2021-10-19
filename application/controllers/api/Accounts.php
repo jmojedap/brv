@@ -47,6 +47,7 @@ class Accounts extends CI_Controller{
         if ( $data['validation_data']['status'] == 1 )
         {
             //Construir registro de usuarios
+                $arr_row['userkey'] = rand(100000,999999);
                 $arr_row['display_name'] = $this->input->post('display_name');
                 $arr_row['email'] = $this->input->post('email');
                 $arr_row['username'] = explode('@', $this->input->post('email'))[0] . rand(10,99);
@@ -78,7 +79,6 @@ class Accounts extends CI_Controller{
      */
     function update($user_id)
     {
-        
         $data = array('status' => 0, 'message' => 'Los datos no se guardaron');  //Initial result values
         $data['validation_data'] = $this->User_model->validate($user_id);
         
@@ -120,6 +120,124 @@ class Accounts extends CI_Controller{
         if ( ! is_null($data['user']) ) {
             //$condition = ""
             $data['user']->qty_posts = '150';
+        }
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * AJAX JSON
+     * Ejecuta el proceso de cambio de contraseña de un usuario (user_id)
+     * 2021-09-11
+     */
+    function change_password()
+    {
+        $row_user = $this->App_model->user_request();
+
+        if ( ! is_null($row_user) )
+        {
+            //Valores iniciales para el resultado del proceso
+                $validation = array('current_password' => 0, 'passwords_match' => 0);
+                $data = array('status' => 0, 'error' => '', 'validation' => $validation);
+            
+            //Regla 1: Verificar contraseña actual
+                $validar_pw = $this->Account_model->validate_password($row_user->username, $this->input->post('current_password'));
+                if ( $validar_pw['status'] == 1 ) {
+                    $data['validation']['current_password'] = 1;
+                } else {
+                    $data['error'] = 'La contraseña actual es incorrecta';
+                }
+            
+            //Regla 2: Verificar que contraseña nueva coincida con la confirmación
+                if ( $this->input->post('password') == $this->input->post('passconf') ) {
+                    $data['validation']['passwords_match'] = 1;
+                } else {
+                    $data['error'] = 'La contraseña de confirmación no coincide.';
+                }
+            
+            //Verificar que no haya error y cambiar contraseña
+                if ( $data['error'] == '' )
+                {
+                    $this->Account_model->change_password($row_user->id, $this->input->post('password'));
+                    $data['status'] = 1;
+                }
+            
+            $this->output->set_content_type('application/json')->set_output(json_encode($data));   
+        } else {
+            //echo 'salida';
+            $data = array('status' => 0, 'error' => 'Usuario no identificado');
+            //Salida JSON
+            $this->output->set_content_type('application/json')->set_output(json_encode($data));
+        }
+
+    }
+
+        //IMAGEN DE PERFIL
+//---------------------------------------------------------------------------------------------------
+
+    /**
+     * Carga archivo de imagen, y se la asigna como imagen de perfil al usuario en sesión
+     * 2021-09-20
+     */
+    function set_image()
+    {
+        $data = array('status' => 0, 'message' => 'Usuario no identificado');   //Resultado por defecto
+        $user = $this->App_model->user_request();
+
+        if ( ! is_null($user) ) {
+            $previous_image_id = $user->image_id;
+
+            //Cargue
+            $this->load->model('File_model');
+            
+            $data_upload = $this->File_model->upload($user->id);
+            
+            $data['message'] = 'La imagen no fue asignada';
+            if ( $data_upload['status'] )
+            {
+                //$this->User_model->remove_image($user->id);                               //Quitar imagen actual, si tiene una
+                $data = $this->User_model->set_image($user->id, $data_upload['row']->id);   //Asignar imagen nueva
+
+                //Eliminar imagen anterior
+                $session_data = ['user_id' => $user->id, 'role' => $user->role];
+                $this->File_model->delete($previous_image_id, $session_data);
+            }
+        }
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Desasigna y elimina la imagen asociada (si la tiene) al usuario en sesión.
+     * 2021-09-20
+     */
+    function remove_image($user_id, $userkey)
+    {
+        $data = array('status' => 0, 'message' => 'Usuario no identificado');   //Resultado por defecto
+        $user = $this->Db_model->row('users', "id = {$user_id} AND userkey = {$userkey}");
+
+        if ( ! is_null($user) ) {
+            $data = $this->User_model->remove_image($user_id);
+        }
+        
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Functión temporal para obtener users.userkey para un usuario mientras se incorpora como variable
+     * en shared_preferences.
+     * 2021-09-17
+     */
+    function get_userkey($public_key, $user_id)
+    {
+        $data = array('status' => 0, 'userkey' => '');
+        //Debe proveer la clave que está solo en la aplicación
+        if ( $public_key == '0IEM5CCSJ97LWC7L' ) {
+            $user = $this->Db_model->row_id('users', $user_id);
+            if ( ! is_null($user) ) {
+                $data = array('status' => 1, 'userkey' => $user->userkey);
+            }
         }
 
         //Salida JSON
