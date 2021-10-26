@@ -271,6 +271,12 @@ class Period_model extends CI_Model{
         //$condition = "type_id = 9 AND month = {}";
     }
 
+    /**
+     * Array de semanas entre dos fechas.
+     * Una semana es también un array de 7 días
+     * 2021-10-21
+     * @return array $weeks
+     */
     function weeks($date_1, $date_2)
     {
         $this->db->select('year, week_number, MIN(start) AS first_day');
@@ -295,6 +301,10 @@ class Period_model extends CI_Model{
         return $weeks;
     }
 
+    /**
+     * Objeto query con días de una semana específica, table periods
+     * 2021-10-21
+     */
     function days_week($week_number)
     {
         $this->db->where('type_id', 9); //Tipo día

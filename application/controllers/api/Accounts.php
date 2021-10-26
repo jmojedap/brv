@@ -36,7 +36,7 @@ class Accounts extends CI_Controller{
 
     /**
      * Crear una cuenta de usuario
-     * 2021-08-03
+     * 2021-10-21
      */
     function register()
     {
@@ -50,6 +50,7 @@ class Accounts extends CI_Controller{
                 $arr_row['userkey'] = rand(100000,999999);
                 $arr_row['display_name'] = $this->input->post('display_name');
                 $arr_row['email'] = $this->input->post('email');
+                $arr_row['document_number'] = $this->input->post('document_number');
                 $arr_row['username'] = explode('@', $this->input->post('email'))[0] . rand(10,99);
                 $arr_row['password'] = $this->Account_model->crypt_pw($this->input->post('new_password'));
                 $arr_row['status'] = 2;     //Registrado sin confirmar email

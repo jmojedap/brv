@@ -28,7 +28,10 @@ Estilos para herramientas administrador BraveBackEnd
 
 /* Tipos de evento */
 /*-----------------------------------------------------------------------------*/
+.text_evt203 {color: #60C83C;}
 .text_evt221 {color: #880e4f;}
+.text_evt223 {color: #daa700;}
+.text_evt225 {color: #2a6dd8;}
 
 /* Estados de variable en un rango */
 /*-----------------------------------------------------------------------------*/

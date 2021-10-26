@@ -40,10 +40,12 @@ class Calendar extends CI_Controller{
         $day = $this->Db_model->row('periods', "type_id = 9 AND id = {$day_id}");
         $row_month = $this->Db_model->row('periods', "year = {$day->year} AND month = {$day->month}");
 
-        $data['weeks'] = $this->Period_model->weeks($row_month->start, $row_month->end);
+        $data['weeks'] = $this->Calendar_model->weeks_qty_events($row_month->start, $row_month->end);
+        //$data['weeks'] = $this->Period_model->weeks($row_month->start, $row_month->end);
 
         //Opciones de filtros de búsqueda
             $data['rooms'] = $this->App_model->rooms();
+            $data['appointment_types'] = $this->Item_model->arr_cod('category_id = 13 AND cod IN (221,223,225)');
 
         //Detalle periodos
             $data['day_start'] = $row_month->start;
@@ -68,13 +70,19 @@ class Calendar extends CI_Controller{
      * 2021-10-05
      * 
      */
-    function schedule_generator($schedule_type = 'trainings')
+    function schedule_generator($schedule_type = 'trainings', $date_start = null)
     {
         $data['head_title'] = 'Programar';
         $data['schedule_type'] = $schedule_type;
         $data['nav_2'] = $this->views_folder . 'menu_v';
         $data['nav_3'] = $this->views_folder . 'schedule_generator/menu_v';
         $data['view_a'] = $this->views_folder . "schedule_generator/{$schedule_type}_v";
+
+        //Fecha por defecto
+        $date['date_start'] = date('Y-m-d');
+        if ( ! is_null($date_start) ) {
+            $data['date_start'] = $date_start;
+        }
 
         //Variables específicas
         if ( $schedule_type == 'trainings' ) {
@@ -83,11 +91,35 @@ class Calendar extends CI_Controller{
             $data['query_hours'] = $this->db->query($sql_query);
         }
 
+        if ( $schedule_type == 'appointments' ) {
+            $data['options_type'] = $this->Item_model->options('category_id = 13 AND cod IN (221,223,225)');
+        }
+
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
 // Citas
 //-----------------------------------------------------------------------------
+
+    /**
+     * AJAX JSON
+     * Ejecutar la creación de citas de control nutricional, tabla events, tipo 221
+     * Recibe datos desde calendar/schedlule
+     */
+    function schedule_appointments()
+    {
+        $type_id = $this->input->post('type_id');   //Tipo evento
+        $date_start = $this->input->post('date_start');
+        $date_end = $this->input->post('date_end');
+        $hours = json_decode($this->input->post('str_hours'));
+        
+        $data = $this->Calendar_model->schedule_appointments($type_id, $date_start, $date_end, $hours);
+
+        $data['hours'] = $hours;
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
 
     function get_appointments($day_id, $event_type_id = 0)
     {
@@ -107,7 +139,7 @@ class Calendar extends CI_Controller{
         $data = array('qty_deleted' => 0);
 
         //Identificar evento
-        $condition = "id = {$event_id} AND type_id = {$type_id} AND type_id IN (221)";
+        $condition = "id = {$event_id} AND type_id = {$type_id} AND type_id IN (221,223,225)";
         $event = $this->Db_model->row('events', $condition);
 
         //Si existe eliminar

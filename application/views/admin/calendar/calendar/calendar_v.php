@@ -23,7 +23,7 @@
                     <i class="fa fa-chevron-right"></i>
                 </button>
             </div>
-            <table class="table bg-white text-center">
+            <table class="table-calendar">
                 <thead>
                     <th class="wd_7">Do</th>
                     <th>Lu</th>
@@ -35,17 +35,28 @@
                 </thead>
                 <tbody>
                     <tr v-for="week in weeks">
-                        <td v-for="day in week.days" v-bind:class="day_class(day)" v-on:click="set_day(day)"
-                        >
-                            {{ day.day }}
+                        <td v-for="day in week.days" v-bind:class="day_class(day)" v-on:click="set_day(day)">
+                            <div>
+                                <div class="day-number">{{ day.day }}</div>
+                                <div>
+                                    <i class="fa fa-circle events-point text_evt203" v-show="day.qty_events_type[203] > 0"></i>
+                                    <i class="fa fa-circle events-point text_evt221" v-show="day.qty_events_type[221] > 0"></i>
+                                    <i class="fa fa-circle events-point text_evt223" v-show="day.qty_events_type[223] > 0"></i>
+                                    <i class="fa fa-circle events-point text_evt225" v-show="day.qty_events_type[225] > 0"></i>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="col-md-8">
+            <div class="text-center" v-show="active_day.id > 0">
+                <h3>{{ active_day.start | date_format }}</h3>
+                <h4 class="text-muted">{{ active_day.start | ago }}</h4>
+            </div>
             <div class="mb-3">
-                <ul class="nav nav-pills justify-content-center">
+                <ul class="nav nav-tabs justify-content-center">
                     <li class="nav-item">
                         <a class="nav-link" v-bind:class="{'active': section == 'trainings' }" href="#" v-on:click="set_section('trainings')">Entrenamientos</a>
                     </li>
@@ -53,10 +64,6 @@
                         <a class="nav-link" v-bind:class="{'active': section == 'appointments' }" href="#" v-on:click="set_section('appointments')">Citas</a>
                     </li>
                 </ul>
-            </div>
-            <div class="text-center" v-show="active_day.id > 0">
-                <h3>{{ active_day.start | date_format }}</h3>
-                <h4 class="text-muted">{{ active_day.start | ago }}</h4>
             </div>
             <div v-show="section == `trainings`">
                 <?php $this->load->view('admin/calendar/calendar/trainings_v') ?>

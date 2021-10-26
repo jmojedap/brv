@@ -49,6 +49,38 @@ class Calendar extends CI_Controller{
 //-----------------------------------------------------------------------------
 
     /**
+     * JSON
+     * Array días en los que hay citas disponibles de un tipo específico
+     * 2021-10-22
+     */
+    function get_appointments_days($user_id, $type_id)
+    {   
+        $data = ['status' => 0, 'days' => array()];
+
+        $days = $this->Calendar_model->get_appointments_days($user_id, $type_id);
+        if ( count($days) > 0 ) {
+            $data = ['status' => 1, 'days' => $days];
+        }
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * JSON
+     * Array listado citas para un día determinado
+     * 2021-10-22
+     */
+    function get_appointments($day_id, $type_id)
+    {        
+        $appointments = $this->Calendar_model->get_appointments($day_id, $type_id);
+        $data['list'] = $appointments;
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
      * Asignar una cita a un usuario específico
      * 2021-10-11
      */

@@ -1,12 +1,22 @@
 <div id="schedule_generator_app">
     <div class="center_box_750">
-        <h3 class="text-center">Citas de control nutricional</h3>
         <p class="d-none">{{ form_values.str_hours }}</p>
         <div class="card">
             <div class="card-body">
                 <div v-show="result.status == -1">
                     <form accept-charset="utf-8" method="POST" id="schedule_form" @submit.prevent="send_form">
                         <fieldset v-bind:disabled="loading">
+                            <div class="form-group row">
+                                <label for="type_id" class="col-md-4 col-form-label text-right">
+                                    <i class="fa fa-circle" v-bind:class="`text_evt` + parseInt(type_id)"></i>
+                                    Tipo citas
+                                </label>
+                                <div class="col-md-8">
+                                    <select name="type_id" v-model="type_id" class="form-control" required v-on:change="check_date_end">
+                                        <option v-for="(option_type, key_type) in options_type" v-bind:value="key_type">{{ option_type }}</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="form-group row">
                                 <label for="date_start" class="col-md-4 col-form-label text-right">Desde &middot; Hasta</label>
                                 <div class="col-md-4">
@@ -95,12 +105,25 @@
                             </div>
     
                             <hr>
-                            <div class="row">
-                                <div class="col-md-8 offset-md-4">
-                                    <p>
-                                        {{ qty_days() }} días x {{ selected_appointments.length }} citas =
+                            <div class="form-group row">
+                                <div class="col-md-4 text-right">
+                                    Citas a programar
+                                </div>
+                                <div class="col-md-8">
+                                    {{ qty_days() }} días x {{ selected_appointments.length }} citas =
+                                    <strong class="text-primary">
                                         {{ qty_days() * selected_appointments.length }}
-                                    </p>
+                                    </strong>
+                                </div>
+                            </div>
+                            <div class="form-group row" v-show="qty_current_events > 0">
+                                <div class="col-md-4 text-right">
+                                    <i class="fa fa-info-circle text-warning"></i>
+                                    Información
+                                </div>
+                                <div class="col-md-8">
+                                    En las fechas seleccionadas ya están programadas
+                                    <strong class="text-primary">{{ qty_current_events }}</strong> citas de <strong class="text-primary">{{ options_type[type_id] }}</strong>
                                 </div>
                             </div>
                             
@@ -136,15 +159,18 @@ var schedule_generator_app = new Vue({
     el: '#schedule_generator_app',
     created: function(){
         this.generate_appointments()
+        this.get_qty_current_events()
     },
     data: {
         form_values: {
-            date_start: '<?= date('Y-m-d') ?>',
-            date_end: '<?= date('Y-m-d') ?>',
+            date_start: '<?= $date_start ?>',
+            date_end: '<?= $date_start ?>',
             minute_start: 0,
             minute_end: 0,
             str_hours: '',
         },
+        options_type: <?= json_encode($options_type) ?>,
+        type_id: '0221',
         hour_start: 8,
         hour_end: 12,
         duration: 30,
@@ -152,15 +178,27 @@ var schedule_generator_app = new Vue({
         selected_appointments: [],
         loading: false,
         result: {status: -1, message: ''},
+        qty_current_events: 0,
     },
     methods: {
-        send_form: function(){
+        get_qty_current_events: function(){
             this.loading = true
             var form_data = new FormData()
-            form_data.append('date_start', this.form_values.date_start)
-            form_data.append('date_end', this.form_values.date_end)
-            form_data.append('str_hours', this.form_values.str_hours)
-            axios.post(url_api + 'calendar/schedule_nutritional_control/', form_data)
+            form_data.append('type', parseInt(this.type_id))
+            form_data.append('d1', this.form_values.date_start)
+            form_data.append('d2', this.form_values.date_end)
+
+            axios.post(url_api + 'events/qty_events/', form_data)
+            .then(response => {
+                this.qty_current_events = response.data.qty_events
+                this.loading = false
+            })
+            .catch( function(error) {console.log(error)} )
+        },
+        send_form: function(){
+            this.loading = true
+            form_data = this.get_form_data();
+            axios.post(url_api + 'calendar/schedule_appointments/', form_data)
             .then(response => {
                 this.result = response.data
                 if ( response.data.status == 1 ) {
@@ -171,6 +209,14 @@ var schedule_generator_app = new Vue({
                 this.loading = false
             })
             .catch( function(error) {console.log(error)} )
+        },
+        get_form_data: function(){
+            var form_data = new FormData()
+            form_data.append('type_id', this.type_id)
+            form_data.append('date_start', this.form_values.date_start)
+            form_data.append('date_end', this.form_values.date_end)
+            form_data.append('str_hours', this.form_values.str_hours)
+            return form_data
         },
         qty_days: function(){
             var date1 = moment(this.form_values.date_start, 'YYYY-MM-DD')
@@ -191,6 +237,7 @@ var schedule_generator_app = new Vue({
                 this.form_values.date_end = this.form_values.date_start
             }
             this.generate_appointments()
+            this.get_qty_current_events()
         },
         check_hour_end: function(){
             //Si hora 2 es anterior

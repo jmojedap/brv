@@ -103,8 +103,8 @@ var schedule_generator_app = new Vue({
     },
     data: {
         form_values: {
-            date_start: '<?= date('Y-m-d') ?>',
-            date_end: '<?= date('Y-m-d') ?>',
+            date_start: '<?= $date_start ?>',
+            date_end: '<?= $date_start ?>',
         },
         hours: <?= json_encode($hours) ?>,
         str_hours: '',

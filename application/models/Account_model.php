@@ -157,10 +157,9 @@ class Account_model extends CI_Model{
         
         $this->load->model('Validation_model');
         $email_validation = $this->Validation_model->email($user_id);
+        $document_number_validation = $this->Validation_model->document_number($user_id);
 
-        //$document_number_validation = $this->Validation_model->document_number($user_id);
-
-        $validation = array_merge($email_validation);
+        $validation = array_merge($email_validation, $document_number_validation);
         $data['validation'] = $validation;
 
         //Verificar cada condición

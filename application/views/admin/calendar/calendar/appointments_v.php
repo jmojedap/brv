@@ -1,15 +1,14 @@
 <div v-show="active_day.id > 0">
     <div class="d-flex mb-2 justify-content-center">
-        <button class="btn mr-2" v-bind:class="{'btn-light': appointment_type_id == 0}" v-on:click="set_event_type(0)">
+        <button class="btn mr-2" v-bind:class="{'btn-light': appointment_type_id == 0}" v-on:click="set_appointment_type(0)">
             Todas
         </button>
-        <button class="btn mr-2" v-bind:class="{'btn-light': appointment_type_id == 221 }" v-on:click="set_event_type(221)">
-            <i class="fa fa-circle text_evt221"></i> Control nutrición
+        <button class="btn mr-2"
+            v-for="(appointment_type, atk) in appointment_types"
+            v-bind:class="{'btn-light': appointment_type_id == atk }" v-on:click="set_appointment_type(atk)">
+            <i class="fa fa-circle" v-bind:class="`text_evt` + atk"></i> {{ appointment_type }}
         </button>
     </div>
-
-    <h5 class="text-center" v-show="appointment_type_id > 0"><i class="fa fa-circle" v-bind:class="`text_z` + appointment_type_id"></i> {{ parseInt(appointment_type_id) | room_name }}</h5>
-    <h5 class="text-center" v-show="appointment_type_id == 0">Todas las zonas</h5>
     
     <table class="table bg-white" v-show="appointments.length > 0">
         <thead>
@@ -60,7 +59,7 @@
     <div v-show="appointments.length == 0" class="text-center">
         <hr>
         <p class="text-center">No hay citas programadas para este día</p>
-        <a class="btn btn-light" href="<?= URL_ADMIN . "calendar/schedule_generator/nutritional_control" ?>">Programar</a>
+        <a class="btn btn-light" v-bind:href="`<?= URL_ADMIN . "calendar/schedule_generator/appointments/" ?>` + active_day.start">Programar</a>
     </div>
 
 </div>

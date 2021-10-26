@@ -1,6 +1,6 @@
 <?php
     $cl_nav_3['trainings'] = '';
-    $cl_nav_3['nutritional_control'] = '';
+    $cl_nav_3['appointments'] = '';
 
     $app_cf_index = $this->uri->segment(4);
     if ( strlen($app_cf_index) == 0 ) { $app_cf_index = 'trainings'; }
@@ -19,19 +19,19 @@
         icon: '',
         text: 'Entrenamientos',
         class: '<?= $cl_nav_3['trainings'] ?>',
-        cf: 'calendar/schedule_generator/trainings'
+        cf: 'calendar/schedule_generator/trainings/<?= $date_start?>'
     };
 
-    sections.nutritional_control = {
+    sections.appointments = {
         icon: '',
-        text: 'Nutrición',
-        class: '<?= $cl_nav_3['nutritional_control'] ?>',
-        cf: 'calendar/schedule_generator/nutritional_control'
+        text: 'Citas',
+        class: '<?= $cl_nav_3['appointments'] ?>',
+        cf: 'calendar/schedule_generator/appointments/<?= $date_start?>'
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['trainings', 'nutritional_control'];
-    sections_role[2] = ['trainings', 'nutritional_control'];
+    sections_role[1] = ['trainings', 'appointments'];
+    sections_role[2] = ['trainings', 'appointments'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

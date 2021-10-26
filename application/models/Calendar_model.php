@@ -167,6 +167,47 @@ class Calendar_model extends CI_Model{
 // Info
 //-----------------------------------------------------------------------------
 
+    function weeks_qty_events($date_1, $date_2)
+    {
+        $weeks_pre = $this->Period_model->weeks($date_1, $date_2);
+        $weeks = array();
+        foreach ($weeks_pre as $week_pre) {
+            $week = $week_pre;
+
+            $days = array();
+            foreach( $week_pre['days'] as $day ){
+                $condition_date = "period_id = {$day->id}";
+                //$arr_qty_events_day_type = $this->qty_events_day_type($day->id);
+
+                $day->qty_events_type = $this->qty_events_day_type($day->id);
+
+                $days[] = $day;
+            }
+            $week['days'] = $days;
+            $weeks[] = $week;
+        }
+
+        return $weeks;
+    }
+
+    function qty_events_day_type($day_id)
+    {
+        $qty_events_type = array(203 => 0, 221 => 0, 223 => 0, 225 => 0);
+
+        $this->db->select('type_id, COUNT(ID) as qty_events');
+        $this->db->where('period_id', $day_id);
+        $this->db->where('type_id IN (203,221,223,225)');
+        $this->db->group_by('type_id');
+
+        $query = $this->db->get('events');
+
+        foreach( $query->result() as $row_type ) {
+            $qty_events_type[$row_type->type_id] = $row_type->qty_events;
+        }
+
+        return $qty_events_type;
+    }
+
     /**
      * Eventos de un usuario para mostrarse en el calendario
      */
@@ -174,7 +215,7 @@ class Calendar_model extends CI_Model{
     {
         $this->db->select('events.id, title, events.type_id, start, end, period_id AS day_id, related_2, items.item_name AS event_type');
         $this->db->join('items', 'items.cod = events.type_id AND items.category_id = 13', 'left');
-        $this->db->where('events.type_id IN (213, 221)');
+        $this->db->where('events.type_id IN (213, 221, 223, 225)');
         $this->db->where('user_id', $user_id);
         $this->db->order_by('period_id', 'ASC');
         $events = $this->db->get('events');
@@ -205,6 +246,8 @@ class Calendar_model extends CI_Model{
         //Llenar los eventos en el array de eventos de cada día corresponidente
         foreach ( $events->result() as $event ) {
             if ( $event->type_id == 221 ) $event->title = 'Cita de control nutricional';
+            if ( $event->type_id == 223 ) $event->title = 'Sesión estética - masajes';
+            if ( $event->type_id == 225 ) $event->title = 'Sesión estética - máquina';
             $user_events_index[$event->day_id]['events'][] = $event;
         }
 
@@ -242,11 +285,89 @@ class Calendar_model extends CI_Model{
         return $event;
     }
 
+// Programación de citas
+//-----------------------------------------------------------------------------
+    /**
+     * Ejecutar la creación de citas de control nutricional, tabla events, tipo 221
+     * Recibe datos desde calendar/schedlule
+     * 2021-10-21
+     */
+    function schedule_appointments($type_id, $date_start, $date_end, $hours)
+    {
+        //Resultado inicial
+        $data = array('status' => 0, 'message' => 'No se programadas citas');
+
+        $days = $this->Period_model->days($date_start, $date_end);
+        
+        $events = array();
+        //Recorrer días y horas, y crear citas
+        foreach ($days->result() as $day) {
+            foreach ($hours as $hour) {
+                $events[] = $this->save_appointment($type_id, $day, $hour);
+            }
+        }
+
+        //Verificar resultado
+        if ( count($events) > 0 ) {
+            $data = array('status' => 1, 'message' => count($events) . ' citas programadas');
+            $data['events'] = $events;
+        }
+
+        return $data;
+    }
+
+    /**
+     * Construye registro para tabla events, tipo 221, cita de control nutricional
+     * Guarda el registro, devuelve ID de registro guardado.
+     * 2021-10-21
+     * @return int $saved_id
+     */
+    function save_appointment($type_id, $period, $hour)
+    {
+        $arr_row['type_id'] = $type_id;
+        $arr_row['period_id'] = $period->id;
+        $arr_row['start'] = $period->start . ' ' . $hour->start;
+        $arr_row['end'] = $period->start . ' ' . $hour->end;
+        $arr_row['status'] = 0;
+
+        $condition = "type_id = {$arr_row['type_id']} AND period_id = {$arr_row['period_id']} AND start = '{$arr_row['start']}'";
+        $saved_id = $this->Db_model->insert_if('events', $condition, $arr_row);
+
+        return $saved_id;
+    }
+
 // Reserva de citas
 //-----------------------------------------------------------------------------
 
     /**
-     * Array, con trainings para una fecha y zona de entrenamiento específica.
+     * Array con días en los que hay programadas citas de un tipo específico
+     * 2021-10-22
+     * @return array $periods
+     */
+    function get_appointments_days($user_id, $type_id)
+    {
+        $today_id = date('Ymd');
+
+        $this->db->select('id, period_name, start');
+        $this->db->where('id >=', $today_id);
+        $this->db->where('type_id', 9); //Periodo tipo día
+        //Día en los que haya citas programadas
+        $this->db->where("id IN (SELECT period_id FROM events WHERE type_id = {$type_id})");
+        $this->db->order_by('id', 'ASC');
+        $query = $this->db->get('periods', 5);  //Hasta 5 días en el futuro
+
+        $periods = array();
+        foreach ( $query->result() as $day ) {
+            $condition = "type_id = {$type_id} AND user_id = {$user_id} AND period_id = {$day->id}";
+            $day->qty_user_reservations = $this->Db_model->num_rows('events', $condition);
+            $periods[] = $day;
+        }
+
+        return $periods;
+    }
+
+    /**
+     * Array, con citas para una fecha y zona de entrenamiento específica.
      * 2021-07-23
      */
     function get_appointments($day_id, $event_type_id = 0)
@@ -278,7 +399,7 @@ class Calendar_model extends CI_Model{
 
     /**
      * Reservar una cita a un usuario, asignando campo events->user_id
-     * 2021-10-11
+     * 2021-10-22
      */
     function reservate_appointment($event_id, $user_id)
     {
@@ -287,37 +408,50 @@ class Calendar_model extends CI_Model{
         //Identificar evento tipo cita
         $event = $this->Db_model->row('events', "id = {$event_id} AND type_id IN (213, 221, 223, 225)");
 
-        if ( is_null($event) ) {
-            //Si el evento no existe
-            $data['error'] = 'El evento o cita no existe';
-        } else {
+        if ( ! is_null($event) ) {
             if ( $event->user_id > 0 ) $data['error'] = 'La cita ya está asignada';
-
+            
             $now = new DateTime('now');
             $now->add(new DateInterval('PT1H'));
             if ( $event->start < $now->format('Y-m-d H:i:s') ) $data['error'] = 'No se puede reservar una cita pasada';
-
+            
             // Que no tenga otra reserva de este tipo en el mismo mes
             $month = substr($event->period_id, 0,6);
-            $condition = "type_id = 221 AND user_id = {$user_id} AND LEFT(period_id,6) = '{$month}'";
+            $condition = "type_id = {$event->type_id} AND user_id = {$user_id} AND LEFT(period_id,6) = '{$month}'";
             $qty_user_appointments = $this->Db_model->num_rows('events', $condition);
             if ( $qty_user_appointments > 0 ) $data['error'] = 'Ya tienes una reserva en este mismo mes';
+        } else {
+            //Si el evento no existe
+            $data['error'] = 'El evento o cita no existe';
         }
 
         //No hay error, se asigna evento
         if ( strlen($data['error']) == 0 ) {
-            $arr_row['status'] = 1; //Tomada
-            $arr_row['user_id'] = $user_id;
-
-            $this->db->where('id', $event_id);
-            $this->db->update('events', $arr_row);
-
-            if ( $this->db->affected_rows() > 0 ) {
-                $data['status'] = 1;
-            }
+            $data['status'] = $this->set_user_to_appointment($event_id, $user_id);
         }
 
         return $data;
+    }
+
+    /**
+     * Asignar un usuario a un evento cita
+     * 2021-10-22
+     */
+    function set_user_to_appointment($event_id, $user_id)
+    {
+        $status = 0;
+
+        $arr_row['status'] = 1; //Tomada
+        $arr_row['user_id'] = $user_id;
+
+        $this->db->where('id', $event_id);
+        $this->db->update('events', $arr_row);
+
+        if ( $this->db->affected_rows() > 0 ) {
+            $status = 1;
+        }
+
+        return $status;
     }
 
     /**

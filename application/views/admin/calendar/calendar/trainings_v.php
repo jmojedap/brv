@@ -64,7 +64,6 @@
     <div v-show="trainings.length == 0" class="text-center">
         <hr>
         <p class="text-center">No hay sesiones programadas para este día y zona</p>
-        <a class="btn btn-light" href="<?= URL_ADMIN . "trainings/schedule_generator/" ?>">Programar</a>
+        <a class="btn btn-light" v-bind:href="`<?= URL_ADMIN . "calendar/schedule_generator/trainings/" ?>` + active_day.start">Programar</a>
     </div>
-
 </div>

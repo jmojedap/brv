@@ -126,4 +126,18 @@ class Events extends CI_Controller{
         
         $this->App_model->view(TPL_ADMIN, $data);
     }
+
+// INFORMACIÓN
+//-----------------------------------------------------------------------------
+
+    function qty_events()
+    {
+        $this->load->model('Search_model');
+        $filters = $this->Search_model->filters();
+        
+        $data['qty_events'] = $this->Event_model->qty_events($filters);
+
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
 }

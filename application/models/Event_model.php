@@ -204,20 +204,20 @@ class   Event_model extends CI_Model{
      * @param type $event_id
      * @return boolean
      */
-    function deletable($event_id)
+    function deleteable($event_id)
     {   
-        $deletable = FALSE;
+        $deleteable = FALSE;
         $row_event = $this->Db_model->row_id('events', $event_id);
         
         //El user creó el event
-        if ( $row_event->creator_id == $this->session->userdata('user_id') ) {
-            $deletable = TRUE;
-        }
+            if ( $row_event->creator_id == $this->session->userdata('user_id') ) {
+                $deleteable = TRUE;
+            }
         
-    //El user es aministrador
-        if ( $this->session->userdata('role') <= 1 ) { $deletable = TRUE; }
+        //El user es aministrador
+            if ( $this->session->userdata('role') <= 2 ) { $deleteable = TRUE; }
             
-        return $deletable;
+        return $deleteable;
     }
     
     /**
@@ -229,9 +229,9 @@ class   Event_model extends CI_Model{
     function delete($event_id)
     {
         $qty_deleted = 0;
-        $deletable = $this->deletable($event_id);
+        $deleteable = $this->deleteable($event_id);
         
-        if ( $deletable ) 
+        if ( $deleteable ) 
         {
             //Tabla
                 $this->db->where('id', $event_id);
@@ -321,7 +321,7 @@ class   Event_model extends CI_Model{
      */
     function type_folder($type_id)
     {
-        $special_types = array(221);
+        $special_types = array(221,223,225);
         $type_folder = $this->views_folder;
 
         if ( in_array($type_id, $special_types) )
@@ -346,13 +346,27 @@ class   Event_model extends CI_Model{
 // DATOS
 //-----------------------------------------------------------------------------
     
+    /**
+     * Cantidate de eventos que existen con unos filtros específicos
+     * 2021-10-21
+     */
     function qty_events($filters)
     {
         if ( $filters['u'] != '' ) { $this->db->where('user_id', $filters['u']); }      //Usuario
-        if ( $filters['tp'] != '' ) { $this->db->where('type_id', $filters['tp']); }    //Tipo
-        if ( $filters['d1'] != '' ) { $this->db->where('start >=', $filters['d1']); }    //Fecha inicial
+        if ( $filters['type'] != '' ) { $this->db->where('type_id', $filters['type']); }    //Tipo
+
+        //Fecha y hora inicial
+        if ( $filters['d1'] != '' ) { 
+            $full_date_time = substr($filters['d1'] . ' 00:00:00',0,19);
+            $this->db->where('start >=', $full_date_time);
+         }
+        //Fecha y hora final
+        if ( $filters['d2'] != '' ) {
+            $full_date_time = substr($filters['d2'] . ' 23:59:59',0,19);
+            $this->db->where('start <=', $full_date_time);
+        }
         
-        $query = $this->db->get('events');
+        $query = $this->db->select('id')->get('events');
         
         return $query->num_rows();
     }

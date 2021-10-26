@@ -234,14 +234,14 @@ class Product_model extends CI_Model{
     /**
      * Establece permiso para eliminar un producto
      */
-    function deletable($product_id)
+    function deleteable($product_id)
     {
-        $deletable = 0;
+        $deleteable = 0;
         $row = $this->Db_model->row_id('products', $product_id);
 
-        if ( $this->session->userdata('role') <= 1 ) { $deletable = 1; }
+        if ( $this->session->userdata('role') <= 2 ) { $deleteable = 1; }
         
-        return $deletable;
+        return $deleteable;
     }
 
     /**
@@ -252,7 +252,7 @@ class Product_model extends CI_Model{
     {
         $qty_deleted = 0;
 
-        if ( $this->deletable($product_id) ) 
+        if ( $this->deleteable($product_id) ) 
         {
             //Tablas relacionadas
 

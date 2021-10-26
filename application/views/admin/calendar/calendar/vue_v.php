@@ -12,7 +12,7 @@ Vue.filter('month_name', function (date) {
 
 Vue.filter('date_format', function (date) {
     if (!date) return ''
-    return moment(date).format('dddd, D [de] MMMM / YYYY')
+    return moment(date).format('D [de] MMMM, dddd')
 });
 
 Vue.filter('ago', function (date) {
@@ -75,6 +75,7 @@ var calendar_app = new Vue({
         trainings: [],
         key_training: -1,
         //appointments vars
+        appointment_types: <?= json_encode($appointment_types) ?>,
         key_appointment: -1,
         appointment_type_id: 0,
         appointments: [],
@@ -150,6 +151,11 @@ var calendar_app = new Vue({
         },
         // Appointments Functions
         //-----------------------------------------------------------------------------
+        set_appointment_type: function(appointment_type_key){
+            console.log(appointment_type_key)
+            this.appointment_type_id = appointment_type_key
+            this.get_appointments()
+        },
         get_appointments: function(){
             axios.get(url_api + 'calendar/get_appointments/' + this.active_day.id + '/' + this.appointment_type_id)
             .then(response => {
@@ -168,7 +174,7 @@ var calendar_app = new Vue({
                     this.appointments.splice(this.key_appointment,1)
                     toastr['info']('Cita eliminada')
                 } else {
-                    toastr['danger']('Ocurrió un error al eliminar')
+                    toastr['error']('Ocurrió un error al eliminar')
                 }
             })
             .catch(function(error) { console.log(error) })

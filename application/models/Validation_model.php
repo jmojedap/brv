@@ -55,8 +55,9 @@ class Validation_model extends CI_Model{
     }
 
     /**
-     * Valida que número de identificacion (document_number) sea único, si se incluye un ID User existente
-     * lo excluye de la comparación cuando se realiza edición
+     * Valida que número de identificacion (document_number) sea único, si se 
+     * incluye un ID User existentelo excluye de la comparación cuando se 
+     * realiza edición
      * 2021-02-18
      */
     function document_number($user_id = null)
