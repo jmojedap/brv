@@ -39,10 +39,8 @@
     //Secciones para cada rol
     sections_role[1] = ['profile', 'edit'];
     sections_role[2] = ['profile', 'edit'];
-    sections_role[3] = ['profile', 'edit'];
-    sections_role[13] = ['profile', 'solicitudes', 'edit'];
+    sections_role[4] = ['profile', 'edit'];
     sections_role[21] = ['profile', 'solicitudes', 'edit'];
-    sections_role[23] = ['profile', 'solicitudes', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

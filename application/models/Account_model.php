@@ -149,7 +149,7 @@ class Account_model extends CI_Model{
     /**
      * Valida datos de un user nuevo o existente, verificando validez respecto
      * a users ya existentes en la base de datos.
-     * 2020-07-17
+     * 2020-10-28
      */
     function validate_form($user_id = NULL)
     {
@@ -157,11 +157,17 @@ class Account_model extends CI_Model{
         
         $this->load->model('Validation_model');
         $email_validation = $this->Validation_model->email($user_id);
-        $document_number_validation = $this->Validation_model->document_number($user_id);
 
-        $validation = array_merge($email_validation, $document_number_validation);
+        $validation = $email_validation;
+        
+        //Si se registró número de documento
+        if ( strlen($this->input->post('document_number')) > 0 ) {
+            $document_number_validation = $this->Validation_model->document_number($user_id);
+            $validation = array_merge($email_validation, $document_number_validation);
+        }
+        
         $data['validation'] = $validation;
-
+        
         //Verificar cada condición
         foreach ( $validation as $value )
         {
@@ -178,7 +184,6 @@ class Account_model extends CI_Model{
     */
     function generate_username()
     {
-        
         $this->load->model('User_model');
         
         //Sin espacios iniciales o finales
@@ -211,6 +216,21 @@ class Account_model extends CI_Model{
             $sufix = $this->username_sufix($username);
             $username .= $sufix;
         
+        return $username;
+    }
+
+    /**
+     * Genera un username a partir de un email
+     * 2021-11-05
+     */
+    function email_to_username($email)
+    {
+        $username = explode('@', $email)[0];
+        $username = substr($username, 0,25);
+        $username = preg_replace('[A-Za-z0-9_]', '', $username);
+        $username = $this->Db_model->unique_slug($username, 'users', 'username');
+        $username = str_replace(array('.', '-'), '', $username);
+
         return $username;
     }
 

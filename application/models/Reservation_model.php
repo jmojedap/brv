@@ -31,7 +31,7 @@ class Reservation_model extends CI_Model{
         $this->db->where('type_id', 9); //Periodo tipo día
         $this->db->where('id IN (SELECT period_id FROM events WHERE type_id = 203)');   //Día en los que haya trainings
         $this->db->order_by('id', 'ASC');
-        $query = $this->db->get('periods', 2);
+        $query = $this->db->get('periods', 4);
 
         $periods = array();
         foreach ( $query->result() as $day ) {

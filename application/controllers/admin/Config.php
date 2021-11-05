@@ -124,4 +124,24 @@ class Config extends CI_Controller {
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
+
+    function test_email()
+    {
+        $this->load->model('Account_model');
+
+        $users = $this->db->get('users');
+        foreach ($users->result() as $user) {
+            echo $user->email;
+            echo ' --- ';
+            echo $this->Account_model->email_to_username($user->email);
+            echo '<br>';
+        }
+
+        $test_email = 'dfhsd00=)(/=(/**--467fsdfads7987fdsfds6497dfsdf99999d@gmail.com';
+
+        echo $test_email;
+        echo ' --- ';
+        echo $this->Account_model->email_to_username($test_email);
+        echo '<br>';
+    }
 }

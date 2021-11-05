@@ -1,8 +1,6 @@
 <?php $this->load->view('assets/bs4_chosen') ?>
 
 <?php
-    $options_role = $this->Item_model->options('category_id = 58', 'Rol de usuario');
-    $options_gender = $this->Item_model->options('category_id = 59 AND cod <= 2', 'Sexo');
     $options_city = $this->App_model->options_place('type_id = 4', 'cr', 'Ciudad');
     $options_document_type = $this->Item_model->options('category_id = 53', 'Tipo documento');
 ?>
@@ -23,12 +21,11 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="first_name" class="col-md-4 col-form-label text-right">Nombre y Apellidos <span class="text-danger">*</span></label>
+                        <label for="first_name" class="col-md-4 col-form-label text-right">Nombre y Apellidos</label>
                         <div class="col-md-4">
                             <input
                                 name="first_name" class="form-control"
                                 placeholder="Nombres" title="Nombres del usuario"
-                                required autofocus
                                 v-model="form_values.first_name"
                                 >
                         </div>
@@ -36,7 +33,6 @@
                             <input
                                 name="last_name" class="form-control"
                                 placeholder="Apellidos" title="Apellidos del usuario"
-                                required
                                 v-model="form_values.last_name"
                                 >
                         </div>
@@ -118,6 +114,28 @@
                         </div>
                     </div>
 
+                    
+                    <div class="form-group row">
+                        <label for="gender" class="col-md-4 col-form-label text-right">Género</label>
+                        <div class="col-md-8">
+                            <select name="gender" v-model="form_values.gender" class="form-control" required>
+                                <option v-for="(option_gender, key_gender) in options_gender" v-bind:value="key_gender">{{ option_gender }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="birth_date" class="col-md-4 col-form-label text-right">Fecha de nacimiento</label>
+                        <div class="col-md-8">
+                            <input
+                            name="birth_date" class="form-control" type="date"
+                            v-model="form_values.birth_date"
+                            >
+                        </div>
+                    </div>
+                    
+                    <hr>
+
                     <div class="form-group row">
                         <label for="city_id" class="col-md-4 col-form-label text-right">Ciudad residencia</label>
                         <div class="col-md-8">
@@ -128,26 +146,17 @@
                     </div>
 
                     <div class="form-group row">
-                        <label for="birth_date" class="col-md-4 col-form-label text-right">Fecha de nacimiento</label>
+                        <label for="address" class="col-md-4 col-form-label text-right">Dirección</label>
                         <div class="col-md-8">
                             <input
-                                name="birth_date" class="form-control" type="date"
-                                v-model="form_values.birth_date"
-                                >
+                                name="address" type="text" class="form-control" title="Dirección"
+                                v-model="form_values.address"
+                            >
                         </div>
                     </div>
 
                     <div class="form-group row">
-                        <label for="gender" class="col-md-4 col-form-label text-right">Sexo</label>
-                        <div class="col-md-8">
-                            <select name="gender" v-model="form_values.gender" class="form-control" required>
-                                <option v-for="(option_gender, key_gender) in options_gender" v-bind:value="key_gender">{{ option_gender }}</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="celular" class="col-md-4 col-form-label text-right">Teléfono / Celular</label>
+                        <label for="celular" class="col-md-4 col-form-label text-right">No. celular</label>
                         <div class="col-md-8">
                             <input
                                 name="phone_number" class="form-control" title="Número celular"
@@ -182,9 +191,7 @@
 
                     <div class="form-group row">
                         <div class="offset-md-4 col-md-8">
-                            <button class="btn btn-primary w120p" type="submit">
-                                Guardar
-                            </button>
+                            <button class="btn btn-primary w120p" type="submit">Guardar</button>
                         </div>
                     </div>
                 </fieldset>
@@ -208,6 +215,7 @@
         city_id: '0<?= $row->city_id ?>',
         birth_date: '<?= $row->birth_date ?>',
         gender: '0<?= $row->gender ?>',
+        address: '<?= $row->address ?>',
         phone_number: '<?= $row->phone_number ?>',
         expiration_at: '<?= $row->expiration_at ?>',
         admin_notes: '<?= $row->admin_notes ?>',

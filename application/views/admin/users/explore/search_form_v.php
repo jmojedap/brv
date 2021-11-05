@@ -34,6 +34,15 @@
             <label for="role" class="col-md-3 col-form-label">Rol</label>
         </div>
 
+        <div class="form-group row">
+            <div class="col-md-9">
+                <select name="fe1" v-model="filters.fe1" class="form-control">
+                    <option v-for="(option_expiration, key_expiration) in options_expiration" v-bind:value="key_expiration">{{ option_expiration }}</option>
+                </select>
+            </div>
+            <label for="fe1" class="col-md-3 col-form-label">Suscripción</label>
+        </div>
+
         <!-- Botón ejecutar y limpiar filtros -->
         <div class="form-group row">
             <div class="col-md-9 text-right">

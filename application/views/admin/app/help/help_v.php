@@ -15,7 +15,7 @@
                 </div>
 
             </form>
-            <div class="list-group">
+            <div class="list-group mb-2">
                 <a href="#" class="list-group-item list-group-item-action"
                     v-bind:class="{'active': post_key == key }"
                     v-for="(post, post_key) in posts"
@@ -63,12 +63,10 @@
                 
                 axios.post(url_api + 'posts/get/1', form_data)
                 .then(response => {
-                    this.posts = response.data.list;
-                    this.get_info(this.key);
+                    this.posts = response.data.list
+                    this.get_info(this.key)
                 })
-                .catch(function (error) {
-                    console.log(error);
-                });
+                .catch(function (error) { console.log(error) })
             },
             get_info: function(key){
                 this.key = key;

@@ -201,8 +201,8 @@ class Users extends CI_Controller{
         $data = $this->User_model->basic($user_id);
 
         //Opciones Select
-        $data['options_role'] = $this->Item_model->options('category_id = 58', 'Rol de usuario');
-        $data['options_gender'] = $this->Item_model->options('category_id = 59 AND cod <= 2', 'Sexo');
+        $data['options_role'] = $this->Item_model->options("category_id = 58 AND cod > {$this->session->userdata('role')}");
+        $data['options_gender'] = $this->Item_model->options('category_id = 59 AND cod <= 2', 'Género');
         $data['options_city'] = $this->App_model->options_place('type_id = 4', 'cr', 'Ciudad');
         $data['options_document_type'] = $this->Item_model->options('category_id = 53', 'Tipo documento');
         
@@ -409,6 +409,18 @@ class Users extends CI_Controller{
 
         $data['view_a'] = 'admin/inbody/user_details/user_details_v';
         $data['back_link'] = $this->url_controller . 'explore';
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
+// LISTAS
+//-----------------------------------------------------------------------------
+
+    function lists()
+    {
+        //$data = $this->UY->basic();
+        $data['head_title'] = 'Listas de usuarios';
+        $data['view_a'] = $this->views_folder . 'lists/lists_v';
+        $data['nav_2'] = $this->views_folder . 'explore/menu_v';
         $this->App_model->view(TPL_ADMIN, $data);
     }
 

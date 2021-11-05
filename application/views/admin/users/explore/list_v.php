@@ -7,10 +7,11 @@
         <thead>
             <th width="10px"><input type="checkbox" @change="select_all" v-model="all_selected"></th>
             <th width="50px"></th>
-            <th>Nombre</th>
+            <th>Usuario</th>
+            <th>Nombre completo</th>
             <th>No. Documento</th>
-            <th>Rol</th>
             <th>Suscripción hasta</th>
+            <th>Edad</th>
             <th width="50px"></th>
         </thead>
         <tbody>
@@ -21,7 +22,7 @@
                     <a v-bind:href="`<?= URL_ADMIN . "users/profile/" ?>` + element.id">
                         <img
                             v-bind:src="element.url_thumbnail"
-                            class="rounded-circle w50p"
+                            class="rounded-circle w40p"
                             v-bind:alt="element.id"
                             onerror="this.src='<?= URL_IMG ?>users/sm_user.png'"
                         >
@@ -37,15 +38,18 @@
                     </span>
                 </td>
                 <td>
-                    {{ element.document_type | document_type_name }} &middot;
-                    {{ element.document_number }}
-                </td>
-                <td>
+                    {{ element.first_name }} <strong>{{ element.last_name }}</strong>
+                    <br>
                     <i class="fa fa-check-circle text-success" v-if="element.status == 1"></i>
                     <i class="fa fa-check-circle text-warning" v-if="element.status == 2"></i>
                     <i class="far fa-circle text-danger" v-if="element.status == 0"></i>
                     {{ element.role | role_name }}
                 </td>
+                <td>
+                    {{ element.document_type | document_type_name }} &middot;
+                    {{ element.document_number }}
+                </td>
+                
                 <td>
                     <span v-html="expiration_icon(element.expiration_at)"></span>
                     
@@ -56,6 +60,14 @@
                     <span class="text-muted">
                         {{ element.expiration_at }}
                     </span>
+                </td>
+
+                <td>
+                    <div v-if="element.birth_date">
+                        {{ element.birth_date | age }}
+                        <br>
+                        <small class="text-muted">{{ element.birth_date }}</small>
+                    </div>
                 </td>
                 
                 <td>

@@ -1,7 +1,7 @@
 <?php
     $cl_nav_3['basic'] = '';
+    $cl_nav_3['details'] = '';
     $cl_nav_3['image'] = '';
-    $cl_nav_3['password'] = '';
 
     $app_cf_index = $this->uri->segment(5);
     if ( strlen($app_cf_index) == 0 ) { $app_cf_index = 'basic'; }
@@ -22,6 +22,13 @@
         class: '<?= $cl_nav_3['basic'] ?>',
         cf: 'users/edit/' + element_id + '/basic'
     };
+
+    sections.details = {
+        icon: '',
+        text: 'Detalles',
+        class: '<?= $cl_nav_3['details'] ?>',
+        cf: 'users/edit/' + element_id + '/details'
+    };
     
     sections.image = {
         icon: 'fa fa-user-circle',
@@ -31,8 +38,8 @@
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['basic', 'image'];
-    sections_role[2] = ['basic', 'image'];
+    sections_role[1] = ['basic', 'details', 'image'];
+    sections_role[2] = ['basic', 'details', 'image'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

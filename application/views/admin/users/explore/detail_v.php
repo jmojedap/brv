@@ -25,14 +25,11 @@
                         <td>{{ element.email }}</td>
                     </tr>
                     <tr>
-                        <td>Último login</td>
-                        <td>{{ element.last_login }}</td>
-                    </tr>
-                    <tr>
                         <td>Creado</td>
                         <td>{{ element.created_at }}</td>
                     </tr>
                 </table>
+                <br>
                 <p>
                     {{ element.admin_notes }}
                 </p>

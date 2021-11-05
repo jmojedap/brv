@@ -50,8 +50,10 @@ class Accounts extends CI_Controller{
                 $arr_row['userkey'] = rand(100000,999999);
                 $arr_row['display_name'] = $this->input->post('display_name');
                 $arr_row['email'] = $this->input->post('email');
-                $arr_row['document_number'] = $this->input->post('document_number');
-                $arr_row['username'] = explode('@', $this->input->post('email'))[0] . rand(10,99);
+                if ( ! is_null($this->input->post('document_number')) ) {
+                    $arr_row['document_number'] = $this->input->post('document_number');
+                }
+                $arr_row['username'] = $this->Account_model->email_to_username($this->input->post('email'));
                 $arr_row['password'] = $this->Account_model->crypt_pw($this->input->post('new_password'));
                 $arr_row['status'] = 2;     //Registrado sin confirmar email
                 $arr_row['role'] = 21;      //21: Rol por defecto

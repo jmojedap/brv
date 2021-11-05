@@ -9,6 +9,7 @@ class User_model extends CI_Model{
         $data['view_a'] = 'admin/users/user_v';
         $data['nav_2'] = 'admin/users/menus/user_v';
 
+        if ( $data['row']->role == 4 ) { $data['nav_2'] = 'admin/users/menus/role_4_v'; }
         if ( $data['row']->role == 13 ) { $data['nav_2'] = 'admin/users/menus/role_13_v'; }
         if ( $data['row']->role == 21 ) { $data['nav_2'] = 'admin/users/menus/role_21_v'; }
 
@@ -70,7 +71,10 @@ class User_model extends CI_Model{
      */
     function select($format = 'general')
     {
-        $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, email, role, image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login, expiration_at';
+        $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, first_name, last_name, email, role';
+        $arr_select['general'] .= ', image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login';
+        $arr_select['general'] .= ', expiration_at, admin_notes, birth_date';
+
         $arr_select['export'] = 'users.id, username, document_number AS no_documento, document_type AS tipo_documento, display_name AS nombre, email, role AS rol, status, created_at AS creado, updated_at AS actualizado, expiration_at AS suscripcion_hasta';
         $arr_select['follow'] = 'users.id, username, qty_followers, qty_following';
 
@@ -124,6 +128,12 @@ class User_model extends CI_Model{
         
         //Otros filtros
         if ( $filters['role'] != '' ) { $condition .= "role = {$filters['role']} AND "; }
+
+        //Estado suscripción
+        $now = date('Y-m-d H:i:s');
+        if ( $filters['fe1'] == '0' ) { $condition .= "expiration_at IS NULL AND "; }
+        if ( $filters['fe1'] == '1' ) { $condition .= "expiration_at >= '{$now}' AND "; }
+        if ( $filters['fe1'] == '2' ) { $condition .= "expiration_at < '{$now}' AND "; }
         
         //Quitar cadena final de ' AND '
         if ( strlen($condition) > 0 ) { $condition = substr($condition, 0, -5);}
@@ -256,11 +266,19 @@ class User_model extends CI_Model{
 
     /**
      * Crear o actualizar registro de usuario
-     * 2021-06-08
+     * 2021-11-03
      */
     function save($arr_row = NULL)
     {
         if ( is_null($arr_row) ) $arr_row = $this->Db_model->arr_row();
+
+        //Revisar fecha de expiración, si no está asignada, NULL
+        if ( isset($arr_row['expiration_at']) ) {
+            if ( $arr_row['expiration_at'] == '' ) {
+                $arr_row['expiration_at'] = NULL;
+            }
+        }
+
         $data['saved_id'] = $this->Db_model->save_id('users', $arr_row);
         return $data;
     }

@@ -74,14 +74,14 @@ class Calendar extends CI_Controller{
     {
         $data['head_title'] = 'Programar';
         $data['schedule_type'] = $schedule_type;
+        $data['date_start'] = $date_start;
         $data['nav_2'] = $this->views_folder . 'menu_v';
         $data['nav_3'] = $this->views_folder . 'schedule_generator/menu_v';
         $data['view_a'] = $this->views_folder . "schedule_generator/{$schedule_type}_v";
 
         //Fecha por defecto
-        $date['date_start'] = date('Y-m-d');
-        if ( ! is_null($date_start) ) {
-            $data['date_start'] = $date_start;
+        if ( is_null($date_start) ) {
+            $data['date_start'] = date('Y-m-d');
         }
 
         //Variables específicas

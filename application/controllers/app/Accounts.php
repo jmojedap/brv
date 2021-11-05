@@ -79,8 +79,8 @@ class Accounts extends CI_Controller {
             $arr_destination = array(
                 1 => 'admin/app/dashboard/',  //Desarrollador
                 2 => 'admin/app/dashboard/',  //Administrador
-                13 => 'app/accounts/profile/',    //Instructor
-                21 => 'app/accounts/profile/'     //Cliente
+                4 => 'admin/calendar/calendar',   //Entrenador
+                21 => 'app/accounts/profile/'     //Deportista
             );
                 
             $destination = $arr_destination[$this->session->userdata('role')];

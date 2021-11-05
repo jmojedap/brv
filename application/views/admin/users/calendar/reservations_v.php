@@ -10,7 +10,7 @@
                 <th>Fecha</th>
                 <th>Hora</th>
                 <th></th>
-                <th></th>
+                <th v-if="app_rid <= 2"></th>
             </thead>
             <tbody>
                 <tr v-for="(reservation, key_reservation) in reservations">
@@ -31,7 +31,7 @@
                     <td>
                         {{ reservation.start | ago }}
                     </td>
-                    <td>
+                    <td v-if="app_rid <= 2">
                         <button class="a4" data-toggle="modal" data-target="#delete_modal" v-on:click="set_element(key_reservation)">
                             <i class="fa fa-trash"></i>
                         </button>

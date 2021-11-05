@@ -40,6 +40,11 @@ Vue.filter('expiration', function (date) {
     return moment(date, "YYYY-MM-DD HH:mm:ss").fromNow()
 })
 
+Vue.filter('age', function (date) {
+    if (!date) return ''
+    return moment().diff(date, 'years',false)
+})
+
 // App
 //-----------------------------------------------------------------------------
 
@@ -63,6 +68,11 @@ var app_explore = new Vue({
         loading: false,
         active_filters: false,
         options_role: <?= json_encode($options_role) ?>,
+        options_expiration: {
+            '0':'Sin fecha definida',
+            '1':'Vigente',
+            '2':'Vencida', 
+        },
         today: '<?= date('Y-m-d') ?>',
     },
     methods: {

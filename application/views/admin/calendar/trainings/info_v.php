@@ -23,10 +23,12 @@
                         <td class="td-title">Total cupos</td>
                         <td>
                             <input
+                                v-if="app_rid <= 2"
                                 name="integer_1" type="number" class="form-control" v-bind:min="reservations.length" max="50"
                                 required
                                 v-model="training.total_spots" v-on:change="update_training"
                             >
+                            <span v-else>{{ training.total_spots }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -45,7 +47,7 @@
                     <thead>
                         <th width="40px"></th>
                         <th>Usuario</th>
-                        <th width="10px"></th>
+                        <th width="10px" v-if="app_rid <= 2"></th>
                     </thead>
                     <tbody>
                         <tr v-for="(reservation, key_reservation) in reservations">
@@ -64,7 +66,7 @@
                                     {{ reservation.user_display_name }}
                                 </a>
                             </td>
-                            <td>
+                            <td v-if="app_rid < 2">
                                 <button class="a4" data-toggle="modal" data-target="#delete_modal" v-on:click="set_element(key_reservation)">
                                     <i class="fa fa-trash"></i>
                                 </button>

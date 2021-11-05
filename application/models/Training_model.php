@@ -144,7 +144,7 @@ class Training_model extends CI_Model{
         $role = $this->session->userdata('role');
         $condition = 'id = 0';  //Valor por defecto, ningún user, se obtendrían cero events.
         
-        if ( $role <= 2 ) 
+        if ( $role <= 4 ) 
         {   //Desarrollador, todos los user
             $condition = 'events.id > 0';
         }

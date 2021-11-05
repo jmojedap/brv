@@ -30,6 +30,7 @@
     //Secciones para cada rol
     sections_role[1] = ['calendar', 'schedule_generator'];
     sections_role[2] = ['calendar', 'schedule_generator'];
+    sections_role[4] = ['calendar'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

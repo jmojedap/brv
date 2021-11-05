@@ -40,10 +40,8 @@
     //Secciones para cada rol
     sections_role[1] = ['basic', 'image', 'password'];
     sections_role[2] = ['basic', 'image', 'password'];
-    sections_role[3] = ['basic', 'image', 'password'];
-    sections_role[13] = ['basic', 'image', 'password'];
+    sections_role[4] = ['basic', 'image', 'password'];
     sections_role[21] = ['basic', 'image', 'password'];
-    sections_role[23] = ['basic', 'image', 'password'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 

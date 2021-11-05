@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-md-4">
             <div class="d-flex mb-2 justify-content-between">
-                <button class="btn btn-light w75p" v-on:click="sum_month(parseInt(month) - 1)">
+                <button class="btn btn-light w75p only-lg" v-on:click="sum_month(parseInt(month) - 1)">
                     <i class="fa fa-chevron-left"></i>
                 </button>
                 <div class="d-flex">
@@ -19,11 +19,11 @@
                         Hoy
                     </a>
                 </div>
-                <button class="btn btn-light w75p" v-on:click="sum_month(parseInt(month) + 1)">
+                <button class="btn btn-light w75p only-lg" v-on:click="sum_month(parseInt(month) + 1)">
                     <i class="fa fa-chevron-right"></i>
                 </button>
             </div>
-            <table class="table-calendar">
+            <table class="table-calendar mb-3">
                 <thead>
                     <th class="wd_7">Do</th>
                     <th>Lu</th>
@@ -55,7 +55,7 @@
                 <h3>{{ active_day.start | date_format }}</h3>
                 <h4 class="text-muted">{{ active_day.start | ago }}</h4>
             </div>
-            <div class="mb-3">
+            <div class="mb-3" v-if="app_rid <= 2">
                 <ul class="nav nav-tabs justify-content-center">
                     <li class="nav-item">
                         <a class="nav-link" v-bind:class="{'active': section == 'trainings' }" href="#" v-on:click="set_section('trainings')">Entrenamientos</a>
