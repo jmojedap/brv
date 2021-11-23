@@ -43,6 +43,7 @@
                 description: '',
                 long_name: '',
                 short_name: '',
+                item_group: '',
             },
             config_form: {
                 title: 'Nuevo elemento',

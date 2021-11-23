@@ -20,6 +20,20 @@ class Inbody extends CI_Controller{
 //-----------------------------------------------------------------------------
 
     /**
+     * JSON
+     * Listado de users, según filtros de búsqueda
+     */
+    function get($num_page = 1, $per_page = 10)
+    {
+        $this->load->model('Search_model');
+        $filters = $this->Search_model->filters();
+        $data = $this->Inbody_model->get($filters, $num_page, $per_page);
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
      * Información sobre una medición InBody específica
      * 2021-09-30
      */
@@ -28,4 +42,6 @@ class Inbody extends CI_Controller{
         $data = $this->Inbody_model->info($inbody_id, $user_id);
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
+
+
 }

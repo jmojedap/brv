@@ -12,10 +12,9 @@
                 <div class="card-body">
                     <h4 class="profile-user"><?= $this->Item_model->name(58, $row->role) ?></h4>
 
-                    <?php if ($this->session->userdata('rol_id') <= 1) { ?>
+                    <?php if ($this->session->userdata('role') <= 2) { ?>
                         <a href="<?= URL_ADMIN . "accounts/ml/{$row->id}" ?>" role="button" class="btn btn-primary" title="Ingresar como este usuario">
-                            <i class="fa fa-sign-in"></i>
-                            Acceder
+                            <i class="fa fa-sign-in"></i>Acceder
                         </a>
                     <?php } ?>
                 </div>

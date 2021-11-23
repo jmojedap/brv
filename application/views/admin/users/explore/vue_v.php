@@ -84,7 +84,6 @@ var app_explore = new Vue({
                 this.list = response.data.list
                 this.max_page = response.data.max_page
                 this.search_num_rows = response.data.search_num_rows
-                $('#head_subtitle').html(response.data.search_num_rows)
                 history.pushState(null, null, url_app + this.cf + this.num_page +'/?' + response.data.str_filters)
                 this.all_selected = false
                 this.selected = []

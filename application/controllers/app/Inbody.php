@@ -15,7 +15,7 @@ class Inbody extends CI_Controller {
     {
         parent::__construct();
 
-        $this->load->model('Info_model');
+        $this->load->model('Inbody_model');
         
         //Local time set
         date_default_timezone_set("America/Bogota");
@@ -30,7 +30,7 @@ class Inbody extends CI_Controller {
     }
 
     /**
-     * Vista resultados de inbody de un usuario, se incrusta en la aplicación
+     * Vista resultados de InBody de un usuario, se incrusta en la aplicación
      * BraveApp
      * 2021-10-26
      */
@@ -39,9 +39,13 @@ class Inbody extends CI_Controller {
         $user = $this->App_model->user_request();
 
         if ( ! is_null($user) ) {
-            echo '<h1>Inbody User</h1>';
+            $data['head_title'] = $user->display_name;
+            $data['view_a'] = 'app/inbody/user_report/user_report_v';
+            $data['user'] = $user;
+            $this->load->view('templates/brave/public', $data);
         } else {
-            redirect('app/app/denied');
+            echo 'no user';
+            //redirect('api/app/denied');
         }
     }
 

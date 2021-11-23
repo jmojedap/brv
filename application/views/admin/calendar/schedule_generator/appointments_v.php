@@ -249,13 +249,14 @@ var schedule_generator_app = new Vue({
         generate_appointments: function(){
             this.appointments = []
             var hour1 = moment(this.form_values.date_start, 'YYYY-MM-DD');
+            console.log('sumando ', this.hour_start)
             hour1.add(this.hour_start, 'hours');
             hour1.add(this.form_values.minute_start, 'minutes');
 
             var hour2 = moment(this.form_values.date_start, 'YYYY-MM-DD');
             hour2.add(this.hour_end, 'hours');
             hour2.add(this.form_values.minute_end, 'minutes');
-            console.log(hour1.format('h'));
+            console.log(hour1.format('YYYY-MM-DD HH:mm:ss'));
 
             this.text = hour1.format('MMMM D YYYY, h:mm:ss a')
             this.text += ' --- '
@@ -274,8 +275,8 @@ var schedule_generator_app = new Vue({
                 var appointment = {
                     selected: true, 
                     title: hour1.format('hh:mm a'),
-                    start: current_hour.format('hh:mm:ss'),
-                    end: current_hour.add(this.duration, 'minutes').format('hh:mm:ss'), //Suma la duración para el inicio en el siguiente cislo
+                    start: current_hour.format('HH:mm:ss'),
+                    end: current_hour.add(this.duration, 'minutes').format('HH:mm:ss'), //Suma la duración para el inicio en el siguiente cislo
                 }
                 this.appointments.push(appointment)
             }

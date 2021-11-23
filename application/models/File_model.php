@@ -40,7 +40,6 @@ class File_model extends CI_Model{
             
         //Vistas
             $data['head_title'] = 'Archivos';
-            $data['head_subtitle'] = $data['search_num_rows'];
             $data['view_a'] = $data['views_folder'] . 'explore_v';
             $data['nav_2'] = $data['views_folder'] . 'menu_v';
         

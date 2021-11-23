@@ -68,7 +68,6 @@ class Calendar extends CI_Controller{
      * Vista formulario para generar diferentes tipos de programación de eventos: 
      * sesiones de entrenamiento, citas de nutrición
      * 2021-10-05
-     * 
      */
     function schedule_generator($schedule_type = 'trainings', $date_start = null)
     {

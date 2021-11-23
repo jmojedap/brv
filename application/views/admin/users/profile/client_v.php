@@ -44,9 +44,8 @@
                 <h4 class="profile-user"><?= $this->Item_model->name(58, $row->role) ?></h4>
 
                 <?php if (in_array($this->session->userdata('role'), array(1,2))) { ?>
-                    <a href="<?= URL_ADMIN . "admin/ml/{$row->id}" ?>" role="button" class="btn btn-primary" title="Log in as this user">
-                        <i class="fa fa-sign-in-alt"></i>
-                        Log In
+                    <a href="<?= URL_ADMIN . "accounts/ml/{$row->id}" ?>" role="button" class="btn btn-primary" title="Log in as this user">
+                        <i class="fa fa-sign-in-alt"></i>Log In
                     </a>
                 <?php } ?>
             </div>

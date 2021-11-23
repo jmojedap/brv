@@ -341,12 +341,17 @@ class Calendar_model extends CI_Model{
 
     /**
      * Array con días en los que hay programadas citas de un tipo específico
-     * 2021-10-22
+     * Se incluyen días con citas que empiecen dentro de 30 minutos o más.
+     * 2021-11-12
      * @return array $periods
      */
     function get_appointments_days($user_id, $type_id)
     {
-        $today_id = date('Ymd');
+        $today_id = date('Ymd');    //ID Hoy period.id
+
+        //Ahora + 30 minutos
+        /*$now = new DateTime('now');
+        $now->add(new DateInterval('PT30M'));*/
 
         $this->db->select('id, period_name, start');
         $this->db->where('id >=', $today_id);
@@ -390,6 +395,7 @@ class Calendar_model extends CI_Model{
         foreach ($query->result() as $appointment) {
             $appointment->active = 1;
             if ( $appointment->start < $now->format('Y-m-d H:i:s') ) $appointment->active = 0;
+            if ( $appointment->user_id > 0 ) $appointment->active = 0;
 
             $appointments[] = $appointment;
         }
@@ -399,7 +405,7 @@ class Calendar_model extends CI_Model{
 
     /**
      * Reservar una cita a un usuario, asignando campo events->user_id
-     * 2021-10-22
+     * 2021-11-11
      */
     function reservate_appointment($event_id, $user_id)
     {
@@ -407,8 +413,9 @@ class Calendar_model extends CI_Model{
 
         //Identificar evento tipo cita
         $event = $this->Db_model->row('events', "id = {$event_id} AND type_id IN (213, 221, 223, 225)");
+        $user = $this->Db_model->row_id('users', $user_id);
 
-        if ( ! is_null($event) ) {
+        if ( ! is_null($event)  && ! is_null($user) ) {
             if ( $event->user_id > 0 ) $data['error'] = 'La cita ya está asignada';
             
             $now = new DateTime('now');
@@ -420,6 +427,16 @@ class Calendar_model extends CI_Model{
             $condition = "type_id = {$event->type_id} AND user_id = {$user_id} AND LEFT(period_id,6) = '{$month}'";
             $qty_user_appointments = $this->Db_model->num_rows('events', $condition);
             if ( $qty_user_appointments > 0 ) $data['error'] = 'Ya tienes una reserva en este mismo mes';
+
+            //Verificación de usuario (2021-11-11 No aplicada incialmente)
+            /*if ( is_null($user->expiration_at) ) {
+                $data['error'] = 'Usuario sin suscripción activa';
+            } else {
+                //Verificar suscripción vigente
+                if ( $event->start > $user->expiration_at . ' 23:59:59' ) {
+                    $data['error'] = 'La suscripción del usuario está vencida: ' . $user->expiration_at;
+                }
+            }*/
         } else {
             //Si el evento no existe
             $data['error'] = 'El evento o cita no existe';
