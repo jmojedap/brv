@@ -1,3 +1,5 @@
+<?php $this->load->view('assets/bs4_chosen') ?>
+
 <div id="training_app">
     <div class="row">
         <div class="col-md-4">
@@ -50,7 +52,22 @@
                         <th width="10px" v-if="app_rid <= 2"></th>
                     </thead>
                     <tbody>
-                        <tr v-for="(reservation, key_reservation) in reservations">
+                        <!-- FORMULARIO PARA AGREGAR USUARIO -->
+                        <tr>
+                            <td></td>
+                            <td>
+                                <select name="user_id" class="form-control form-control-chosen" id="field-user_id">
+                                    <option v-for="(option_user, key_user) in options_user" v-bind:value="key_user">{{ option_user }}</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" v-on:click="set_user_add">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- LISTADO DE USUARIOS CON RESERVA -->
+                        <tr v-for="(reservation, key_reservation) in reservations" v-bind:class="{'table-info': reservation.user_id == parseInt(user_id) }">
                             <td>
                                 <a v-bind:href="`<?= URL_ADMIN . "users/reservations/" ?>` + reservation.user_id" class="">
                                     <img
@@ -72,6 +89,7 @@
                                 </button>
                             </td>
                         </tr>
+                        
                     </tbody>
                 </table>
             </div>
@@ -99,6 +117,8 @@ var training_app = new Vue({
         training: <?= json_encode($training) ?>,
         reservations: [],
         current_key: -1,
+        options_user: <?= json_encode($options_user) ?>,
+        user_id: 0,
         loading: true,
     },
     methods: {
@@ -146,6 +166,31 @@ var training_app = new Vue({
                 this.loading = false
             })
             .catch( function(error) {console.log(error)} )
+        },
+        //Establecer valor de user_id desde Chosen Select Field y solicitar reserva
+        set_user_add: function(){
+            this.user_id = parseInt($('#field-user_id').val())
+            if ( this.user_id > 0 ) {
+                this.add_user()
+            } else {
+                toastr['info']('Selecciona un usuario')
+            }
+        },
+        //Solicitar reserva
+        add_user: function(){
+            console.log(this.user_id)
+            axios.get(url_api + 'trainings/reserve/' + this.training.id + '/' + this.user_id)
+            .then(response => {
+                console.log(response.data)
+                if ( response.data.error.length > 0 ) {
+                    toastr['info'](response.data.error, 'No agregado')
+                }
+                if ( response.data.saved_id > 0 ) {
+                    toastr['success']('El usuario fue agregado al entrenamiento', 'Agregado')
+                    this.get_list()
+                }
+            })
+            .catch(function(error) { console.log(error) })
         },
     }
 })

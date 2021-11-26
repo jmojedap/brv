@@ -190,20 +190,28 @@ class App_model extends CI_Model{
         return $options_place;
     }
 
-    /* Devuelve un array con las opciones de la tabla place, limitadas por una condición definida
-    * en un format ($format) definido
+    /** Devuelve un array con las opciones de la tabla user, limitadas por una 
+    * condición definida en un format ($format) definido
+    * 2021-11-26
     */
-    function options_user($condition, $empty_text = 'Usuario', $value_field = 'display_name')
+    function options_user($condition, $empty_value = NULL, $value_field = 'display_name')
     {
         
         $this->db->select("CONCAT('0', users.id) AS user_id, display_name, username", FALSE); 
         $this->db->where($condition);
         $this->db->order_by('users.display_name', 'ASC');
         $query = $this->db->get('users');
+
+        $options_pre = $this->pml->query_to_array($query, $value_field, 'user_id');
+
+        if ( ! is_null($empty_value) ) 
+        {
+            $options = array_merge(array('' => '[ ' . $empty_value . ' ]'), $options_pre);
+        } else {
+            $options = $options_pre;
+        }
         
-        $options_user = array_merge(array('' => '[ ' . $empty_text . ' ]'), $this->pml->query_to_array($query, $value_field, 'user_id'));
-        
-        return $options_user;
+        return $options;
     }
 
     /* Devuelve un array con las opciones de la tabla post, limitadas por una condición definida

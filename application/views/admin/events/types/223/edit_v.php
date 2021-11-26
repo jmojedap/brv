@@ -1,126 +1,111 @@
+<?php $this->load->view('assets/bs4_chosen') ?>
+
 <?php
-    $current_user = '';
-    if ( $row->user_id > 0 ) {
-        $current_user = $this->App_model->name_user($row->user_id);
-    }
+    $options_user = $this->App_model->options_user('role = 21', 'NINGUNO');
+    $type_event_name = $this->Item_model->name(13, $row->type_id);
 ?>
 
 <div id="edit_event_app">
     <div class="center_box_750">
-        <div class="card">
+        <div class="card" style="height: 350px;">
             <div class="card-body">
                 <fieldset>
                     <div class="form-group row">
+                        <label for="user_id" class="col-md-4 col-form-label text-right">Asignada a</label>
+                        <div class="col-md-8">
+                            <select class="form-control form-control-chosen" id="field-user_id" v-model="form_values.user_id">
+                                <option v-for="(option_user, key_user) in options_user" v-bind:value="key_user">{{ option_user }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label for="start" class="col-md-4 col-form-label text-right">Tipo</label>
                         <div class="col-md-8">
-                        <input type="text" readonly class="form-control-plaintext" value="Cita de control nutricional">
+                            <input type="text" readonly class="form-control-plaintext" value="<?= $type_event_name ?>">
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="start" class="col-md-4 col-form-label text-right">Inicio</label>
                         <div class="col-md-8">
-                        <input type="text" readonly class="form-control-plaintext" value="<?= $row->start ?>">
+                            <input type="text" readonly class="form-control-plaintext" v-bind:value="start_format">
+                            <small class="form-text text-muted">{{ start_ago }}</small>
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="user_id" class="col-md-4 col-form-label text-right">Asignada a</label>
-                        <div class="col-md-8">
-
-                            
-                            <div class="input-group mb-3">
-                                <input
-                                    type="text" class="form-control"
-                                    title="Buscar usuario" placeholder="Buscar..."
-                                    v-model="q" v-on:change="get_users"
-                                >
-                                <div class="input-group-append">
-                                    <button class="btn btn-light" type="button" v-on:click="unset_user"><i class="fa fa-times"></i></button>
-                                </div>
-                            </div>
+                        <div class="col-md-8 offset-md-4">
+                            <button class="btn btn-primary w120p" v-on:click="set_user_send">
+                                Guardar
+                            </button>
                         </div>
                     </div>
+                    
                 </fieldset>
-                <form accept-charset="utf-8" method="POST" id="event_form" @submit.prevent="send_form">
-                    <fieldset v-bind:disabled="loading">
-                        <input type="hidden" name="id" value="<?= $row->id ?>">
-                        <input type="hidden" name="user_id" v-model="form_values.user_id">
-
-                        <div class="form-group row" v-show="users.length > 0">
-                            <label for="user_id" class="col-md-4 col-form-label text-right">Clic para elegir usuario <i class="fa fa-arrow-right"></i></label>
-                            <div class="col-md-8">
-                                <div class="list-group">
-                                    <a href="#" class="list-group-item list-group-item-action"
-                                        v-for="(user, key) in users" v-on:click="set_user(key)" v-bind:class="{'active': user.id == form_values.user_id }"
-                                        >
-                                        {{ user.display_name }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group row">
-                            <div class="col-md-8 offset-md-4">
-                                <button class="btn btn-primary w120p" type="submit">Guardar</button>
-                            </div>
-                        </div>
-                    <fieldset>
-                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+// Filters
+//-----------------------------------------------------------------------------
+Vue.filter('date_format', function (date) {
+    if (!date) return ''
+    return moment(date).format('D [de] MMMM, dddd')
+});
+
+Vue.filter('ago', function (date) {
+    if (!date) return ''
+    return moment(date, 'YYYY-MM-DD HH:mm:ss').fromNow()
+});
+
+// VueApp
+//-----------------------------------------------------------------------------
 var edit_event_app = new Vue({
     el: '#edit_event_app',
-    created: function(){
-        //this.get_list()
-    },
     data: {
         form_values: {
-            user_id: '<?= $row->user_id ?>'
+            id: <?= $row->id ?>,
+            user_id: '0<?= $row->user_id ?>',
+            start: '<?= $row->start ?>',
         },
-        q: '<?= $current_user ?>',
-        users: [],
+        options_user: <?= json_encode($options_user) ?>,
         loading: false,
     },
     methods: {
+        // Establecer user_id desde chosen select y enviar formulario
+        set_user_send: function(user_key){
+            var user_id = 0
+            if ( parseInt($('#field-user_id').val()) >0 ) {
+                user_id = parseInt($('#field-user_id').val())
+            }
+            console.log('user_id', user_id)
+            this.form_values.user_id = user_id
+            this.send_form()
+        },
+        // Enviar formulario
         send_form: function(){
             this.loading = true
-            var form_data = new FormData(document.getElementById('event_form'))
+            var form_data = new FormData()
+            form_data.append('id', this.form_values.id)
+            form_data.append('user_id', this.form_values.user_id)
+
             axios.post(url_api + 'events/update/', form_data)
             .then(response => {
                 if ( response.data.saved_id > 0 ) {
-                    toastr['success']('Guardado')
+                    toastr['success']('Cita actualizada')
                 }
                 this.loading = false
             })
             .catch( function(error) {console.log(error)} )
         },
-        get_users: function(){
-            if ( this.q.length > 3 ) {
-                this.loading = true
-                var form_data = new FormData
-                form_data.append('q', this.q)
-                axios.post(url_api + 'users/get/', form_data)
-                .then(response => {
-                    this.users = response.data.list
-                    this.loading = false
-                })
-                .catch( function(error) {console.log(error)} )
-            } else {
-                this.users = []
-            }
+    },
+    computed: {
+        start_format: function(){
+            return moment(this.form_values.start).format('dddd, D [de] MMMM, h:mm a')
         },
-        set_user: function(user_key){
-            this.form_values.user_id = this.users[user_key].id
-            this.q = this.users[user_key].display_name
-            this.users = []
-        },
-        unset_user: function(){
-            this.form_values.user_id = 0
-            this.q = ''
-        },
+        start_ago: function(){
+            return moment(this.form_values.start, 'YYYY-MM-DD HH:mm:ss').fromNow()
+        }
     }
 })
 </script>

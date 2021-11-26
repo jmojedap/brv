@@ -236,7 +236,7 @@ class Training_model extends CI_Model{
 
     /**
      * Array, con trainings para una fecha y zona de entrenamiento específica.
-     * 2021-07-23
+     * 2021-11-24 -> No se filtran eventos pasados
      */
     function get_trainings($day_id, $room_id = 0)
     {
@@ -244,10 +244,10 @@ class Training_model extends CI_Model{
         $now->add(new DateInterval('PT1H'));
 
         $this->db->select($this->select('trainings'));
-        $this->db->where('type_id', 203);           //Sesión de entrenamiento presencial
+        $this->db->where('type_id', 203);                       //Sesión de entrenamiento presencial
         if ( $room_id > 0 ) $this->db->where('element_id', $room_id);   //Zona de entrenamiento
         $this->db->where('period_id', $day_id);     //Día de la sesión de entrenamiento
-        $this->db->where('start >', date('Y-m-d') . ' 00:00:00');   //Posteriores a la fecha de hoy
+        //$this->db->where('start >', date('Y-m-d') . ' 00:00:00');   //Posteriores a la fecha de hoy
         $this->db->order_by('start', 'ASC');
         
         $query = $this->db->get('events');

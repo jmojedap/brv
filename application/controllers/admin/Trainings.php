@@ -79,6 +79,7 @@ class Trainings extends CI_Controller{
 
         $data['training'] = $training;
         $data['head_title'] = 'Entrenamiento ' . $data['training']->id;
+        $data['options_user'] = $this->App_model->options_user('role = 21', 'Seleccione el usuario');
         $data['view_a'] = $this->views_folder. 'info_v';
         $data['nav_2'] = $this->views_folder . 'menu_v';
 
@@ -111,6 +112,21 @@ class Trainings extends CI_Controller{
     {        
         $trainings = $this->Training_model->get_trainings($day_id, $room_id);
         $data['list'] = $trainings;
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+// Reservación de usuario
+//-----------------------------------------------------------------------------
+
+    /**
+     * Insertar una reservación a una sesión de entrenamiento, tabla events tipo 213
+     */
+    function reserve($training_id, $user_id)
+    {
+        $this->load->model('Reservation_model');
+        $data = $this->Reservation_model->save($training_id, $user_id);
 
         //Salida JSON
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
