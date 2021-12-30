@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------------
 var role_names = <?= json_encode($arr_roles) ?>;
 var document_type_names = <?= json_encode($arr_document_types) ?>;
+var commercial_plans = <?= json_encode($arr_commercial_plans) ?>;
 var status_icons = {
     "0":'<i class="far fa-circle text-danger" title="Inactivo"></i>',
     "1":'<i class="fa fa-check-circle text-success" title="Activo"></i>'
@@ -21,6 +22,12 @@ Vue.filter('status_icon', function (value) {
 Vue.filter('role_name', function (value) {
     if (!value) return ''
     value = role_names[value]
+    return value
+})
+
+Vue.filter('commercial_plan_name', function (value) {
+    if (!value) return ''
+    value = commercial_plans[value]
     return value
 })
 
@@ -64,10 +71,12 @@ var app_explore = new Vue({
         selected: [],
         all_selected: false,
         filters: <?= json_encode($filters) ?>,
+        str_filters: '<?= $str_filters ?>',
         display_filters: false,
         loading: false,
         active_filters: false,
         options_role: <?= json_encode($options_role) ?>,
+        options_commercial_plan: <?= json_encode($options_commercial_plan) ?>,
         options_expiration: {
             '0':'Sin fecha definida',
             '1':'Vigente',
@@ -84,6 +93,7 @@ var app_explore = new Vue({
                 this.list = response.data.list
                 this.max_page = response.data.max_page
                 this.search_num_rows = response.data.search_num_rows
+                this.str_filters = response.data.str_filters
                 history.pushState(null, null, url_app + this.cf + this.num_page +'/?' + response.data.str_filters)
                 this.all_selected = false
                 this.selected = []

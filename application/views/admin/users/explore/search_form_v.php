@@ -36,6 +36,15 @@
 
         <div class="form-group row">
             <div class="col-md-9">
+                <select name="fe2" v-model="filters.fe2" class="form-control">
+                    <option v-for="(option_fe2, key_fe2) in options_commercial_plan" v-bind:value="key_fe2">{{ option_fe2 }}</option>
+                </select>
+            </div>
+            <label for="fe2" class="col-md-3 col-form-label">Plan</label>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-9">
                 <select name="fe1" v-model="filters.fe1" class="form-control">
                     <option v-for="(option_expiration, key_expiration) in options_expiration" v-bind:value="key_expiration">{{ option_expiration }}</option>
                 </select>

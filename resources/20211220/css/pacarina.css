@@ -44,6 +44,8 @@
 .w240p { width: 240px; }
 .w360p { width: 360px; }
 
+.w25pc { width: 25%;}
+.w33pc { width: 33%;}
 .w100pc { width: 100%;}
 
 .mw360p { max-width: 360px; }
@@ -90,8 +92,8 @@ a.a4{
 /*-----------------------------------------------------------------------------*/
 
 .td-title{
-    width: 25%;
-    font-weight: bold;
+    font-size: 0.9em;
+    width: 33%;
     text-align: right;
 }
 

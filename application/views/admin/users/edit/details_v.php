@@ -6,11 +6,33 @@
                     <input type="hidden" name="id" value="<?= $row->id ?>">
 
                     <div class="form-group row">
+                        <label for="commercial_plan" class="col-md-4 col-form-label text-right">Plan comercial</label>
+                        <div class="col-md-8">
+                            <select name="commercial_plan" v-model="form_values.commercial_plan" class="form-control" required>
+                                <option v-for="(option_commercial_plan, key_commercial_plan) in options_commercial_plan" v-bind:value="key_commercial_plan">{{ option_commercial_plan }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="expiration_at" class="col-md-4 col-form-label text-right">Suscripción hasta</label>
+                        <div class="col-md-8">
+                            <input
+                                name="expiration_at" class="form-control" type="date"
+                                v-model="form_values.expiration_at"
+                                >
+                                <small class="form-text text-muted">Fecha hasta la cual el usuario puede reservar entrenamientos</small>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="form-group row">
                         <label for="contract" class="col-md-4 col-form-label text-right">Contrato</label>
                         <div class="col-md-8">
                             <input
                                 name="contract" type="text" class="form-control"
-                                required title="Contrato"
+                                title="Contrato"
                                 v-model="form_values.contract"
                             >
                         </div>
@@ -67,6 +89,8 @@
         eps: '<?= $row->eps ?>',
         shirt_size: '<?= $row->shirt_size ?>',
         job: '<?= $row->job ?>',
+        expiration_at: '<?= $row->expiration_at ?>',
+        commercial_plan: '0<?= $row->commercial_plan ?>',
     };
 
 // Vue App
@@ -81,10 +105,7 @@
                 username_unique: -1,
                 email_unique: -1
             },
-            options_role: <?= json_encode($options_role) ?>,
-            options_city: <?= json_encode($options_city) ?>,
-            options_gender: <?= json_encode($options_gender) ?>,
-            options_document_type: <?= json_encode($options_document_type) ?>,
+            options_commercial_plan: <?= json_encode($options_commercial_plan) ?>,
             loading: false
         },
         methods: {

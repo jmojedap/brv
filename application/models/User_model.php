@@ -73,7 +73,7 @@ class User_model extends CI_Model{
     {
         $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, first_name, last_name, email, role';
         $arr_select['general'] .= ', image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login';
-        $arr_select['general'] .= ', expiration_at, admin_notes, birth_date';
+        $arr_select['general'] .= ', expiration_at, commercial_plan, admin_notes, birth_date';
 
         $arr_select['export'] = 'users.id, username, document_number AS no_documento, document_type AS tipo_documento, display_name AS nombre, email, role AS rol, status, created_at AS creado, updated_at AS actualizado, expiration_at AS suscripcion_hasta';
         $arr_select['follow'] = 'users.id, username, qty_followers, qty_following';
@@ -134,6 +134,9 @@ class User_model extends CI_Model{
         if ( $filters['fe1'] == '0' ) { $condition .= "expiration_at IS NULL AND "; }
         if ( $filters['fe1'] == '1' ) { $condition .= "expiration_at >= '{$now}' AND "; }
         if ( $filters['fe1'] == '2' ) { $condition .= "expiration_at < '{$now}' AND "; }
+
+        //Plan comercial
+        if ( strlen($filters['fe2']) > 0 ) { $condition .= "commercial_plan = '{$filters['fe2']}' AND "; }
         
         //Quitar cadena final de ' AND '
         if ( strlen($condition) > 0 ) { $condition = substr($condition, 0, -5);}
@@ -574,6 +577,56 @@ class User_model extends CI_Model{
         }
         
         return $suffix;
+    }
+
+// LISTAS DE USUARIO
+//-----------------------------------------------------------------------------
+
+    /**
+     * Listas de usuario, marcando a cuales pertenece un usuario específico
+     * 2021-12-03
+     */
+    function lists($user_id, $cat_list = 10)
+    {
+        $this->db->select('posts.id, post_name AS name, excerpt as description, IF(users_meta.user_id IS NULL, (0), (1)) AS in_list');
+        $this->db->where('posts.type_id', 22);
+        $this->db->where('posts.cat_1', $cat_list);
+        $this->db->join('users_meta', "posts.id = users_meta.related_1 AND users_meta.user_id = {$user_id}", 'left');
+        
+        $user_lists = $this->db->get('posts');
+    
+        return $user_lists;
+    }
+
+    /**
+     * Agregar o eliminar a un usuario de una lista, tabla users_meta
+     * 2021-12-06
+     */
+    function update_list($user_id, $list_id, $add = TRUE)
+    {
+        $data = array('saved_id' => 0, 'qty_deleted' => 0);
+
+        $condition = "type_id = 22 AND user_id = $user_id AND related_1 = $list_id";
+    
+        if ( $add )
+        {
+            //Crear registro
+            $arr_row = $this->Db_model->arr_row(false);
+    
+            $arr_row['type_id'] = 22;   //Usuario en lista
+            $arr_row['user_id'] = $user_id;
+            $arr_row['related_1'] = $list_id;
+
+            $data['saved_id'] = $this->Db_model->save('users_meta', $condition, $arr_row);
+        } else {
+            //Eliminar existente
+            $this->db->where($condition);
+            $this->db->delete('users_meta');
+            
+            $data['qty_deleted'] = $this->db->affected_rows();
+        }
+    
+        return $data;
     }
 
 // CONTENIDOS VIRUTALES ASIGNADOS

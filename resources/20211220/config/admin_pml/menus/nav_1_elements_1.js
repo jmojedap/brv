@@ -6,7 +6,7 @@ var nav_1_elements = [
     },
     {
         text: 'Usuarios', active: false, icon: 'fa fa-user', cf: 'users/explore', anchor: false,
-        sections: ['users/explore', 'users/add', 'users/import', 'users/profile', 'users/edit', 'users/inbody'],
+        sections: ['users/explore', 'users/add', 'users/import', 'users/profile', 'users/edit', 'users/inbody', 'users/orders'],
         subelements: []
     },
     {
@@ -65,18 +65,18 @@ var nav_1_elements = [
         sections: [],
         subelements: [
             {
-                text: 'Compras',
+                text: 'Ventas',
                 active: false,
                 icon: 'fa fa-shopping-cart',
                 cf: 'orders/explore',
-                sections: ['orders/explore', 'orders/info']
+                sections: ['orders/explore', 'orders/info', 'orders/add', 'orders/edit']
             },
             {
-                text: 'Products',
+                text: 'Productos',
                 active: false,
-                icon: 'fa fa-book',
+                icon: 'fas fa-tag',
                 cf: 'products/explore',
-                sections: ['products/explore', 'products/import', 'products/add', 'products/edit', 'products/edit', 'products/posts', 'products/info']
+                sections: ['products/explore', 'products/import', 'products/add', 'products/edit', 'products/edit', 'products/info', 'products/prices_types']
             }
         ]
     },

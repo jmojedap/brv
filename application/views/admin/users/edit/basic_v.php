@@ -165,19 +165,6 @@
                         </div>
                     </div>
 
-                    <hr>
-
-                    <div class="form-group row">
-                        <label for="expiration_at" class="col-md-4 col-form-label text-right">Suscripción hasta</label>
-                        <div class="col-md-8">
-                            <input
-                                name="expiration_at" class="form-control" type="date"
-                                v-model="form_values.expiration_at"
-                                >
-                                <small class="form-text text-muted">Fecha hasta la cual el usuario puede reservar entrenamientos</small>
-                        </div>
-                    </div>
-
                     <div class="form-group row">
                         <label for="admin_notes" class="col-md-4 col-form-label text-right">Notas internas</label>
                         <div class="col-md-8">
@@ -237,6 +224,7 @@
             options_city: <?= json_encode($options_city) ?>,
             options_gender: <?= json_encode($options_gender) ?>,
             options_document_type: <?= json_encode($options_document_type) ?>,
+            options_commercial_plan: <?= json_encode($options_commercial_plan) ?>,
             loading: false
         },
         methods: {

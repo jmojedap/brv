@@ -4,6 +4,15 @@
             <form id="add_form" accept-charset="utf-8" @submit.prevent="send_form">
 
                 <div class="form-group row">
+                    <label for="cat_1" class="col-md-4 col-form-label text-right">Categoría</label>
+                    <div class="col-md-8">
+                        <select name="cat_1" v-model="form_values.cat_1" class="form-control" required>
+                            <option v-for="(option_cat_1, key_cat_1) in options_cat_1" v-bind:value="key_cat_1">{{ option_cat_1 }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
                     <label for="code" class="col-md-4 col-form-label text-right">Referencia</label>
                     <div class="col-md-8">
                         <input
@@ -128,7 +137,8 @@ var form_values = {
 var app_insert = new Vue({
     el: '#app_insert',
     data: {
-        form_values: form_values
+        form_values: form_values,
+        options_cat_1: <?= json_encode($options_cat_1) ?>,
     },
     methods: {
         send_form: function() {

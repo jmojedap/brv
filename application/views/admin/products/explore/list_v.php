@@ -13,7 +13,7 @@
         <th>Precio</th>
         <th>Disponibles</th>
         <th>Estado</th>
-        <th>Palabras clave</th>
+        <th>Categoría</th>
 
         <th width="50px"></th>
         </thead>
@@ -36,13 +36,18 @@
                 </td>
                 <td class="text-right">{{ element.price | currency }}</td>
 
-                <td>{{ element.stock }}</td>
+                <td>
+                    <span v-if="element.weight > 0">
+                        {{ element.stock }}
+                    </span>
+                    <small class="text-muted">Servicio</small>
+                </td>
                 <td>
                     <span v-show="element.status==0"><i class="fa fa-exclamation-triangle text-warning"></i> Inactivo</span>
                     <span v-show="element.status==1"><i class="fa fa-check-circle text-success"></i> Activo</span>
                     <span v-show="element.status==2"><i class="fas fa-minus-circle text-info"></i> Borrador</span>
                 </td>
-                <td>{{ element.keywords }}</td>
+                <td>{{ element.cat_1 | category_name }}</td>
 
                 <td>
                     <button class="a4" data-toggle="modal" data-target="#detail_modal" @click="set_current(key)">

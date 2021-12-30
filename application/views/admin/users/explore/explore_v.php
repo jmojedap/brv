@@ -5,7 +5,7 @@
         </div>
 
         <div class="col-md-3">
-            <a href="<?= URL_ADMIN . "users/export/?{$str_filters}" ?>" class="btn btn-light only-lg" v-bind:title="`Exportar ` + search_num_rows + ` registros encontrados a Excel CSV`">
+            <a v-bind:href="`<?= URL_ADMIN . "{$controller}/export/?" ?>` + str_filters" class="btn btn-light only-lg" v-bind:title="`Exportar ` + search_num_rows + ` registros encontrados a Excel`">
                 <i class="fa fa-download"></i>
             </a>
             <button class="btn btn-warning"

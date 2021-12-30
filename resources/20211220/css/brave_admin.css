@@ -50,3 +50,22 @@ Estilos para herramientas administrador BraveBackEnd
 .bmi_4{ background: #ffa852; }
 .bmi_5{ background: #ff9151; }
 .bmi_6{ background: #eb5b5e; }
+
+/* Precios y planes comerciales */
+/*-----------------------------------------------------------------------------*/
+
+.prtp_10 { color: #42a5f5; }
+.prtp_20 { color: #ffa726; }
+.prtp_22 { color: #66bb6a; }
+.prtp_30 { color: #ec407a; }
+.prtp_40 { color: #7e57c2; }
+
+/* Payment Channels */
+/*-----------------------------------------------------------------------------*/
+
+.channel_10{ color: #a6c307;}
+.channel_12{ color: #ffd200;}
+.channel_20{ color: #c000a6;}
+.channel_22{ color: #1c95d1;}
+.channel_23{ color: #0fb130;}
+.channel_24{ color: #23004a;}

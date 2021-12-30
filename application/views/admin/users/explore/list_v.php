@@ -11,7 +11,7 @@
             <th>Nombre completo</th>
             <th>No. Documento</th>
             <th>Suscripción hasta</th>
-            <th>Edad</th>
+            <th>Plan</th>
             <th width="50px"></th>
         </thead>
         <tbody>
@@ -40,8 +40,6 @@
                 <td>
                     {{ element.first_name }} <strong>{{ element.last_name }}</strong>
                     <br>
-                    <i class="fa fa-check-circle text-success" v-if="element.status == 1"></i>
-                    <i class="fa fa-check-circle text-warning" v-if="element.status == 2"></i>
                     <i class="far fa-circle text-danger" v-if="element.status == 0"></i>
                     {{ element.role | role_name }}
                 </td>
@@ -63,10 +61,11 @@
                 </td>
 
                 <td>
-                    <div v-if="element.birth_date">
-                        {{ element.birth_date | age }}
-                        <br>
-                        <small class="text-muted">{{ element.birth_date }}</small>
+                    <div v-if="element.role >= 20">
+                        <a v-bind:href="`<?= URL_ADMIN . 'users/edit/' ?>` + element.id + `/details`" class="btn" title="Editar plan">
+                            <i class="fa fa-circle" v-bind:class="`prtp_` + element.commercial_plan"></i>
+                            {{ element.commercial_plan | commercial_plan_name }}
+                        </a>
                     </div>
                 </td>
                 

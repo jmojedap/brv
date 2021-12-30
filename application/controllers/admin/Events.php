@@ -97,6 +97,23 @@ class Events extends CI_Controller{
 //-----------------------------------------------------------------------------
 
     /**
+     * Crear o actualizar un registro en events
+     * 2021-12-21
+     */
+    function save()
+    {
+        $arr_row = $this->input->post();
+        $condition_add = NULL;
+
+        if ( $this->input->post('condition_add') != NULL ) {
+            $condition_add = $this->input->post('condition_add');
+            unset($arr_row['condition_add']);
+        }
+        $data['saved_id'] = $this->Event_model->save($arr_row, $condition_add);
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
      * Guardar los datos de un event
      * 2021-10-14
      */

@@ -25,11 +25,24 @@
                         <td>{{ element.email }}</td>
                     </tr>
                     <tr>
+                        <td>Edad</td>
+                        <td>
+                        <div v-if="element.birth_date">
+                            {{ element.birth_date | age }} &middot;
+                            <small class="text-muted">{{ element.birth_date }}</small>
+                        </div>
+                        </td>
+                    </tr>
+                    <tr>
                         <td>Creado</td>
-                        <td>{{ element.created_at }}</td>
+                        <td v-bind:title="element.created_at">{{ element.created_at | ago }}</td>
+                    </tr>
+                    <tr>
+                        <td>Actualizado</td>
+                        <td v-bind:title="element.updated_at">{{ element.updated_at | ago }}</td>
                     </tr>
                 </table>
-                <br>
+                <hr>
                 <p>
                     {{ element.admin_notes }}
                 </p>

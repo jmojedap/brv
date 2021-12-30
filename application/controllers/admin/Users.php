@@ -44,10 +44,12 @@ class Users extends CI_Controller{
         
         //Opciones de filtros de búsqueda
             $data['options_role'] = $this->Item_model->options('category_id = 58', 'Todos');
+            $data['options_commercial_plan'] = $this->Item_model->options('category_id = 189 AND item_group <= 2', 'Todos');
             
         //Arrays con valores para contenido en lista
             $data['arr_roles'] = $this->Item_model->arr_cod('category_id = 58');
             $data['arr_document_types'] = $this->Item_model->arr_item('category_id = 53', 'cod_abr');
+            $data['arr_commercial_plans'] = $this->Item_model->arr_cod('category_id = 189');
             
         //Cargar vista
             $this->App_model->view(TPL_ADMIN, $data);
@@ -128,6 +130,11 @@ class Users extends CI_Controller{
         $data = $this->User_model->basic($user_id);
 
         $data['view_a'] = $this->views_folder . 'profile/profile_v';
+
+        if ( $data['row']->role == 21 ) {
+            $data['view_a'] = $this->views_folder . 'profile/21_v';
+        }
+
         $data['back_link'] = $this->url_controller . 'explore';
         
         $this->App_model->view(TPL_ADMIN, $data);
@@ -138,7 +145,7 @@ class Users extends CI_Controller{
 
     /**
      * Formulario para la creación de un nuevo usuario
-     * 2021-02-17
+     * 2021-12-07
      */
     function add($role_type = 'deportista')
     {
@@ -146,7 +153,7 @@ class Users extends CI_Controller{
             $data['role_type'] = $role_type;
 
         //Opciones Select
-            $data['options_role'] = $this->Item_model->options('category_id = 58', 'Rol de usuario');
+            $data['options_role'] = $this->Item_model->options("category_id = 58 AND cod > {$this->session->userdata('role')}");
             $data['options_gender'] = $this->Item_model->options('category_id = 59 AND cod <= 2', 'Sexo');
 
         //Variables generales
@@ -205,6 +212,7 @@ class Users extends CI_Controller{
         $data['options_gender'] = $this->Item_model->options('category_id = 59 AND cod <= 2', 'Género');
         $data['options_city'] = $this->App_model->options_place('type_id = 4', 'cr', 'Ciudad');
         $data['options_document_type'] = $this->Item_model->options('category_id = 53', 'Tipo documento');
+        $data['options_commercial_plan'] = $this->Item_model->options('category_id = 189 AND item_group <= 2');
         
         $view_a = $this->views_folder . "edit/{$section}_v";
         if ( $section == 'cropping' )
@@ -415,39 +423,71 @@ class Users extends CI_Controller{
 // LISTAS
 //-----------------------------------------------------------------------------
 
-    function lists()
+    /**
+     * Vista listas de usuarios, permite editar las listas a las que un usuario
+     * pertenece.
+     * 2021-12-03
+     */
+    function lists($user_id)
     {
         //$data = $this->UY->basic();
+        $data = $this->User_model->basic($user_id);
+
+        //Obtener listas
+        $this->load->model('Search_model');
+        $filters = $this->Search_model->filters();
+        $filters['sf'] = '22_list';
+        $filters['condition'] = 'type_id = 22 AND cat_1 = 10';
+        
+        $this->load->model('Post_model');
+        $data['user_lists'] = $this->User_model->lists($user_id);
+
         $data['head_title'] = 'Listas de usuarios';
         $data['view_a'] = $this->views_folder . 'lists/lists_v';
-        $data['nav_2'] = $this->views_folder . 'explore/menu_v';
+        $data['back_link'] = $this->url_controller . 'explore';
+        //$data['nav_2'] = $this->views_folder . 'explore/menu_v';
         $this->App_model->view(TPL_ADMIN, $data);
     }
 
-// POSTS ASIGNADOS COMO CLIENTE
+    function update_list()
+    {
+        $user_id = $this->input->post('user_id');
+        $list_id = $this->input->post('list_id');
+        $add = $this->input->post('add');
+        
+        $data = $this->User_model->update_list($user_id, $list_id, $add);
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+// COMPRAS Y PAGOS
 //-----------------------------------------------------------------------------
 
-    function assigned_posts($user_id = 0)
+    function orders($user_id)
     {
-        $this->load->model('File_model');
-        //Control de permisos de acceso
-        if ( $this->session->userdata('role') >= 10 ) { $user_id = $this->session->userdata('user_id'); }
-        if ( $user_id == 0 ) { $user_id = $this->session->userdata('user_id'); }
-
         $data = $this->User_model->basic($user_id);
+        $data['arr_payment_channel'] = $this->Item_model->arr_cod('category_id = 106');
+        
+        $data['view_a'] = $this->views_folder . 'orders_v';
+        $data['back_link'] = $this->url_controller . 'explore';
+        
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
 
-        $data['posts'] = $this->User_model->assigned_posts($user_id);
-        $data['options_post'] = $this->App_model->options_post('type_id IN (5,8)', 'n', 'Contenido');
+    /**
+     * Suscripciones de entrenamiento del usuario
+     * 2021-12-17
+     */
+    function subscriptions($user_id)
+    {
+        $data = $this->User_model->basic($user_id);
+        $data['arr_payment_channel'] = $this->Item_model->arr_cod('category_id = 106');
+        
+        $data['view_a'] = $this->views_folder . 'subscriptions/subscriptions_v';
         $data['back_link'] = $this->url_controller . 'explore';
 
-        $data['view_a'] = $this->views_folder . 'assigned_posts_v';
-        if ( $this->session->userdata('role') >= 20 )
-        {
-            $data['head_title'] = 'Mis contenidos';
-            $data['nav_2'] = NULL;
-            $data['back_link'] = NULL;
-        }
-
+        //$this->load->model('Subscription_model');
+        //$data['subscription_creation'] = $this->Subscription_model->create($user_id);
+        
         $this->App_model->view(TPL_ADMIN, $data);
     }
 }

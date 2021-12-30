@@ -90,6 +90,7 @@ class Products extends CI_Controller{
 
     /**
      * Información general del producto
+     * 2021-12-07
      */
     function info($product_id)
     {        
@@ -97,8 +98,8 @@ class Products extends CI_Controller{
         $data = $this->Product_model->basic($product_id);
         
         //Variables específicas
-        $data['head_subtitle'] = 'Información general';
-        $data['view_a'] = $this->views_folder . 'info_v';
+        $data['nav_2'] = $data['category_folder'] . 'menu_v';
+        $data['view_a'] = $data['category_folder'] . 'info_v';
         
         $this->App_model->view(TPL_ADMIN, $data);
     }
@@ -123,10 +124,12 @@ class Products extends CI_Controller{
 
     /**
      * Formulario para la creación de un nuevo producto
-     * 2021-02-25
+     * 2021-12-09
      */
     function add()
     {
+        $data['options_cat_1'] = $this->Item_model->options('category_id = 25 AND level = 0');
+
         //Variables generales
         $data['head_title'] = 'Productos';
         $data['nav_2'] = $this->views_folder . 'explore/menu_v';
@@ -152,8 +155,8 @@ class Products extends CI_Controller{
             $data['options_cat_2'] = $this->Item_model->options('category_id = 25 AND level = 1', 'Todos las categorías');
         
         //Variables cargue vista
-            $data['nav_2'] = $this->views_folder . 'menu_v';
-            $data['view_a'] = $this->views_folder . 'edit_v';
+            $data['nav_2'] = $data['category_folder'] . 'menu_v';
+            $data['view_a'] = $data['category_folder'] . 'edit_v';
         
         $this->App_model->view(TPL_ADMIN, $data);
     }    
@@ -280,8 +283,7 @@ class Products extends CI_Controller{
             $data['back_destination'] = "products/explore/";
         
         //Cargar vista
-            $data['head_title'] = 'Productos';
-            $data['head_subtitle'] = 'Resultado importación';
+            $data['head_title'] = 'Productos cargados';
             $data['view_a'] = 'common/import_result_v';
             $data['nav_2'] = $this->views_folder . 'explore/menu_v';
 
@@ -315,9 +317,46 @@ class Products extends CI_Controller{
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
 
+// TIPOS DE PRECIO
+//-----------------------------------------------------------------------------
+
+    function prices_types($product_id)
+    {
+        $data = $this->Product_model->basic($product_id);
+        $data['view_a'] = $this->views_folder . 'prices_types_v';
+        $data['nav_2'] = $data['category_folder'] . 'menu_v';
+        $data['options_price_type'] = $this->Item_model->options('category_id = 189 AND item_group > 1');
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
+    /**
+     * 2021-12-07
+     * 
+     */
+    function get_prices_types($product_id)
+    {
+        $row_product = $this->Db_model->row_id('products', $product_id);
+        $data['prices_types'] = $this->Product_model->prices_types($row_product);
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
 // METADATA
 //-----------------------------------------------------------------------------
 
+    /**
+     * Guardar datos en products_meta
+     * 2021-12-07
+     */
+    function save_meta()
+    {
+        $data = $this->Product_model->save_meta();
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    /**
+     * Eliminar registro de la tabla products_meta
+     */
     function delete_meta($product_id, $meta_id)
     {
         $data = $this->Product_model->delete_meta($product_id, $meta_id);

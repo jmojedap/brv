@@ -27,8 +27,7 @@ class Order_model extends CI_Model{
             $data['views_folder'] = $this->views_folder . 'explore/';           //Carpeta donde están las vistas de exploración
             
         //Vistas
-            $data['head_title'] = 'Compras';
-            $data['head_subtitle'] = $data['search_num_rows'];
+            $data['head_title'] = 'Ventas y pagos';
             $data['view_a'] = $data['views_folder'] . 'explore_v';
             $data['nav_2'] = $data['views_folder'] . 'menu_v';
         
@@ -54,6 +53,26 @@ class Order_model extends CI_Model{
 
         return $data;
     }
+
+    /**
+     * Segmento Select SQL, con diferentes formatos, consulta de usuarios
+     * 2021-12-28
+     */
+    function select($format = 'general')
+    {
+        $arr_select['general'] = 'orders.*';
+        $arr_select['export'] = 'orders.id AS ID_venta, orders.status, order_code AS ref_venta, buyer_name AS nombre_comprador, 
+            email, document_number AS numero_documento, phone_number AS telefono, address AS direccion, 
+            notes_admin AS notas_internas, bill AS numero_factura, total_tax AS impuestos, 
+            total_extras AS otros_cobros, amount AS total_venta, payed AS pagado, 
+            payment_channel AS canal_pago, wompi_id, wompi_status, 
+            wompi_payment_method_type AS wompi_tipo_metodo_pago, confirmed_at AS fecha_confirmado, 
+            user_id AS ID_usuario, orders.created_at AS fecha_creado, orders.updater_id AS ID_actualizado_por, 
+            orders.updated_at AS fecha_actualizado,
+            order_product.product_id AS ID_producto, products.name AS nombre_producto, products.code AS referencia_producto, order_product.quantity AS cantidad_producto';
+
+        return $arr_select[$format];
+    }
     
     /**
      * String con condición WHERE SQL para filtrar post
@@ -64,6 +83,10 @@ class Order_model extends CI_Model{
         
         //Tipo de post
         if ( $filters['status'] != '' ) { $condition .= "status = {$filters['status']} AND "; }
+        if ( $filters['fe3'] != '' ) { $condition .= "payment_channel = {$filters['fe3']} AND "; }
+        if ( $filters['u'] != '' ) { $condition .= "user_id = {$filters['u']} AND "; }
+        if ( $filters['d1'] != '' ) { $condition .= "orders.confirmed_at >= '{$filters['d1']} 00:00:00' AND "; }
+        if ( $filters['d2'] != '' ) { $condition .= "orders.confirmed_at <= '{$filters['d2']} 23:59:59' AND "; }
         
         if ( strlen($condition) > 0 )
         {
@@ -74,12 +97,11 @@ class Order_model extends CI_Model{
     }
     
     function search($filters, $per_page = NULL, $offset = NULL)
-    {
-        
-        $role_filter = $this->role_filter($this->session->userdata('post_id'));
+    {   
+        $role_filter = $this->role_filter();
 
         //Construir consulta
-            //$this->db->select('id, post_name, except, ');
+            $this->db->select($this->select());
         
         //Crear array con términos de búsqueda
             $words_condition = $this->Search_model->words_condition($filters['q'], array('order_code', 'buyer_name', 'city', 'email', 'phone_number'));
@@ -157,16 +179,52 @@ class Order_model extends CI_Model{
         return $order_options;
     }
 
+    /**
+     * Query para exportar
+     * 2021-09-27
+     */
+    function query_export($filters)
+    {
+        $this->db->select($this->select('export'));
+        $this->db->join('order_product', 'orders.id = order_product.order_id', 'left');
+        $this->db->join('products', 'order_product.product_id = products.id', 'left');
+        $search_condition = $this->search_condition($filters);
+        if ( $search_condition ) { $this->db->where($search_condition);}
+        $query = $this->db->get('orders', 10000);  //Hasta 10.000 registros
+
+        return $query;
+    }
+
 // CRUD
 //-----------------------------------------------------------------------------
 
     /**
-     * Actualiza los datos de una compra desde la edición de la administración
-     * 2021-05-04
+     * Eliminación de una venta
+     * 2021-12-09
      */
-    function admin_update()
+    function delete($order_id)
     {
-        $arr_row = $this->input->post();
+        $this->db->where('id', $order_id);
+        $this->db->delete('orders');
+        
+        $qty_deleted = $this->db->affected_rows();
+
+        /*
+        if ( $qty_deleted > 0 ) {
+            //Procesos relacionados
+        }*/
+    
+        return $qty_deleted;
+    }
+
+    /**
+     * Actualiza los datos de una compra desde la edición de la administración
+     * 2021-12-10
+     */
+    function admin_update($arr_row = null)
+    {
+        if ( is_null($arr_row) ) { $arr_row = $this->input->post(); }
+        
         $arr_row['updater_id'] = $this->session->userdata('user_id');
         $arr_row['updated_at'] = date('Y-m-d H:i:s');
 
@@ -179,25 +237,28 @@ class Order_model extends CI_Model{
     /**
      * Crear una compra, la tabla orders
      */
-    function create()
+    function create($user_id)
     {
         $data = array('order_id' => 0, 'order_code' => NULL);
 
         //Datos por defecto
-            $arr_row['city'] = '';
+            $arr_row['city_id'] = 0;        //Cali, ver tabla places
             $arr_row['country_id'] = 51;    //Colombia, ver tabla places
             $arr_row['address'] = '';
             $arr_row['created_at'] = date('Y-m-d H:i:s');
             $arr_row['updated_at'] = date('Y-m-d H:i:s');
 
-        //Si hay usuario en sesión
-            $row_user = $this->Db_model->row_id('users', $this->session->userdata('user_id'));
+        //Datos de usuario
+            $row_user = $this->Db_model->row_id('users', $user_id);
             if ( ! is_null($row_user) )
             {
-                $arr_row['buyer_name'] = $row_user->display_name;
+                $arr_row['buyer_name'] = $row_user->first_name . ' ' . $row_user->last_name;
                 $arr_row['email'] = $row_user->email;
                 $arr_row['phone_number'] = $row_user->phone_number;
+                $arr_row['address'] = $row_user->address;
                 $arr_row['user_id'] = $row_user->id;
+                $arr_row['document_number'] = $row_user->document_number;
+                $arr_row['document_type'] = $row_user->document_type;
             }
 
         //Crear registro
@@ -215,14 +276,14 @@ class Order_model extends CI_Model{
     }
 
     /**
-     * Genera y establece un código único para un pedido. Campo order.order_code
+     * Genera y establece un código único para un pedido. Campo orders.order_code
      * 2019-06-17
      */
     function set_order_code($order_id)
     {
         $this->load->helper('string');
         
-        $order_code = 'CP' . strtoupper(random_string('alpha', 2)) . '-' . $order_id;
+        $order_code = 'B' . strtoupper(random_string('alpha', 3)) . '-' . $order_id;
 
         $arr_row['order_code'] = $order_code;
         $arr_row['description'] = 'Compra ' . $order_code . ' en ' . APP_NAME;
@@ -292,7 +353,7 @@ class Order_model extends CI_Model{
      */
     function add_product($product_id, $quantity = 1, $order_id)
     {
-        $data = array('status' => 0, 'op_id' => 0, 'qty_items' => NULL);
+        $data = array('status' => 0, 'op_id' => 0, 'qty_items' => NULL, 'order_id' => $order_id);
 
         //Identificar producto
         $this->load->model('Product_model');
@@ -367,14 +428,35 @@ class Order_model extends CI_Model{
 
     /**
      * Actualiza el campo products.stock después de que se confirma el pago de una compra
-     * 2021-05-03
+     * 2021-12-17
      */
     function substract_stock($order_id)
     {
         $products = $this->products($order_id);
         
         foreach ( $products->result() as $row_product ) {
-            $sql = "UPDATE products SET stock = stock - {$row_product->quantity} WHERE id = {$row_product->product_id}";
+            $sql = "UPDATE products";
+            $sql .= " SET stock = stock - {$row_product->quantity}";
+            $sql .= " WHERE id = {$row_product->product_id}";   //El producto correspondiente
+            $sql .= " AND weight > 0";                          //Es un producto físico
+            $this->db->query($sql);
+        }
+    }
+
+    /**
+     * Reestablecer campo products.stock cuando se reversa el pago de una venta
+     * Se devuelven cantidades al inventario.
+     * 2021-12-17
+     */
+    function reset_stock($order_id)
+    {
+        $products = $this->products($order_id);
+        
+        foreach ( $products->result() as $row_product ) {
+            $sql = "UPDATE products";
+            $sql .= " SET stock = stock + {$row_product->quantity}";
+            $sql .= " WHERE id = {$row_product->product_id}";   //El producto correspondiente
+            $sql .= " AND weight > 0";                          //Es un producto físico
             $this->db->query($sql);
         }
     }
@@ -383,7 +465,7 @@ class Order_model extends CI_Model{
 //-----------------------------------------------------------------------------
 
     /**
-     * Actualiza el valor del costo de una compra
+     * Actualiza el valor del costo de envío de una compra
      * Agrega o edita el registro en la tabla order_product
      */
     function update_shipping_cost($order_id)
@@ -392,7 +474,7 @@ class Order_model extends CI_Model{
 
         $row_order = $this->Db_model->row_id('orders', $order_id);
         
-        //Se actualiza si la ciudad destino ya está definida
+        //Se actualiza solo si la ciudad destino ya está definida
         if ( $row_order->city_id > 0 ) 
         {
             //Guardar costo de envío, tabla order_product
@@ -533,10 +615,16 @@ class Order_model extends CI_Model{
 // DATOS DEL PEDIDO
 //-----------------------------------------------------------------------------
 
-    //Productos incluidos en un pedido
+    /**
+     * Productos incluidos en una compra
+     * 2021-12-23
+     */
     function products($order_id)
     {
-        $this->db->select('order_product.*, products.name, products.url_thumbnail, products.slug, products.stock');
+        $this->db->select(
+                'order_product.*, products.name, products.url_thumbnail, 
+                products.slug, products.stock, products.code, products.cat_1'
+            );
         $this->db->join('products', 'products.id = order_product.product_id');
         $this->db->where('order_id', $order_id);
         $this->db->where('order_product.type_id', 1);  //Producto
@@ -586,7 +674,7 @@ class Order_model extends CI_Model{
             code AS reference_sale, slug AS value, excerpt AS response_message_pol, related_1 AS response_code_pol, 
             related_2 AS payment_method_id, cat_1 AS merchant_id, cat_2 AS state_pol, text_1 AS sign,
             text_2 AS currency, created_at, updated_at');
-        $this->db->where('type_id', 54);
+        $this->db->where('type_id', 54);    //54: Post confirmación de pago
         $this->db->where('parent_id', $order_id);
         $this->db->order_by('id', 'DESC');
         $confirmations = $this->db->get('posts');    
@@ -594,148 +682,107 @@ class Order_model extends CI_Model{
         return $confirmations;
     }
 
-// CHECKOUT PayU
+    /**
+     * Datos faltantes para poder ir a pagar
+     * 2021-11-18
+     */
+    function missing_data($order)
+    {
+        $missing_data = array();
+        if ( strlen($order->document_number) == 0 ) { $missing_data[] = 'Número de documento'; }
+        if ( strlen($order->email) == 0 ) { $missing_data[] = 'Correo electrónico'; }
+        if ( strlen($order->address) == 0 && $order->total_weight > 0 ) { $missing_data[] = 'Dirección de entrega'; }
+        if ( strlen($order->phone_number) == 0 ) { $missing_data[] = 'Número de celular'; }
+
+        return $missing_data;
+    }
+
+// REGISTRO DE PAGOS NO AUTOMÁTICOS
 //-----------------------------------------------------------------------------
 
     /**
-     * Array con todos los datos para construir el formulario que se envía a PayU
-     * para iniciar el proceso de pago.
+     * Establecer una venta como pagada.
+     * 2021-11-18
      */
-    function z_payu_form_data($order_id)
+    function set_payed($order_id, $arr_row)
     {
-        //Registro del pedido
-        $row = $this->Db_model->row_id('orders', $order_id);
+        //Estado inicial de la venta
+        $order_pre = $this->Db_model->row_id('orders', $order_id);
 
-        //Construir array
-            $data['merchantId'] = K_PUMI;
-            $data['referenceCode'] = $row->order_code;
-            $data['description'] = $row->description;
-            $data['amount'] = $row->amount;
-            $data['tax'] = $row->total_tax;
-            $data['taxReturnBase'] = 0; //No tiene IVA
-            $data['signature'] = $this->payu_signature($row);
-            $data['accountId'] = K_PUAI;
-            $data['currency'] = 'COP';  //Pesos colombianos
-            $data['test'] = ( $this->input->get('test') == 1 ) ? 1 : 0;
-            $data['buyerFullName'] = $row->buyer_name;
-            $data['buyerEmail'] = $row->email;
-            $data['shippingAddress'] = $row->address;
-            $data['shippingCity'] = $row->city;
-            $data['shippingCountry'] = 'CO';
-            $data['telephone'] = $row->phone_number;
-            $data['responseUrl'] = base_url('orders/result');
-            $data['confirmationUrl'] = base_url('orders/confirmation_payu');
+        // Resultado por defecto
+        $data = array('saved_id' => 0, 'message' => 'Venta no actualizada', 'payed_updated' => 0);
 
-        return $data;
-    }
-
-    /**
-     * Genera la firma que se envía en el Formulario para ir al pago en PayU
-     */
-    function z_payu_signature($row_order)
-    {
-        $signature_pre = K_PUAK;
-        $signature_pre .= '~' . K_PUMI;
-        $signature_pre .= '~' . $row_order->order_code;
-        $signature_pre .= '~' . $row_order->amount;
-        $signature_pre .= '~' . 'COP';
-        
-        return md5($signature_pre);
-    }
-
-    function payu_confirmation_signature($order_id, $row_confirmation)
-    {
-        $new_value = number_format($row_confirmation->value, 1, '.', '');   //
-        $arr_response_pol = json_decode($row_confirmation->content_json, TRUE);
-
-        $signature_pre = K_PUAK;
-        $signature_pre .= '~' . $row_confirmation->merchant_id;
-        $signature_pre .= '~' . $row_confirmation->reference_sale;
-        $signature_pre .= '~' . $new_value;
-        $signature_pre .= '~' . $row_confirmation->currency;
-        $signature_pre .= '~' . $row_confirmation->state_pol;
-
-        $confirmation_signature = $signature_pre;
-
-        return md5($signature_pre);
-    }
-
-    /**
-     * Tomar y procesar los datos POST que envía PayU a la página de confirmación
-     * url_confirmacion >> 'orders/confirmation_payu'
-     * 2021-05-03
-     */
-    function confirmation_payu()
-    {   
-        //Identificar Pedido
-        $confirmation_id = 0;
-        $order = $this->row_by_code($this->input->post('reference_sale'));
-
-        if ( ! is_null($order) )
-        {
-            //Guardar array completo de confirmación en la tabla "meta"
-                $row_confirmation = $this->save_confirmation($order);
-
-            //Restar existencias si hay confirmación de pago y la compra no sido marcada como pagada aún (1)
-                if ( $row_confirmation->status == 1 && $order->status != 1 )
-                {
-                    $this->substract_stock($order->id);     //Restar vendidos de cantidades disponibles
-                }
-
-            //Actualizar registro de la compra
-                if ( ! is_null($row_confirmation) )
-                {
-                    $confirmation_id = $row_confirmation->id;
-                    $this->update_status($order, $row_confirmation);
-                }
-
-            //Enviar mensaje a administradores de tienda y al comprador
-                if ( ENV == 'production' ) { $this->email_buyer($order->id); } 
-        }
-
-        return $confirmation_id;
-    }
-
-    /**
-     * Actualiza el estado de un pedido, dependiendo del código de respuesta en la 
-     * confirmación
-     */
-    function update_status($order, $row_confirmation)
-    {
-        $arr_row['status'] = ( $row_confirmation->related_1 == 1 ) ? 1 : 5;
-        $arr_row['response_code_pol'] = $row_confirmation->related_1;
-        $arr_row['confirmed_at'] = date('Y-m-d H:i:s');
+        // Actualizar
         $arr_row['updated_at'] = date('Y-m-d H:i:s');
-        $arr_row['updater_id'] = 100001;  //PayU Automático
-
-        $this->db->where('id', $order->id);   //Parent ID = Order ID
+        $this->db->where('id', $order_id);
         $this->db->update('orders', $arr_row);
-    }
+        
+        //Verificar resultado
+        if ( $this->db->affected_rows() > 0 ) {
+            $data['saved_id'] = $order_id;
+            $data['message'] = 'Pago actualizado';
 
-    function result_data()
-    {
-        $order_code = $this->input->get('referenceCode');
-        $row = $this->row_by_code($order_code);
+            // Si el estado de pago se modificó respecto al inicial
+            if ( $order_pre->payed != $arr_row['payed'] ) {
+                $this->payment_updated($order_id, $arr_row['payed']);
 
-        $data = array('status' => 0, 'message' => 'Compra no identificada', 'success' => 0);
-        $data['success'] = 0;
-        $data['order_id'] = 0;
-        $data['head_title'] = 'Pago no realizado';
-
-        if ( ! is_null($row) )
-        {
-            $data['status'] = 1;
-            $data['message'] = 'Resultado recibido';
-            $data['order_id'] = $row->id;
-
-            if ( $this->input->get('polResponseCode') == 1 )
-            {
-                $data['success'] = 1;
-                $data['head_title'] = 'Pago exitoso';
+                $data['payed_updated'] = 1;
+                $data['message'] .= '. Se modificó como Pagada.';
             }
         }
 
         return $data;
+    }
+
+    /**
+     * Actualizar los pago de una venta, como No Pagado
+     * 2021-11-22
+     */
+    function remove_payment()
+    {
+        $data = array('saved_id' => 0, 'message' => 'La información de pago de la venta no se actualizó');
+
+        $arr_row = $this->input->post();
+        $arr_row['payment_channel'] = 0;
+        $arr_row['payed'] = 0;
+        $arr_row['status'] = 10;  //Iniciado
+        $arr_row['bill'] = '';
+        $arr_row['confirmed_at'] = NULL;
+
+        $saved_id = $this->admin_update($arr_row);
+
+        if ( $saved_id > 0 ) {
+            $this->payment_updated($arr_row['id'], $arr_row['payed']);
+            $data = array('saved_id' => $saved_id, 'message' => 'El pedido se actualizó como NO PAGADO');
+        }
+
+        return $data;
+    }
+
+    /**
+     * Procesos automatizados tras la confirmación de un pago.
+     * 2021-12-16
+     */
+    function payment_updated($order_id, $payed)
+    {
+        //Descontar cantidades de producto.cant_disponibles, si el pedido fue pagado = 1: Pagado
+        if ( $payed == 1 )
+        {
+            $this->substract_stock($order_id);     //Restar vendidos de cantidades disponibles
+
+            $this->load->model('Subscription_model');
+            $this->Subscription_model->update_from_order($order_id);
+
+            //Enviar e-mails a administradores de tienda y al cliente
+            if ( ENV == 'production' )
+            {
+                $this->Order_model->email_buyer($order_id);
+            }
+        } else {
+            //Reestablecer inventario, sumar cantidades disponibles
+            $this->reset_stock($order_id);
+        }
+
     }
 
 // Datos de compras asociados a usuarios
@@ -767,7 +814,7 @@ class Order_model extends CI_Model{
         $admin_email = $this->Db_model->field_id('sis_option', 25, 'option_value'); //Opción 25
             
         //Asunto de mensaje
-            $subject = "Estado compra {$row_order->order_code}: " . $this->Item_model->name(7, $row_order->status);
+            $subject = "Estado venta {$row_order->order_code}: " . $this->Item_model->name(7, $row_order->status);
         
         //Enviar Email
             $this->load->library('email');
@@ -795,8 +842,12 @@ class Order_model extends CI_Model{
 
         $str_style = file_get_contents(URL_RESOURCES . 'css/email.json');
         $data['style'] = json_decode($str_style);
+
+        $this->load->model('Notification_model');
+        $data['styles'] = $this->Notification_model->email_styles();
+        $data['view_a'] = $this->views_folder . 'emails/message_buyer_v';
         
-        $message = $this->load->view($this->views_folder . 'emails/message_buyer_v', $data, TRUE);
+        $message = $this->load->view('templates/email/main', $data, TRUE);
         
         return $message;
     }

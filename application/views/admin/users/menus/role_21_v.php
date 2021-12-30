@@ -4,6 +4,8 @@
     $cl_nav_2['users_explore'] = '';
     $cl_nav_2['users_profile'] = '';
     $cl_nav_2['users_reservations'] = '';
+    $cl_nav_2['users_orders'] = '';
+    $cl_nav_2['users_subscriptions'] = '';
     $cl_nav_2['users_inbody'] = '';
     $cl_nav_2['follow_following'] = '';
     $cl_nav_2['follow_followers'] = '';
@@ -31,6 +33,27 @@
         text: 'Calendario',
         class: '<?= $cl_nav_2['users_reservations'] ?>',
         cf: 'users/reservations/' + element_id
+    };
+
+    sections.orders = {
+        icon: '',
+        text: 'Pagos',
+        class: '<?= $cl_nav_2['users_orders'] ?>',
+        cf: 'users/orders/' + element_id
+    };
+    
+    sections.subscriptions = {
+        icon: '',
+        text: 'Suscripciones',
+        class: '<?= $cl_nav_2['users_subscriptions'] ?>',
+        cf: 'users/subscriptions/' + element_id
+    };
+
+    sections.lists = {
+        icon: '',
+        text: 'Listas',
+        class: '<?= $cl_nav_2['users_lists'] ?>',
+        cf: 'users/lists/' + element_id
     };
 
     sections.inbody = {
@@ -63,8 +86,8 @@
     };
     
     //Secciones para cada rol
-    sections_role[1] = ['profile', 'calendar', 'inbody', 'edit'];
-    sections_role[2] = ['profile', 'calendar', 'inbody', 'edit'];
+    sections_role[1] = ['profile', 'calendar', 'orders', 'subscriptions', 'inbody', 'edit'];
+    sections_role[2] = ['profile', 'calendar', 'orders', 'subscriptions', 'inbody', 'edit'];
     sections_role[4] = ['calendar', 'inbody'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú

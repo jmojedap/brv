@@ -8,6 +8,7 @@ class Product_model extends CI_Model{
         $data['head_title'] = $data['row']->name;
         $data['nav_2'] = 'admin/products/menu_v';
         $data['back_link'] = $this->url_controller . 'explore';
+        $data['category_folder'] = $this->category_folder($data['row']->cat_1);
 
         return $data;
     }
@@ -31,7 +32,6 @@ class Product_model extends CI_Model{
             
         //Vistas
             $data['head_title'] = 'Productos';
-            $data['head_subtitle'] = $data['search_num_rows'];
             $data['view_a'] = $data['views_folder'] . 'explore_v';
             $data['nav_2'] = $data['views_folder'] . 'menu_v';
         
@@ -69,7 +69,7 @@ class Product_model extends CI_Model{
      */
     function select($format = 'general')
     {
-        $arr_select['general'] = 'products.id, name, slug, description, keywords, price, stock, image_id, url_image, url_thumbnail, status, products.type_id, created_at, updated_at';
+        $arr_select['general'] = 'products.id, products.code, name, slug, cat_1, description, keywords, price, stock, image_id, url_image, url_thumbnail, status, products.type_id, created_at, updated_at';
 
         //$arr_select['export'] = 'usuario.id, username, usuario.email, nombre, apellidos, sexo, rol_id, estado, no_documento, tipo_documento_id, institucion_id, grupo_id';
 
@@ -215,6 +215,29 @@ class Product_model extends CI_Model{
         return $editable;
     }
 
+    /** Devuelve un array con las opciones de la tabla product, limitadas por una condición definida
+    * en un formato ($format) definido
+    */
+    function options($condition, $value_field = 'name', $empty_value = 'Producto')
+    {
+        
+        $this->db->select("CONCAT('0', products.id) AS product_id, name", FALSE); 
+        $this->db->where($condition);
+        $this->db->order_by('products.name', 'ASC');
+        $query = $this->db->get('products');
+        
+        $options_pre = $this->pml->query_to_array($query, $value_field, 'product_id');
+
+        if ( ! is_null($empty_value) ) 
+        {
+            $options = array_merge(array('' => '[ ' . $empty_value . ' ]'), $options_pre);
+        } else {
+            $options = $options_pre;
+        }
+        
+        return $options;
+    }
+
 // CRUD
 //-----------------------------------------------------------------------------
 
@@ -226,6 +249,24 @@ class Product_model extends CI_Model{
     {
         $data['saved_id'] = $this->Db_model->save_id('products');
         return $data;
+    }
+
+    /**
+     * Nombre de la vista con el formulario para la edición del producto. Puede 
+     * cambiar dependiendo de la categoría cat_1.
+     * 2021-12-07
+     */
+    function category_folder($cat_1)
+    {
+        $special_categories = array(2110);
+        $category_folder = $this->views_folder;
+
+        if ( $cat_1 == 2110 ) $category_folder = "{$this->views_folder}/categories/2110/";
+        if ( $cat_1 == 2115 ) $category_folder = "{$this->views_folder}/categories/2110/";
+        if ( $cat_1 == 2150 ) $category_folder = "{$this->views_folder}/categories/2110/";
+        if ( $cat_1 == 2210 ) $category_folder = "{$this->views_folder}/categories/2110/";
+
+        return $category_folder;
     }
 
 // ELINMINACIÓN
@@ -348,9 +389,9 @@ class Product_model extends CI_Model{
 //-----------------------------------------------------------------------------}
 
     /**
-     * Array con configuración de la vista de importación según el tipo de usuario
-     * que se va a importar.
-     * 2020-02-27
+     * Array con configuración de la vista de importación según el tipo de 
+     * producto que se va a importar.
+     * 2021-12-13
      */
     function import_config($type)
     {
@@ -362,8 +403,7 @@ class Product_model extends CI_Model{
             $data['help_tips'] = array();
             $data['template_file_name'] = 'f60_productos.xlsx';
             $data['sheet_name'] = 'productos';
-            $data['head_subtitle'] = 'Importar';
-            $data['destination_form'] = "products/import_e/{$type}";
+            $data['destination_form'] = "admin/products/import_e/{$type}";
         }
 
         return $data;
@@ -397,38 +437,40 @@ class Product_model extends CI_Model{
         //Validar
             $error_text = '';
                             
-            if ( strlen($row_data[1]) == 0 ) { $error_text = 'La casilla Nombre está vacía. '; }
-            if ( strlen($row_data[3]) == 0 ) { $error_text = 'La casilla Descripción está vacía. '; }
-            if ( ! (floatval($row_data[6]) > 0) ) { $error_text .= 'Debe tener costo (' . $row_data[6] .  ') mayor a 0. '; }
-            if ( ! (floatval($row_data[8]) > floatval($row_data[6])) ) { $error_text .= 'El precio debe ser mayor al costo. '; }
+            if ( strlen($row_data[0]) == 0 ) { $error_text = 'La casilla Nombre está vacía. '; }
+            if ( strlen($row_data[4]) == 0 ) { $error_text = 'La casilla Descripción está vacía. '; }
+            if ( ! (floatval($row_data[9]) > 0) ) { $error_text .= 'Debe tener precio (' . $row_data[9] .  ') mayor a 0. '; }
+            if ( ! (floatval($row_data[9]) > floatval($row_data[7])) ) { $error_text .= 'El precio debe ser mayor al costo. '; }
 
         //Si no hay error
             if ( $error_text == '' )
             {
-                $arr_row['name'] = $row_data[1];
+                $arr_row['name'] = $row_data[0];
                 $arr_row['type_id'] = 1;    //Producto
-                $arr_row['code'] = $row_data[2];
-                $arr_row['cat_1'] = $row_data[4];
-                $arr_row['status'] = $this->pml->if_strlen($row_data[4], 2);
-                $arr_row['description'] = $row_data[3];
-                $arr_row['keywords'] = $this->pml->if_null($row_data[5]);
-                $arr_row['cost'] = $row_data[6];
-                $arr_row['tax_percent'] = $this->pml->if_null($row_data[7]);
-                $arr_row['price'] = $row_data[8];
-                $arr_row['weight'] = $this->pml->if_null($row_data[9]);
-                $arr_row['width'] = $this->pml->if_null($row_data[10]);
-                $arr_row['height'] = $this->pml->if_null($row_data[11]);
-                $arr_row['depth'] = $this->pml->if_null($row_data[12]);
-                $arr_row['stock'] = $this->pml->if_null($row_data[13]);
+                $arr_row['code'] = $row_data[1];
+                $arr_row['cat_1'] = $row_data[2];
+                $arr_row['status'] = $this->pml->if_strlen($row_data[3], 2);
+                $arr_row['description'] = $row_data[4];
+                $arr_row['keywords'] = $this->pml->if_null($row_data[6]);
+                $arr_row['cost'] = $this->pml->if_null($row_data[7], 0);
+                $arr_row['tax_percent'] = $this->pml->if_null($row_data[8]);
+                $arr_row['price'] = $row_data[9];
+                $arr_row['weight'] = $this->pml->if_null($row_data[10]);
+                $arr_row['width'] = $this->pml->if_null($row_data[11]);
+                $arr_row['height'] = $this->pml->if_null($row_data[12]);
+                $arr_row['depth'] = $this->pml->if_null($row_data[13]);
+                $arr_row['stock'] = $this->pml->if_null($row_data[14]);
                 
-                $arr_row['slug'] = $this->Db_model->unique_slug($row_data[1], 'products');
+                //Valores calculados
+                $arr_row['slug'] = $this->Db_model->unique_slug($row_data[0], 'products');
+                $arr_row['base_price'] = $arr_row['price'] /  (1 + ($arr_row['tax_percent']/100));
                 
                 $arr_row['creator_id'] = $this->session->userdata('user_id');
                 $arr_row['updater_id'] = $this->session->userdata('user_id');
 
                 //Guardar en tabla user
                 //if ( strlen($row_data[0]) ) { $arr_row['id'] = $row_data[0]; }
-                $condition = "code = '{$row_data[2]}'";
+                $condition = "code = '{$row_data[1]}'";
                 $saved_id = $this->Db_model->save('products', $condition, $arr_row);
 
                 $data = array('status' => 1, 'text' => '', 'imported_id' => $saved_id);
@@ -467,8 +509,60 @@ class Product_model extends CI_Model{
     
     }
 
+// TIPOS DE PRECIOS
+//-----------------------------------------------------------------------------
+
+    /**
+     * Array, tipos de precio de un producto
+     * 2021-12-07
+     */
+    function prices_types($row_product)
+    {
+        //Precio normal
+        $prices_types = array(
+            array(
+                'meta_id' => 0, 'price_type' => '10', 'price_type_name' => 'Precio normal', 'price' => $row_product->price
+            )
+        );
+
+        $this->db->select('products_meta.id AS meta_id, related_1 AS price_type, decimal_1 AS price, items.item_name AS price_type_name');
+        $this->db->join('items', 'items.cod = products_meta.related_1 AND items.category_id = 189');
+        $this->db->where('type_id', 189);
+        $this->db->where('product_id', $row_product->id);
+        $this->db->order_by('products_meta.decimal_1', 'desc');
+        
+        $query = $this->db->get('products_meta');
+
+        foreach( $query->result() as $row_price ) {
+            $price_type['meta_id'] = $row_price->meta_id;
+            $price_type['price_type'] = $row_price->price_type;
+            $price_type['price_type_name'] = $row_price->price_type_name;
+            $price_type['price_type'] = $row_price->price_type;
+            $price_type['price'] = $row_price->price;
+            $prices_types[] = $price_type;
+        }
+    
+        return $prices_types;
+    }
+
 // METADATOS
 //-----------------------------------------------------------------------------
+
+    /**
+     * Guardar registro en la tabla products_meta
+     * 2021-12-07
+     */
+    function save_meta()
+    {
+        $arr_row = $this->Db_model->arr_row();
+        $condition = "product_id = {$arr_row['product_id']}";
+        $condition .= " AND type_id = {$arr_row['type_id']}";
+        $condition .= " AND related_1 = {$arr_row['related_1']}";
+
+        $data['saved_id'] = $this->Db_model->save('products_meta', $condition, $arr_row);
+
+        return $data;
+    }
     
     /**
      * Elimina un registro de la tabla products_meta

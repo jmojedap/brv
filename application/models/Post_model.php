@@ -88,7 +88,7 @@ class Post_model extends CI_Model{
         $arr_select['export'] = '*';
         $arr_select['5_album'] = 'id, post_name AS name, status, slug, related_1 AS girl_id, related_2 AS cat_clothes, integer_1 AS album_type, integer_2 AS price, url_image, url_thumbnail';
         $arr_select['6_picture'] = 'id, content, posts.related_1 AS user_id, text_1 AS file_name, text_2 AS private_file_name, related_1 AS girl_id, status, parent_id AS album_id';
-        $arr_select['22_list'] = 'id, post_name AS name';
+        $arr_select['22_list'] = 'id, post_name AS name, excerpt AS description';
 
         return $arr_select[$format];
     }
@@ -247,7 +247,7 @@ class Post_model extends CI_Model{
      */
     function type_folder($type_id)
     {
-        $special_types = array(6,7,12,20);
+        $special_types = array(6,7,12,20,22);
         $type_folder = $this->views_folder;
 
         if ( in_array($type_id, $special_types) ) { $type_folder = "{$this->views_folder}/types/{$type_id}/"; }

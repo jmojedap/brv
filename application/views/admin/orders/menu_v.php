@@ -1,12 +1,14 @@
 <?php
     $app_cf_index = $this->uri->segment(2) . '_' . $this->uri->segment(3);
-    
-    $cl_nav_2['orders_info'] = '';
-    $cl_nav_2['orders_details'] = '';
-    $cl_nav_2['orders_responses'] = '';
-    $cl_nav_2['orders_edit'] = '';
-    $cl_nav_2['orders_test'] = '';
-    //$cl_nav_2['orders_import'] = '';
+
+    $cl_nav_2 = [
+        'orders_info' => '',
+        'orders_details' => '',
+        'orders_responses' => '',
+        'orders_payment' => '',
+        'orders_edit' => '',
+        'orders_test' => '',
+    ];
     
     $cl_nav_2[$app_cf_index] = 'active';
     if ( $app_cf_index == 'orders_cropping' ) { $cl_nav_2['orders_test'] = 'active'; }
@@ -47,6 +49,13 @@
         cf: 'orders/responses/' + element_id
     };
 
+    sections.payment = {
+        icon: '',
+        text: 'Pago',
+        class: '<?= $cl_nav_2['orders_payment'] ?>',
+        cf: 'orders/payment/' + element_id
+    };
+
     sections.edit = {
         icon: '',
         text: 'Editar',
@@ -62,13 +71,12 @@
     };
     
     //Secciones para cada rol
-    sections_role[0] = ['explore', 'info', 'details', 'responses', 'edit', 'test'];
-    sections_role[2] = ['explore', 'info', 'details', 'responses', 'edit', 'test'];
+    sections_role[1] = ['info', 'payment', 'details', 'responses', 'edit', 'test'];
+    sections_role[2] = ['info', 'payment', 'details', 'responses', 'edit'];
     
     //Recorrer el sections del rol actual y cargarlos en el menú
     for ( key_section in sections_role[app_rid]) 
     {
-        //console.log(sections_role[rol][key_section]);
         var key = sections_role[app_rid][key_section];   //Identificar elemento
         nav_2.push(sections[key]);    //Agregar el elemento correspondiente
     }

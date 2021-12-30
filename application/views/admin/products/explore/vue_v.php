@@ -2,7 +2,7 @@
 <script>
 // Variables
 //-----------------------------------------------------------------------------
-var category_names = '';
+var category_names = <?= json_encode($arr_categories) ?>;
 
 
 // Filters
@@ -15,6 +15,12 @@ Vue.filter('ago', function (date) {
 Vue.filter('currency', function (value) {
     if (!value) return ''
     value = new Intl.NumberFormat().format(value)
+    return value
+})
+
+Vue.filter('category_name', function (value) {
+    if (!value) return ''
+    value = category_names[value]
     return value
 })
 

@@ -8,12 +8,11 @@
             <th width="10px">
                 <input type="checkbox" @change="select_all" v-model="all_selected">
             </th>
-            <th width="10px"></th>
-            <th>Cód. compra</th>
-            <th>Estado</th>
+            <th>Cód. venta</th>
             <th>Comprador</th>
+            <th>Canal</th>
+            <th width="5px"></th>
             <th>Valor</th>
-            <th>Ciudad</th>
             <th></th>
             
             <th width="50px"></th>
@@ -21,32 +20,34 @@
         <tbody>
             <tr v-for="(element, key) in list" v-bind:id="`row_` + element.id" v-bind:class="{'table-info': selected.includes(element.id) }">
                 <td><input type="checkbox" v-bind:id="`check_` + element.id" v-model="selected" v-bind:value="element.id"></td>
-                    
+                
                 <td>
-                    <i class="fa fa-check-circle text-success" v-if="element.status == 1"></i>
-                    <i class="fa fa-exclamation-triangle text-warning" v-if="element.status == 5"></i>
-                    <i class="far fa-circle text-muted" v-if="element.status == 10"></i>
-                </td>
-                <td>
-                    <a v-bind:href="`<?= base_url("orders/info/") ?>` + element.id">
+                    <a v-bind:href="`<?= URL_ADMIN . "orders/info/" ?>` + element.id">
                         {{ element.order_code }}
                     </a>
                 </td>
                 <td>
-                    {{ element.status | status_name  }}
-                </td>
-
-                <td>
-                    <a v-bind:href="`<?= base_url("users/profile/") ?>` + element.user_id">
+                    <a v-bind:href="`<?= URL_ADMIN . "users/orders/" ?>` + element.user_id">
                         {{ element.buyer_name }}
                     </a>
                     <br>
                     {{ element.email }}
                 </td>
                 <td>
+                    <div v-if="element.payment_channel > 0">
+                        <i class="fa fa-circle" v-bind:class="`channel_` + element.payment_channel"></i>
+                        {{ element.payment_channel | payment_channel_name }}
+                    </div>
+                </td>
+                <td>
+                    <i class="fa fa-check-circle text-success" v-if="element.status == 1" title="Pago confirmado"></i>
+                    <i class="far fa-circle text-muted" v-if="element.status == 5" title="Pago no exitoso"></i>
+                    <i class="far fa-circle text-muted" v-if="element.status == 10" title="Iniciado"></i>
+                </td>
+
+                <td>
                     {{ element.amount | currency }}
                 </td>
-                <td>{{ element.city }}</td>
                 <td>
                     <b>A</b> <span v-bind:title="element.updated_at">{{ element.updated_at | ago }}</span>
                     <br>

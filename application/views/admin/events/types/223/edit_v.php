@@ -33,9 +33,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-md-8 offset-md-4">
-                            <button class="btn btn-primary w120p" v-on:click="set_user_send">
-                                Guardar
-                            </button>
+                            <button class="btn btn-primary w120p" v-on:click="set_user_send">Guardar</button>
                         </div>
                     </div>
                     

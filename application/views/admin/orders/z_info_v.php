@@ -6,9 +6,9 @@
     </div>
     <div class="row mb-2">
         <div class="col-md-4">
-            <div class="card">
+            <div class="card mb-2">
                 <div class="card-header">
-                    <i class="fa fa-user"></i> Cliente
+                    Cliente
                 </div>
                 <table class="table bg-white">
                     <tbody>
@@ -43,10 +43,67 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <i class="fa fa-map-marker"></i> Envío
-                </div>
+            <div class="card mb-2">
+                <div class="card-header">Administración</div>
+                <table class="table bg-white">
+                    <tbody>
+                        <tr>
+                            <td class="td-title">Pagado</td>
+                            <td>
+                                <div class="d-flex">
+                                    <div class="mr-2">
+                                        <span v-if="order.payed == 1">
+                                            <i class="fa fa-check-circle text-success"></i>
+                                            <strong class="text-success">Sí</strong>
+                                        </span>
+                                        <span class="text-muted" v-else="order.payed">
+                                            <i class="fa fa-info-circle text-warning"></i>
+                                            No
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <?php if ( $row->payment_channel ) : ?>
+                                            <i class="fa fa-circle channel_<?= $row->payment_channel ?>"></i>
+                                            <?= $this->Item_model->name(106, $row->payment_channel) ?>    
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">Estado venta</td>
+                            <td>{{ order.status | order_status_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">Actualizado</td>
+                            <td v-bind:title="order.updated_at">
+                                {{ order.updated_at | date_format }} &middot; {{ order.updated_at | ago }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">Actualizado por</td>
+                            <td>
+                                <a href="<?= base_url("users/profile/{$row->updater_id}") ?>">
+                                    <?= $this->App_model->name_user($row->updater_id); ?> &middot;
+                                    <?= $row->updater_id; ?>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">Factura</td>
+                            <td>{{ order.bill }}</td>
+                        </tr>
+                        <tr>
+                            <td class="td-title">Anotación</td>
+                            <td>{{ order.notes_admin }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card" v-if="order.weigth > 0">
+                <div class="card-header">Envío</div>
                 <table class="table bg-white">
                     <tbody>
                         <tr>
@@ -83,91 +140,53 @@
                 </table>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    Gestión
-                </div>
-                <table class="table bg-white">
-                    <tbody>
-                        <tr>
-                            <td class="td-title">Estado de compra</td>
-                            <td>{{ order.status | order_status_name }}</td>
-                        </tr>
-                        <tr>
-                            <td class="td-title">Actualizado</td>
-                            <td v-bind:title="order.updated_at">
-                                {{ order.updated_at | date_format }} &middot; {{ order.updated_at | ago }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="td-title">Actualizado por</td>
-                            <td>
-                                <a href="<?= base_url("users/profile/{$row->updater_id}") ?>">
-                                    <?= $this->App_model->name_user($row->updater_id); ?> &middot;
-                                    <?= $row->updater_id; ?>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="td-title">Factura</td>
-                            <td>{{ order.bill }}</td>
-                        </tr>
-                        <tr>
-                            <td class="td-title">Anotación</td>
-                            <td>{{ order.notes_admin }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
-    <h3>Productos &middot; {{ products.length }}</h3>
+    <div class="my-2">
+        <h3>Productos &middot; {{ products.length }}</h3>
 
-    <table class="table bg-white">
-        <thead>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>{{ order.total_products | currency }}</th>
-        </thead>
-        <tbody>
-            <tr v-for="product in products">
-                <td>
-                    <a v-bind:href="`<?= base_url("products/info/") ?>` + product.product_id">
-                        {{ product.name }}
-                    </a>
-                </td>
-                <td>
-                    {{ product.quantity }}
-                </td>
-                <td>{{ product.price | currency }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <table class="table bg-white">
+            <thead>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>{{ order.total_products | currency }}</th>
+            </thead>
+            <tbody>
+                <tr v-for="product in products">
+                    <td>
+                        <a v-bind:href="`<?= base_url("products/info/") ?>` + product.product_id">
+                            {{ product.name }}
+                        </a>
+                    </td>
+                    <td>
+                        {{ product.quantity }}
+                    </td>
+                    <td>{{ product.price | currency }}</td>
+                </tr>
+            </tbody>
+        </table>
 
-    <h3>Extras &middot; {{ extras.length }}</h3>
+        <h3>Extras &middot; {{ extras.length }}</h3>
 
-    <table class="table bg-white">
-        <thead>
-            <th>Extra</th>
-            <th>Cantidad</th>
-            <th>{{ order.total_extras | currency }}</th>
-        </thead>
-        <tbody>
-            <tr v-for="extra in extras">
-                <td>
-                    {{ extra.extra_name }}
-                </td>
-                <td>
-                    {{ extra.quantity }}
-                </td>
-                <td>{{ extra.price | currency }}</td>
-            </tr>
-        </tbody>
-    </table>
-    
-
+        <table class="table bg-white">
+            <thead>
+                <th>Extra</th>
+                <th>Cantidad</th>
+                <th>{{ order.total_extras | currency }}</th>
+            </thead>
+            <tbody>
+                <tr v-for="extra in extras">
+                    <td>
+                        {{ extra.extra_name }}
+                    </td>
+                    <td>
+                        {{ extra.quantity }}
+                    </td>
+                    <td>{{ extra.price | currency }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 
