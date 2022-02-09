@@ -70,6 +70,9 @@ class Product_model extends CI_Model{
     function select($format = 'general')
     {
         $arr_select['general'] = 'products.id, products.code, name, slug, cat_1, description, keywords, price, stock, image_id, url_image, url_thumbnail, status, products.type_id, created_at, updated_at';
+        $arr_select['export'] = 'products.id, products.code, name, slug, cat_1, description, keywords, price, stock, image_id, url_image, url_thumbnail, status, products.type_id, created_at, updated_at';
+        $arr_select['subscriptions'] = 'id, code, name, price, integer_1 AS for_partners';
+        
 
         //$arr_select['export'] = 'usuario.id, username, usuario.email, nombre, apellidos, sexo, rol_id, estado, no_documento, tipo_documento_id, institucion_id, grupo_id';
 
@@ -202,6 +205,20 @@ class Product_model extends CI_Model{
         
         return $order_options;
     }
+
+    /**
+     * Query para exportar
+     * 2021-09-27
+     */
+    function query_export($filters)
+    {
+        $this->db->select($this->select('export'));
+        $search_condition = $this->search_condition($filters);
+        if ( $search_condition ) { $this->db->where($search_condition);}
+        $query = $this->db->get('products', 10000);  //Hasta 10.000 registros
+
+        return $query;
+    }
     
     /**
      * Establece si un usuario en sesión puede o no editar los datos de un producto
@@ -220,9 +237,9 @@ class Product_model extends CI_Model{
     */
     function options($condition, $value_field = 'name', $empty_value = 'Producto')
     {
-        
-        $this->db->select("CONCAT('0', products.id) AS product_id, name", FALSE); 
+        $this->db->select("CONCAT('0', products.id) AS product_id, name, CONCAT((code),' - ',(name)) AS code_name", FALSE); 
         $this->db->where($condition);
+        $this->db->order_by('products.code', 'ASC');
         $this->db->order_by('products.name', 'ASC');
         $query = $this->db->get('products');
         

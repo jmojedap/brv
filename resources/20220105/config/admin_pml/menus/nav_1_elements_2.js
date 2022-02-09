@@ -26,6 +26,29 @@ var nav_1_elements = [
         subelements: []
     },
     {
+        text: 'Comercial',
+        active: false,
+        icon: 'fa fa-shopping-cart',
+        cf: '',
+        sections: [],
+        subelements: [
+            {
+                text: 'Ventas',
+                active: false,
+                icon: 'fa fa-shopping-cart',
+                cf: 'orders/explore',
+                sections: ['orders/explore', 'orders/info', 'orders/add', 'orders/edit']
+            },
+            {
+                text: 'Productos',
+                active: false,
+                icon: 'fas fa-tag',
+                cf: 'products/explore',
+                sections: ['products/explore', 'products/import', 'products/add', 'products/edit', 'products/edit', 'products/info', 'products/prices_types']
+            }
+        ]
+    },
+    {
         text: 'Posts',
         active: false,
         icon: 'far fa-file-alt',

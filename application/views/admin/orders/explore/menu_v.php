@@ -3,6 +3,7 @@
     
     $cl_nav_2['orders_explore'] = '';
     $cl_nav_2['orders_add'] = '';
+    $cl_nav_2['subscriptions_orders_generation'] = '';
     
     $cl_nav_2[$app_cf_index] = 'active';
     if ( $app_cf_index == 'orders_import_e' ) { $cl_nav_2['orders_import'] = 'active'; }
@@ -25,6 +26,13 @@
         text: 'Nuevo',
         class: '<?= $cl_nav_2['orders_add'] ?>',
         cf: 'orders/add'
+    };
+
+    sections.orders_generation = {
+        icon: '',
+        text: 'Generar',
+        class: '<?= $cl_nav_2['subscriptions_orders_generation'] ?>',
+        cf: 'subscriptions/orders_generation'
     };
     
     //Secciones para cada rol

@@ -30,7 +30,7 @@ var user_subscriptions_app = new Vue({
     },
     data: {
         form_values: {
-            start: '', end: '',
+            start: '', end: '', content: ''
         },
         user_id: <?= $row->id ?>,
         last_date: '',
@@ -60,6 +60,7 @@ var user_subscriptions_app = new Vue({
                 if ( response.data.saved_id > 0 ) {
                     this.get_list()
                     toastr['success']('Guardado')
+                    this.clear_form()
                     $('#modal_form').modal('hide')
                 }
                 this.loading = false
@@ -86,6 +87,9 @@ var user_subscriptions_app = new Vue({
                 this.loading = false
             })
             .catch( function(error) {console.log(error)} )
+        },
+        clear_form: function(){
+            this.form_values = {start: '', end: '', content: ''}
         },
     },
     computed: {

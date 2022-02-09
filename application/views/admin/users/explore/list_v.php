@@ -10,8 +10,8 @@
             <th>Usuario</th>
             <th>Nombre completo</th>
             <th>No. Documento</th>
-            <th>Suscripción hasta</th>
             <th>Plan</th>
+            <th>Suscripción hasta</th>
             <th width="50px"></th>
         </thead>
         <tbody>
@@ -49,6 +49,17 @@
                 </td>
                 
                 <td>
+                    <div v-if="element.role >= 20">
+                        <a v-bind:href="`<?= URL_ADMIN . 'users/edit/' ?>` + element.id + `/details`" title="Editar plan del usuario" v-if="element.commercial_plan > 0">
+                            {{ element.commercial_plan | commercial_plan_name }}
+                        </a>
+                        <a v-bind:href="`<?= URL_ADMIN . 'users/edit/' ?>` + element.id + `/details`" title="Editar plan del usuario" class="btn btn-light btn-sm" v-else>
+                            Asignar
+                        </a>
+                    </div>
+                </td>
+
+                <td>
                     <span v-html="expiration_icon(element.expiration_at)"></span>
                     
                     <span>
@@ -60,14 +71,6 @@
                     </span>
                 </td>
 
-                <td>
-                    <div v-if="element.role >= 20">
-                        <a v-bind:href="`<?= URL_ADMIN . 'users/edit/' ?>` + element.id + `/details`" class="btn" title="Editar plan">
-                            <i class="fa fa-circle" v-bind:class="`prtp_` + element.commercial_plan"></i>
-                            {{ element.commercial_plan | commercial_plan_name }}
-                        </a>
-                    </div>
-                </td>
                 
                 <td>
                     <button class="a4" data-toggle="modal" data-target="#detail_modal" @click="set_current(key)">

@@ -147,6 +147,10 @@ var app_explore = new Vue({
         remove_filters: function(){
             this.filters.q = ''
             this.filters.role = ''
+            this.filters.fe1 = ''
+            this.filters.fe2 = ''
+            this.filters.d1 = ''
+            this.filters.d2 = ''
             this.display_filters = false
             //$('#adv_filters').hide()
             setTimeout(() => { this.get_list() }, 100)
@@ -155,6 +159,10 @@ var app_explore = new Vue({
             var calculated_active_filters = false
             if ( this.filters.q ) calculated_active_filters = true
             if ( this.filters.role ) calculated_active_filters = true
+            if ( this.filters.fe1 ) calculated_active_filters = true
+            if ( this.filters.fe2 ) calculated_active_filters = true
+            if ( this.filters.d1 ) calculated_active_filters = true
+            if ( this.filters.d2 ) calculated_active_filters = true
 
             this.active_filters = calculated_active_filters
         },

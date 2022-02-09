@@ -21,7 +21,7 @@ class Wompi_model extends CI_Model{
             $data['description'] = $order->description;
             $data['amount-in-cents'] = intval($order->amount * 100);
             $data['currency'] = 'COP';  //Pesos colombianos
-            $data['redirect-url'] = base_url('tienda/resultado');
+            $data['redirect-url'] = URL_APP . ('suscripciones/resultado_pago');
 
         return $data;
     }
@@ -46,8 +46,13 @@ class Wompi_model extends CI_Model{
             //Actualizar estado registro en la tabla orders
                 $order_status = $this->update_status($order->id, $wompi_response);
 
+                if ( $order_status == 1 ) {
+                    $this->load->model('Order_model');
+                    $this->Order_model->payment_updated($order->id, 1);
+                }
+
             //Enviar mensaje a administradores de tienda y al cliente
-                if ( ENV == 'production' ) { $this->Order_model->email_buyer($order->id); } 
+                //if ( ENV == 'production' ) { $this->Order_model->email_buyer($order->id); } 
         }
 
         return $confirmation_id;
@@ -125,14 +130,17 @@ class Wompi_model extends CI_Model{
 
     /**
      * Actualiza el estado de una venta, dependiendo de la respuesta wompi
-     * 2020-12-09
+     * 2022-01-27
      */
     function update_status($order_id, $wompi_response)
     {
         $arr_row['status'] = ( $wompi_response->data->transaction->status == 'APPROVED' ) ? 1 : 5;
+        $arr_row['payed'] = ( $wompi_response->data->transaction->status == 'APPROVED' ) ? 1 : 0;
+        $arr_row['payment_channel'] = 12; //12 es wompi, Ver items.category_id = 106
         $arr_row['wompi_status'] = $wompi_response->data->transaction->status;
         $arr_row['wompi_id'] = $wompi_response->data->transaction->id;
         $arr_row['wompi_payment_method_type'] = $wompi_response->data->transaction->payment_method_type;
+        $arr_row['confirmed_at'] = date('Y-m-d H:i:s', $wompi_response->timestamp);
         $arr_row['updated_at'] = date('Y-m-d H:i:s', $wompi_response->timestamp);
         $arr_row['updater_id'] = 1001;  //Wompi Automático
 

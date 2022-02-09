@@ -39,7 +39,7 @@ var add_order_app = new Vue({
     el: '#add_order_app',
     created: function(){
         //this.get_users()
-        this.get_products()
+        //this.get_products()
     },
     data: {
         step: 1,
@@ -56,18 +56,21 @@ var add_order_app = new Vue({
             id: 0, display_name: '', document_number: '', document_type: '', 
             expiration_at: '',
         },
+        partner: {id: 0, last_name: '(NO ASIGNADO)'},
+        quantity: 1,
+        pay_partner_value: false,
         key_user: -1,
         no_users: false,
         product_filters: {
             q: '',
             cat_1: 2110, //Suscripción a entrenamiento
         },
-        products: [],
+        products: <?= json_encode($products->result()) ?>,
         product: {
-            id: 0, name: '', price: 0
+            id: 0, code: '', name: '', price: 0
         },
         order: {
-            id: 0, order_code: ''
+            id: 0, order_code: '', period_id: ''
         },
         options_product_category: <?= json_encode($options_product_category) ?>,
         options_payment_channel: <?= json_encode($options_payment_channel) ?>,
@@ -96,7 +99,24 @@ var add_order_app = new Vue({
         set_user: function(key){
             this.key_user = key
             this.user = this.users[key]
-            this.step = 2
+            if ( this.user.commercial_plan > 0 ) {    
+                this.set_product(this.user.commercial_plan)
+                this.check_partner()
+                this.step = 3
+            } else {
+                this.step = 2
+            }
+        },
+        //Verificar si tiene beneficiario y obtener sus datos.
+        check_partner: function(){
+            if ( this.user.partner_id > 0 ) {
+                axios.get(url_api + 'users/get_info/' + this.user.partner_id)
+                .then(response => {
+                    this.partner = response.data.user
+                    console.log(this.partner)
+                })
+                .catch(function(error) { console.log(error) })
+            }
         },
         // Productos
         //-----------------------------------------------------------------------------
@@ -105,6 +125,7 @@ var add_order_app = new Vue({
             var form_data = new FormData()
             form_data.append('q', this.product_filters.q)
             form_data.append('cat_1', this.product_filters.cat_1)
+            form_data.append('sf', 'subscriptions')     //Select format
             axios.post(url_api + 'products/get/1/30', form_data)
             .then(response => {
                 this.products = response.data.list
@@ -112,17 +133,25 @@ var add_order_app = new Vue({
             })
             .catch( function(error) {console.log(error)} )
         },
-        set_product: function(key){
-            this.key_product = key
-            this.product = this.products[key]
+        set_product: function(product_id){
+            this.product = this.products.find(element => element.id == product_id)
             this.step = 3
-            this.set_new_expiration_at()
+            //this.set_new_expiration_at()
         },
-        set_new_expiration_at: function(){
+        // Establecer la cantidad de productos, dependiendo si va a pagar el valor
+        // del beneficiario
+        set_quantity: function(){
+            if ( this.pay_partner_value ) {
+                this.quantity = 2
+            } else {
+                this.quantity = 1
+            }
+        },
+        /*set_new_expiration_at: function(){
             console.log('Fecha Exp')
             var newExpirationDay = today.add(1,'months')
             this.payment.user_expiration_at = newExpirationDay.format('YYYY-MM-DD')
-        },
+        },*/
         // General
         //-----------------------------------------------------------------------------
         send_form: function(){
@@ -146,7 +175,7 @@ var add_order_app = new Vue({
             var form_data = new FormData()
             form_data.append('user_id', this.user.id)
             form_data.append('product_id', this.product.id)
-            form_data.append('quantity', 1)
+            form_data.append('quantity', this.quantity)
 
             form_data.append('payed', '01')
             form_data.append('payment_channel', this.payment.payment_channel)
@@ -155,12 +184,5 @@ var add_order_app = new Vue({
             return form_data
         },
     },
-    /*computed: {
-        expirationAtDays: function(){
-            var newExpirationAt = moment(this.payment.user_expiration_at)
-            var expirationAtDays = today.diff(newExpirationAt, 'days')
-            return expirationAtDays
-        },
-    }*/
 })
 </script>

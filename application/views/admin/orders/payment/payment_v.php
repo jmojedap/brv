@@ -80,11 +80,11 @@
                         </form>
                     </div>
 
-                    <!-- PEDIDO PAGADO A TRAVÉS DE PAYU -->
-                    <div v-if="order.payment_channel == 10">
-                        <h3>Pedido procesado por PayU</h3>
+                    <!-- PEDIDO PAGADO A TRAVÉS DE WOMPI -->
+                    <div v-if="order.payment_channel == 12">
+                        <h3>Pago procesado a través de Wompi</h3>
                         <p>
-                            <a class="btn btn-primary" href="<?= URL_ADMIN . "pedidos/payu/{$row->id}" ?>">Ver detalles</a>
+                            <a class="btn btn-primary" href="<?= URL_ADMIN . "orders/responses/{$row->id}" ?>">Ver detalle respuestas</a>
                         </p>
                     </div>
                 </div>

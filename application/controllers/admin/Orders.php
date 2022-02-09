@@ -27,10 +27,14 @@ class Orders extends CI_Controller{
 //---------------------------------------------------------------------------------------------------
 
     /** Exploración de Posts */
-    function explore()
+    function explore($num_page = 1)
     {        
+        //Identificar filtros de búsqueda
+            $this->load->model('Search_model');
+            $filters = $this->Search_model->filters();
+
         //Datos básicos de la exploración
-            $data = $this->Order_model->explore_data(1);
+            $data = $this->Order_model->explore_data($filters, $num_page);
         
         //Opciones de filtros de búsqueda
             $data['options_status'] = $this->Item_model->options('category_id = 7', 'Todos');
@@ -45,11 +49,14 @@ class Orders extends CI_Controller{
     }
 
     /**
-     * Listado de Posts, filtrados por búsqueda, JSON
+     * Listado de orders, filtrados por búsqueda, JSON
+     * 2022-01-25
      */
-    function get($num_page = 1)
+    function get($num_page = 1, $per_page = 10)
     {
-        $data = $this->Order_model->get($num_page);
+        $this->load->model('Search_model');
+        $filters = $this->Search_model->filters();
+        $data = $this->Order_model->get($filters, $num_page, $per_page);
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
     
@@ -124,6 +131,10 @@ class Orders extends CI_Controller{
 
         //Referencia
         $data['arr_document_types'] = $this->Item_model->arr_item('category_id = 53', 'cod_abr');
+
+        //Opciones producto
+        $this->load->model('Subscription_model');
+        $data['products'] = $this->Subscription_model->products();
 
         //Variables básicas
         $data['head_title'] = 'Nueva venta';
@@ -240,6 +251,7 @@ class Orders extends CI_Controller{
         $product_id = $this->input->post('product_id');
         $quantity = $this->input->post('quantity');
         $order_code = $this->input->post('order_code');
+        
         // Identificar usuario
         $user_id = $this->session->userdata('user_id');
         if ( $this->input->post('user_id') ) $user_id = $this->input->post('user_id');
@@ -257,7 +269,7 @@ class Orders extends CI_Controller{
         $row_order = $this->Order_model->row_by_code($order_code);
         $editable = $this->Order_model->editable($row_order);
 
-        //Código de compra existe
+        //Si se puede modificar, agregar producto
         if ( $editable )
         {
             $data = $this->Order_model->add_product($product_id, $quantity, $row_order->id);
@@ -326,7 +338,6 @@ class Orders extends CI_Controller{
 
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
-
 
 // DATOS Y DETALLES
 //-----------------------------------------------------------------------------
@@ -488,4 +499,114 @@ class Orders extends CI_Controller{
         $row_order = $this->Db_model->row_id('orders', $order_id);
         echo $this->Order_model->message_buyer($row_order);
     }
+
+// Cargue masivo histórico de pagos
+//-----------------------------------------------------------------------------
+
+    function cph_cargar_pagos()
+    {
+        $orders = array();
+
+        $this->db->order_by('published_at', 'ASC');
+        $posts = $this->db->get_where('posts', 'type_id = 99');
+
+        foreach ( $posts->result() as $post )
+        {            
+            $user = $this->Db_model->row('users', "document_number = '{$post->code}'");
+            if( ! is_null($user) ){
+                //$arr_row = $this->Order_model->cph_arr_row($user, $post);
+
+                $data_order = $this->Order_model->create($user->id);
+                $order_code = $data_order['order_code'];
+
+                //Agregar producto
+                    $product_id = $post->related_1;
+                    $quantity = 1;
+
+                    $data_order['product'] = $this->Order_model->cph_add_product($product_id, $post->integer_1, $data_order['order_id']);
+
+                //Establecer estado de pago
+                    $arr_row['payment_channel'] = $post->related_2;
+                    $arr_row['payed'] = 1;
+                    $arr_row['status'] = 1;  //Pago confirmado
+                    $arr_row['confirmed_at'] = $post->published_at;
+                    $arr_row['updater_id'] = 202024;
+                    $arr_row['notes_admin'] = $post->content;
+                    $arr_row['payed'] = 1;
+                    $arr_row['status'] = 1;
+                    $arr_row['description'] = 'CargueMasivo20220207';
+                    $arr_row['confirmed_at'] = $post->published_at;
+                    $arr_row['updated_at'] = $post->published_at;
+                    $arr_row['created_at'] = $post->published_at;
+
+                    $data_order['updated_id'] = $this->Db_model->save('orders', "id = {$data_order['order_id']}", $arr_row);
+
+                //Actualizar post
+                    $arr_row_post['cat_1'] = $data_order['order_id'];
+                    $this->Db_model->save('posts', "id = {$post->id}", $arr_row_post);
+            }
+
+            $orders[] = $data_order;
+        }
+
+        $data['orders'] = $orders;
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    function cph_actualizar_vencimientos()
+    {
+        $posts = $this->db->query('SELECT MAX(updated_at) AS max_updated_at, code, COUNT(id) AS count_payments FROM `posts` WHERE type_id = 99 GROUP BY code');
+        $users = array();
+
+
+        foreach ($posts->result() as $post) {
+            $user = $this->Db_model->row('users', "document_number = '{$post->code}'");
+            if ( ! is_null($user) ) {
+                if ( is_null($user->expiration_at) ) {
+                    
+                    $arr_row['expiration_at'] = $post->max_updated_at;
+                    $arr_row['admin_notes'] = $user->admin_notes . ' UpdateExpirationAt20220208';
+                    $this->db->where('id', $user->id)->update('users', $arr_row);
+                    
+                    $users[] = $user->id . ' Actualizado';
+                }
+            }
+        }
+
+        $data['posts'] = $posts->result();
+        $data['users'] = $users;
+        $data['updated_users'] = count($users);
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+    function cph_actualizar_plan()
+    {
+        $posts = $this->db->query('SELECT related_1 AS product_id, code AS document_number, published_at FROM posts WHERE type_id = 99 ORDER BY published_at DESC');
+
+        foreach ($posts->result() as $payment) {
+            $user = $this->Db_model->row('users', "document_number = '{$payment->document_number}'");
+            if ( ! is_null($user) ) {
+                if ( $user->commercial_plan == 0 ) {
+                    
+                    $arr_row['commercial_plan'] = $payment->product_id;
+                    $arr_row['admin_notes'] = $user->admin_notes . ' UpdateCommercialPlan20220208';
+                    $this->db->where('id', $user->id)->update('users', $arr_row);
+                    
+                    $users[] = $user->id . ' Actualizado';
+                }
+            }
+        }
+
+        $data['posts'] = $posts->result();
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
+
+
+
 }

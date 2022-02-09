@@ -94,14 +94,22 @@ class App_model extends CI_Model{
         $summary = array();
 
         $summary['users']['num_rows'] = $this->db->count_all('users');
+        $summary['users']['qty_deportistas'] = $this->Db_model->num_rows('users', 'role = 21');
         $summary['orders']['num_rows'] = $this->db->count_all('orders');
         $summary['products']['num_rows'] = $this->db->count_all('products');
         $summary['posts']['num_rows'] = $this->db->count_all('posts');
-
+        
         //Lapso próxima semana
         $today = date('Y-m-d') . ' 00:00:00';
         $one_week_time = strtotime($today . ' +6 days');
         $one_week = date('Y-m-d',$one_week_time);
+
+        //Lapso semana pasada
+        $last_week_time = strtotime($today . ' -6 days');
+        $last_week = date('Y-m-d',$last_week_time);
+
+        //Ventas y pagos
+        $summary['orders']['num_rows'] = $this->Db_model->num_rows('orders', "payed = 1 AND confirmed_at >='{$last_week}'");
 
         $summary['trainings']['num_rows'] = $this->Db_model->num_rows('events', "type_id = 203 AND start >='{$today}' AND start <='{$one_week}'");
         $summary['reservations']['num_rows'] = $this->Db_model->num_rows('events', "type_id = 213 AND start >='{$today}' AND start <='{$one_week}'");
@@ -196,10 +204,12 @@ class App_model extends CI_Model{
     */
     function options_user($condition, $empty_value = NULL, $value_field = 'display_name')
     {
+        $select = "CONCAT('0', users.id) AS user_id, display_name, username,
+            CONCAT((first_name), ' ', (last_name)) AS document_name";
         
-        $this->db->select("CONCAT('0', users.id) AS user_id, display_name, username", FALSE); 
+        $this->db->select($select, FALSE); 
         $this->db->where($condition);
-        $this->db->order_by('users.display_name', 'ASC');
+        $this->db->order_by('users.first_name', 'ASC');
         $query = $this->db->get('users');
 
         $options_pre = $this->pml->query_to_array($query, $value_field, 'user_id');
@@ -268,7 +278,6 @@ class App_model extends CI_Model{
 
         return $schedules;
     }
-
 
 // Procesos del sistema para la aplicación
 //-----------------------------------------------------------------------------

@@ -17,7 +17,6 @@
                                 <input
                                     name="start" type="date" class="form-control"
                                     required
-                                    title="Desde" placeholder="Desde"
                                     v-model="form_values.start" v-on:change="set_end_date"
                                 >
                             </div>
@@ -28,10 +27,19 @@
                                 <input
                                     name="end" type="date" class="form-control"
                                     required
-                                    title="Hasta" placeholder="Hasta"
                                     v-model="form_values.end"
                                 >
                                 <small class="form-text text-muted">{{ dates_difference }}</small>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="content" class="col-md-4 col-form-label text-right">Notas</label>
+                            <div class="col-md-8">
+                                <textarea
+                                    name="content" rows="3" class="form-control"
+                                    title="Notas" placeholder="Notas"
+                                    v-model="form_values.content"
+                                ></textarea>
                             </div>
                         </div>
                     </div>

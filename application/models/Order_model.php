@@ -15,11 +15,12 @@ class Order_model extends CI_Model{
     
     /**
      * Array con los datos para la vista de exploración
+     * 2022-01-25
      */
-    function explore_data($num_page)
+    function explore_data($filters, $num_page, $per_page = 10)
     {
         //Data inicial, de la tabla
-            $data = $this->get($num_page);
+            $data = $this->get($filters, $num_page, $per_page = 10);
         
         //Elemento de exploración
             $data['controller'] = 'orders';                      //Nombre del controlador
@@ -34,18 +35,21 @@ class Order_model extends CI_Model{
         return $data;
     }
 
-    function get($num_page)
+    /**
+     * Obtener listado de orders, según filtros de búsqueda, paginado, con 
+     * datos adicionales para representación en interfaz
+     * 2022-01-25
+     */
+    function get($filters, $num_page, $per_page)
     {
         //Referencia
-            $per_page = 10;                             //Cantidad de registros por página
             $offset = ($num_page - 1) * $per_page;      //Número de la página de datos que se está consultado
 
         //Búsqueda y Resultados
-            $this->load->model('Search_model');
-            $data['filters'] = $this->Search_model->filters();
-            $elements = $this->search($data['filters'], $per_page, $offset);    //Resultados para página
+            $elements = $this->search($filters, $per_page, $offset);    //Resultados para página
         
         //Cargar datos
+            $data['filters'] = $filters;
             $data['list'] = $elements->result();
             $data['str_filters'] = $this->Search_model->str_filters();
             $data['search_num_rows'] = $this->search_num_rows($data['filters']);
@@ -61,6 +65,7 @@ class Order_model extends CI_Model{
     function select($format = 'general')
     {
         $arr_select['general'] = 'orders.*';
+        $arr_select['personal'] = 'orders.id, order_code, bill, amount, confirmed_at';
         $arr_select['export'] = 'orders.id AS ID_venta, orders.status, order_code AS ref_venta, buyer_name AS nombre_comprador, 
             email, document_number AS numero_documento, phone_number AS telefono, address AS direccion, 
             notes_admin AS notas_internas, bill AS numero_factura, total_tax AS impuestos, 
@@ -96,12 +101,18 @@ class Order_model extends CI_Model{
         return $condition;
     }
     
+    /**
+     * Query con la búsqueda de orders, página específica
+     * 2022-01-25
+     */
     function search($filters, $per_page = NULL, $offset = NULL)
     {   
         $role_filter = $this->role_filter();
 
         //Construir consulta
-            $this->db->select($this->select());
+            $select_format = 'general';
+            if ( $filters['sf'] ) $select_format = $filters['sf'];
+            $this->db->select($this->select($select_format));
         
         //Crear array con términos de búsqueda
             $words_condition = $this->Search_model->words_condition($filters['q'], array('order_code', 'buyer_name', 'city', 'email', 'phone_number'));
@@ -116,7 +127,9 @@ class Order_model extends CI_Model{
                 $order_type = $this->pml->if_strlen($filters['ot'], 'ASC');
                 $this->db->order_by($filters['o'], $order_type);
             } else {
+                $this->db->order_by('id', 'DESC');
                 $this->db->order_by('updated_at', 'DESC');
+                $this->db->order_by('confirmed_at', 'DESC');
             }
             
         //Filtros
@@ -617,13 +630,14 @@ class Order_model extends CI_Model{
 
     /**
      * Productos incluidos en una compra
-     * 2021-12-23
+     * 2022-01-05
      */
     function products($order_id)
     {
         $this->db->select(
                 'order_product.*, products.name, products.url_thumbnail, 
-                products.slug, products.stock, products.code, products.cat_1'
+                products.slug, products.stock, products.code, products.cat_1,
+                products.integer_1'
             );
         $this->db->join('products', 'products.id = order_product.product_id');
         $this->db->where('order_id', $order_id);
@@ -665,7 +679,7 @@ class Order_model extends CI_Model{
     }
 
     /**
-     * Query con posts confirmaciones de un pedido hechas por PayU
+     * Query con posts confirmaciones de un pedido hechas por Wompi
      * 2021-05-03
      */
     function confirmations($order_id)
@@ -706,7 +720,7 @@ class Order_model extends CI_Model{
      */
     function set_payed($order_id, $arr_row)
     {
-        //Estado inicial de la venta
+        //Estado inicial de la venta, registro order
         $order_pre = $this->Db_model->row_id('orders', $order_id);
 
         // Resultado por defecto
@@ -770,8 +784,10 @@ class Order_model extends CI_Model{
         {
             $this->substract_stock($order_id);     //Restar vendidos de cantidades disponibles
 
+            //Actualizar susbcripción de usuario, si tiene productos de este tipo
             $this->load->model('Subscription_model');
             $this->Subscription_model->update_from_order($order_id);
+            $this->Subscription_model->update_for_partner($order_id);   //También a beneficiarios
 
             //Enviar e-mails a administradores de tienda y al cliente
             if ( ENV == 'production' )
@@ -782,7 +798,6 @@ class Order_model extends CI_Model{
             //Reestablecer inventario, sumar cantidades disponibles
             $this->reset_stock($order_id);
         }
-
     }
 
 // Datos de compras asociados a usuarios
@@ -814,7 +829,7 @@ class Order_model extends CI_Model{
         $admin_email = $this->Db_model->field_id('sis_option', 25, 'option_value'); //Opción 25
             
         //Asunto de mensaje
-            $subject = "Estado venta {$row_order->order_code}: " . $this->Item_model->name(7, $row_order->status);
+            $subject = "Pago {$row_order->order_code}: " . $this->Item_model->name(7, $row_order->status);
         
         //Enviar Email
             $this->load->library('email');
@@ -851,4 +866,57 @@ class Order_model extends CI_Model{
         
         return $message;
     }
+
+// TEMPORAL CARGUE PAGOS HISTORICOS
+//-----------------------------------------------------------------------------
+
+    function cph_arr_row($user, $post)
+    {
+        $arr_row['status'] = 1; //Pagado
+        $arr_row['buyer_name'] = $user->first_name . ' ' . $user->last_name;
+        $arr_row['email'] = $user->email;
+        $arr_row['document_number'] = $user->document_number;
+        $arr_row['document_type'] = $user->document_type;
+        $arr_row['address'] = $user->address;
+        $arr_row['phone_number'] = $user->phone_number;
+        $arr_row['description'] = 'CargueMasivo20220208';
+        $arr_row['notes_admin'] = $post->content;
+        $arr_row['amount'] = $post->integer_1;
+        $arr_row['payed'] = 1;
+        $arr_row['payment_channel'] = $post->related_2;
+        $arr_row['confirmed_at'] = $post->published_at;
+        $arr_row['created_at'] = $post->published_at;
+        $arr_row['updated_at'] = $post->published_at;
+        $arr_row['updater_id'] = 202024;
+        $arr_row['creator_id'] = 202024;
+
+        $arr_row['user_id'] = $user->id;
+
+        return $arr_row;
+    }
+
+    function cph_add_product($product_id, $price = 0, $order_id)
+    {
+        $data = array('status' => 0, 'op_id' => 0, 'qty_items' => NULL, 'order_id' => $order_id);
+
+        //Construir registro order_product
+        $arr_row['order_id'] = $order_id;
+        $arr_row['product_id'] = $product_id;
+        $arr_row['original_price'] = $price;
+        $arr_row['price'] = $price;
+        $arr_row['quantity'] = 1;
+
+        //Guardar registro en order_product
+        $condition = "order_id = {$arr_row['order_id']} AND product_id = {$arr_row['product_id']} AND type_id = 1";
+        $data['op_id'] = $this->Db_model->save('order_product', $condition, $arr_row);
+
+        //Actualizar totales de la compra
+        $this->update_totals($order_id);
+        
+        //Actualizar resultado respuesta
+        $data['status'] = ($data['op_id'] > 0 ) ? 1 : 0 ;
+
+        return $data;
+    }
+
 }

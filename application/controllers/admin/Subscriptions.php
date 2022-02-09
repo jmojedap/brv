@@ -7,7 +7,7 @@ class Subscriptions extends CI_Controller{
 
 // Variables generales
 //-----------------------------------------------------------------------------
-    public $views_folder = 'admin/calendar/subscriptions/';
+    public $views_folder = 'admin/subscriptions/';
     public $url_controller = URL_ADMIN . 'subscriptions/';
 
 // Constructor
@@ -44,6 +44,7 @@ class Subscriptions extends CI_Controller{
         $arr_row['user_id'] = $this->input->post('user_id');
         $arr_row['start'] = $this->input->post('start') . ' 00:00:00';
         $arr_row['end'] = $this->input->post('end') . ' 23:59:59';
+        $arr_row['content'] = $this->input->post('content');
         $arr_row['element_id'] = $this->input->post('user_id');
 
         $data['saved_id']= $this->Subscription_model->save($arr_row);
@@ -82,4 +83,42 @@ class Subscriptions extends CI_Controller{
 
         $this->output->set_content_type('application/json')->set_output(json_encode($data));
     }
+
+// Generación de órdenes de pago
+//-----------------------------------------------------------------------------
+
+    /**
+     * Vista, herramienta para generación de órdenes de pago de subscripciones
+     * 2022-01-03
+     */
+    function orders_generation()
+    {
+        $data['head_title'] = 'Generar órdenes de pago';
+        $data['view_a'] = $this->views_folder . 'orders_generation/orders_generation_v';
+        $data['nav_2'] = 'admin/orders/explore/menu_v';
+
+        $data['products'] = $this->Subscription_model->products();
+
+        //Identificar filtros de búsqueda
+        $this->load->model('Search_model');
+        $data['filters'] = $this->Search_model->filters();
+
+        $this->App_model->view(TPL_ADMIN, $data);
+    }
+
+    /**
+     * Crear una orden de pago, para un usuario y producto de subscripción
+     * determinado
+     * 2021-01-04
+     */
+    function create_order()
+    {
+        $creation_data = $this->input->post();
+        $data['order'] = $this->Subscription_model->create_order($creation_data);
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+
+    }
+
 }

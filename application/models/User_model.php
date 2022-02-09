@@ -71,11 +71,14 @@ class User_model extends CI_Model{
      */
     function select($format = 'general')
     {
-        $arr_select['general'] = 'users.id, username, document_number, document_type, display_name, first_name, last_name, email, role';
-        $arr_select['general'] .= ', image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login';
-        $arr_select['general'] .= ', expiration_at, commercial_plan, admin_notes, birth_date';
+        $arr_select['general'] = 'users.id, username, document_number, 
+            document_type, display_name, first_name, last_name, email, role, address, phone_number,
+            image_id, url_image, url_thumbnail, status, users.type_id, created_at, updated_at, last_login,
+            expiration_at, commercial_plan, admin_notes, birth_date, partner_id';
 
-        $arr_select['export'] = 'users.id, username, document_number AS no_documento, document_type AS tipo_documento, display_name AS nombre, email, role AS rol, status, created_at AS creado, updated_at AS actualizado, expiration_at AS suscripcion_hasta';
+        $arr_select['export'] = 'users.id, username, document_number AS no_documento, document_type AS tipo_documento, 
+            display_name AS nombre, email, role AS rol, status, created_at AS creado, updated_at AS actualizado, 
+            expiration_at AS suscripcion_hasta, admin_notes AS notas_internas';
         $arr_select['follow'] = 'users.id, username, qty_followers, qty_following';
 
         return $arr_select[$format];
@@ -135,8 +138,13 @@ class User_model extends CI_Model{
         if ( $filters['fe1'] == '1' ) { $condition .= "expiration_at >= '{$now}' AND "; }
         if ( $filters['fe1'] == '2' ) { $condition .= "expiration_at < '{$now}' AND "; }
 
+        //Vecha de vencimiento
+        if ( $filters['d1'] != '' ) { $condition .= "users.expiration_at >= '{$filters['d1']}' AND "; }
+        if ( $filters['d2'] != '' ) { $condition .= "users.expiration_at <= '{$filters['d2']}' AND "; }
+
         //Plan comercial
         if ( strlen($filters['fe2']) > 0 ) { $condition .= "commercial_plan = '{$filters['fe2']}' AND "; }
+        if ( strlen($filters['fe3']) == 1 ) { $condition .= "commercial_plan > 0 AND "; }    //Que tenga un plan asignado
         
         //Quitar cadena final de ' AND '
         if ( strlen($condition) > 0 ) { $condition = substr($condition, 0, -5);}
@@ -262,6 +270,23 @@ class User_model extends CI_Model{
         $query = $this->db->get('users', $limit); //Resultados por página
         
         return $query;
+    }
+
+    /**
+     * Arrar con información de un usuario específico
+     * 2022-01-05
+     */
+    function get_info($user_id)
+    {
+        $user = ['id' => 0, 'display_name' => 'ND'];
+
+        $this->db->select($this->select());
+        $this->db->where('id', $user_id);
+        $users = $this->db->get('users');
+
+        if ( $users->num_rows() > 0 ) $user = $users->row(0);
+
+        return $user;
     }
 
 // GUARDAR

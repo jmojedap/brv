@@ -224,7 +224,6 @@
             options_city: <?= json_encode($options_city) ?>,
             options_gender: <?= json_encode($options_gender) ?>,
             options_document_type: <?= json_encode($options_document_type) ?>,
-            options_commercial_plan: <?= json_encode($options_commercial_plan) ?>,
             loading: false
         },
         methods: {

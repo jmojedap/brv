@@ -314,6 +314,24 @@ class Period_model extends CI_Model{
         return $days->result();
     }
 
+    /**
+    * Devuelve un array con las opciones de la tabla periods, limitadas por 
+    * una condición definida, para un valor campo determinado
+    * 2022-01-04
+    */
+    function options($condition, $value_field = 'period_name', $empty_text = 'Periodo')
+    {
+        
+        $this->db->select("CONCAT('0', periods.id) AS period_id, period_name", FALSE); 
+        $this->db->where($condition);
+        $this->db->order_by('periods.id', 'ASC');
+        $query = $this->db->get('periods');
+        
+        $options = array_merge(array('' => '[ ' . $empty_text . ' ]'), $this->pml->query_to_array($query, $value_field, 'period_id'));
+        
+        return $options;
+    }
+
 // Tools
 //-----------------------------------------------------------------------------
 

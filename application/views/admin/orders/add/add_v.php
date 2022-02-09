@@ -2,17 +2,6 @@
     <div class="center_box_750">
         <div class="card mb-2">
             <div class="card-body">
-                <div class="mb-2 d-flex justify-content-between">
-                    <button class="btn btn-light w120p" type="button" v-on:click="set_step(1)" v-show="step == 2">
-                        <i class="fa fa-arrow-left"></i>
-                        Usuarios
-                    </button>
-                    <button class="btn btn-light w120p" type="button" v-on:click="set_step(2)" v-show="step == 3">
-                        <i class="fa fa-arrow-left"></i>
-                        Productos
-                    </button>
-                </div>
-
                 <!-- 3: VERIFICACIÓN Y FORMULARIO DATOS ADICIONALES -->
                 <div v-show="user.id > 0 && step < 4">
                     <?php $this->load->view($this->views_folder . 'add/form_v') ?>
@@ -22,7 +11,7 @@
                 <div v-show="step == 1">
                     <h3 class="text-center"><i class="fa fa-arrow-right text-success"></i> Seleccione el usuario</h3>
                     <div class="form-group row">
-                        <label for="user_id" class="col-md-4 col-form-label text-right">Usuario</label>
+                        <label for="user_id" class="col-md-4 col-form-label text-right">Buscar</label>
                         <div class="col-md-8">
                             <input
                                 name="q" type="text" class="form-control"
@@ -42,7 +31,7 @@
                         <tbody>
                             <tr v-for="(user, key) in users">
                                 <td>
-                                    {{ user.display_name }}
+                                    {{ user.first_name }} {{ user.last_name }}
                                     <br>
                                     <span class="text-muted">{{ user.document_number }}</span>
                                 </td>
@@ -96,7 +85,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-light" v-on:click="set_product(key)">
+                                        <button class="btn btn-light" v-on:click="set_product(product.id)">
                                             Seleccionar
                                         </button>
                                     </td>
@@ -109,7 +98,7 @@
                 <!-- 4: CONFIRMACIÓN -->
                 <div v-show="step == 4">
                     <h3 class="text-success text-center"><i class="fa fa-check text-success"></i> Pago guardado</h3>
-                    <p class="text-center">Ref. venta: {{ order.order_code }}</p>
+                    <p class="text-center">Cód. venta: {{ order.order_code }}</p>
                     <div class="d-flex justify-content-around">
                         <a v-bind:href="`<?= URL_ADMIN . "orders/info/" ?>` + order.order_id" class="btn btn-primary w120p">
                             Abrir
@@ -119,7 +108,6 @@
                         </a>
                     </div>
                 </div>
-                
             </div>
         </div>
     </div>

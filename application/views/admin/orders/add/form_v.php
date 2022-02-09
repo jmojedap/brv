@@ -2,21 +2,54 @@
     <fieldset v-bind:disabled="loading">
         <div class="form-group row">
             <label for="campo" class="col-md-4 text-right">Usuario</label>
-            <div class="col-md-8">
-                <span class="text-primary">{{ user.display_name }}</span>
-                <br> {{ user.document_type | document_type_name }} {{ user.document_number }}
-                <br>
-                <span>Vencimiento: </span> {{ user.expiration_at | date_format }} &middot; {{ user.expiration_at | ago }}
+            <div class="col-md-8 d-flex justify-content-between">
+                <div>
+                    <span class="text-primary">{{ user.display_name }}</span>
+                    <br> {{ user.document_type | document_type_name }} {{ user.document_number }}
+                    <br>
+                    <span>Vencimiento: </span> {{ user.expiration_at | date_format }} &middot; {{ user.expiration_at | ago }}
+                </div>
+                <div>
+                    <button class="btn btn-light btn-sm" type="button" v-on:click="set_step(1)">Cambiar</button>
+                </div>
             </div>
         </div>
-
+            
         <div v-show="step == 3">
+            <!-- SI EL PRODUCTO TIENE BENEFICIO DE PAREJAS -->
+            <div class="form-group row" v-show="product.for_partners == 1">
+                <label for="partner" class="col-md-4 text-right"><i class="fa fa-user text-primary"></i> Beneficiario</label>
+                <div class="col-md-8">
+                    <span class="text-primary">
+                        {{ partner.first_name }} {{ partner.last_name }}
+                    </span>
+                    <br>
+                    <span class="text-muted">
+                        {{ partner.document_type | document_type_name }}
+                        {{ partner.document_number }}
+                    </span>
+                </div>
+            </div>
+            <div class="form-group form-check row" v-show="product.for_partners == 1">
+                <div class="col-md-8 offset-md-4">
+                    <input type="checkbox" class="form-check-input" id="pay_partner_value" v-model="pay_partner_value" v-on:change="set_quantity">
+                    <label class="form-check-label" for="pay_partner_value">Incluir pago por beneficiario</label>
+                </div>
+            </div>
             <div class="form-group row">
                 <label for="campo" class="col-md-4 text-right">Producto</label>
-                <div class="col-md-8">
-                    <span class="text-muted">{{ product.code }}</span>
-                    <br>{{ product.name }} 
-                    <br><span class="text-primary">${{ product.price | currency }}</span>
+                <div class="col-md-8 d-flex justify-content-between">
+                    <div>
+                        <span class="text-muted">{{ product.code }}</span>
+                        <br>{{ product.name }} 
+                        <br>
+                        <span v-show="quantity > 1">${{ product.price | currency }} x {{ quantity }} = </span> 
+                        <span class="text-primary">${{ product.price * quantity | currency }}</span>
+
+                    </div>
+                    <div>
+                        <button class="btn btn-light btn-sm" type="button" v-on:click="set_step(2)">Cambiar</button>
+                    </div>
                 </div>
             </div>
     
@@ -74,7 +107,7 @@
             </div>
             <div class="form-group row">
                 <div class="col-md-8 offset-md-4">
-                    <button class="btn btn-primary w120p" type="submit">Guardar</button>
+                    <button class="btn btn-success btn-lg w120p" type="submit">Crear pago</button>
                 </div>
             </div>
         </div>

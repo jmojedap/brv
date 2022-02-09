@@ -1,6 +1,11 @@
 <?php
     $condition = "creator_id = {$row->id} AND type_id IN (7,6)";
     $qty_posts = $this->Db_model->num_rows('posts', $condition);
+
+    $commercial_plan = $this->Db_model->row_id('products', $row->commercial_plan);
+    $partner = $this->Db_model->row_id('users', $row->partner_id);
+
+    $is_partner_of = $this->Db_model->exists('users', "partner_id = {$row->id}");
 ?>
 
 <div class="container" id="profile_app">
@@ -44,13 +49,36 @@
                         <td><?= $this->Item_model->name(53, $row->document_type, 'abbreviation') ?> &middot; <?= $row->document_number ?></td>
                     </tr>
                     <tr>
-                        <td class="td-title">Plan comercial</td>
+                        <td class="td-title">Plan suscripción</td>
                         <td>
-                            <i class="fa fa-circle prtp_<?= $row->commercial_plan ?>"></i>
-                            <?= $this->Item_model->name(189, $row->commercial_plan) ?> &middot; 
-                            <small class="text-muted">(<?= $row->commercial_plan ?>)</small>
+                            <?php if ( ! is_null($commercial_plan) ) : ?>
+                                <a href="<?= URL_ADMIN . "products/info/" . $commercial_plan->id ?>">
+                                    <?= $commercial_plan->code ?> &middot; 
+                                    <span class="text-muted"><?= $commercial_plan->name ?></span>
+                                </a>
+                            <?php endif; ?>
                         </td>
                     </tr>
+                            
+                    <tr>
+                        <td class="td-title">
+                            Beneficiario
+                            <?php if ( $is_partner_of > 0 ) : ?>de<?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if ( ! is_null($partner) ) : ?>
+                                <a href="<?= URL_ADMIN . "users/profile/" . $partner->id ?>">
+                                    <?= $partner->document_number ?> &middot; 
+                                    <?= $partner->first_name . ' ' . $partner->last_name ?>
+                                </a>
+                            <?php endif; ?>
+                            <?php if ( $is_partner_of > 0 ) : ?>
+                                <a href="<?= URL_ADMIN . "users/profile/{$is_partner_of}" ?>"><?= $this->App_model->name_user($is_partner_of, 'FL'); ?>
+                            </a>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    
                     <tr>
                         <td class="td-title">Suscripción hasta</td>
                         <td>

@@ -26,7 +26,6 @@ Vue.filter('category_name', function (value) {
 
 // App
 //-----------------------------------------------------------------------------
-
 var app_explore = new Vue({
     el: '#app_explore',
     created: function(){
@@ -43,6 +42,7 @@ var app_explore = new Vue({
         selected: [],
         all_selected: false,
         filters: <?= json_encode($filters) ?>,
+        str_filters: '<?= $str_filters ?>',
         display_filters: false,
         loading: false,
         options_cat_1: <?= json_encode($options_cat_1) ?>,
@@ -57,6 +57,7 @@ var app_explore = new Vue({
                 this.list = response.data.list
                 this.max_page = response.data.max_page
                 this.search_num_rows = response.data.search_num_rows
+                this.str_filters = response.data.str_filters
                 $('#head_subtitle').html(response.data.search_num_rows)
                 history.pushState(null, null, url_app + this.cf + this.num_page +'/?' + response.data.str_filters)
                 this.all_selected = false

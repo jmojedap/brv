@@ -25,6 +25,47 @@
                 </a>
             </div>
             <div class="col-md-6">
+                <a href="<?= URL_ADMIN . "users/explore/1/?role=021" ?>">
+                    <div class="card mb-2">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media">
+                                    <div class="media-body text-left w-100">
+                                        <h3 class="text-color-2">{{ summary.users.qty_deportistas }}</h3>
+                                        <span>Deportistas</span>
+                                    </div>
+                                    <div class="media-right media-middle">
+                                        <i class="fa fa-users fa-3x float-right color-text-2"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- VENTAS Y PAGOS -->
+            <div class="col-md-6">
+                <div class="card mb-2">
+                    <a href="<?= URL_ADMIN . "orders/explore" ?>">
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="media">
+                                    <div class="media-body text-left w-100">
+                                        <h3 class="text-color-2">{{ summary.orders.num_rows }}</h3>
+                                        <span>Ventas y pagos</span>
+                                        <p class="text-muted">Pagos recibidos en los últimos 7 días</p>
+                                    </div>
+                                    <div class="media-right media-middle">
+                                        <i class="fa fa-receipt fa-3x float-right color-text-3"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="card mb-2">
                     <a href="<?= URL_ADMIN . "products/explore" ?>">
                         <div class="card-content">
@@ -33,9 +74,10 @@
                                     <div class="media-body text-left w-100">
                                         <h3 class="text-color-2">{{ summary.products.num_rows }}</h3>
                                         <span>Productos activos</span>
+                                        <p class="text-muted">Servicios de suscripción y otros</p>
                                     </div>
                                     <div class="media-right media-middle">
-                                        <i class="fa fa-tags fa-3x float-right color-text-2"></i>
+                                        <i class="fa fa-tags fa-3x float-right color-text-4"></i>
                                     </div>
                                 </div>
                             </div>
@@ -43,6 +85,7 @@
                     </a>
                 </div>
             </div>
+
             <!-- ENTRENAMIENTOS -->
             <div class="col-md-6">
                 <div class="card mb-2">
@@ -56,7 +99,7 @@
                                         <p class="text-muted">Programados en los próximos 7 días</p>
                                     </div>
                                     <div class="media-right media-middle">
-                                        <i class="fas fa-dumbbell fa-3x float-right color-text-3"></i>
+                                        <i class="fas fa-dumbbell fa-3x float-right color-text-5"></i>
                                     </div>
                                 </div>
                             </div>
@@ -77,7 +120,7 @@
                                         <p class="text-muted">En los próximos 7 días</p>
                                     </div>
                                     <div class="media-right media-middle">
-                                        <i class="far fa-calendar-check fa-3x float-right color-text-4"></i>
+                                        <i class="far fa-calendar-check fa-3x float-right color-text-6"></i>
                                     </div>
                                 </div>
                             </div>
@@ -99,7 +142,7 @@
                                         <p class="text-muted">Programados en los próximos 7 días</p>
                                     </div>
                                     <div class="media-right media-middle">
-                                        <i class="fas fa-user-md fa-3x float-right color-text-5"></i>
+                                        <i class="fas fa-user-md fa-3x float-right color-text-1"></i>
                                     </div>
                                 </div>
                             </div>
@@ -120,7 +163,7 @@
                                         <p class="text-muted">En los próximos 7 días</p>
                                     </div>
                                     <div class="media-right media-middle">
-                                        <i class="far fa-calendar-check fa-3x float-right color-text-6"></i>
+                                        <i class="far fa-calendar-check fa-3x float-right color-text-2"></i>
                                     </div>
                                 </div>
                             </div>
@@ -140,7 +183,7 @@
                                         <p class="text-muted">Total mediciones de InBody cargadas</p>
                                     </div>
                                     <div class="media-right media-middle">
-                                        <i class="fa fa-weight fa-3x float-right color-text-1"></i>
+                                        <i class="fa fa-weight fa-3x float-right color-text-3"></i>
                                     </div>
                                 </div>
                             </div>

@@ -46,6 +46,16 @@
                                     ></textarea>
                             </div>
                         </div>
+
+                        <div class="form-group row">
+                            <label for="integer_1" class="col-md-4 col-form-label text-right">Beneficio pareja</label>
+                            <div class="col-md-8">
+                                <select name="integer_1" v-model="form_values.integer_1" class="form-control" required>
+                                    <option v-for="(option_integer_1, key_integer_1) in options_integer_1" v-bind:value="key_integer_1">{{ option_integer_1 }}</option>
+                                </select>
+                                <small class="form-text text-muted">¿El producto aplica suscripción al beneficiario asociado?</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group row">
@@ -67,24 +77,12 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="price" class="col-md-4 col-form-label text-right">Precio de venta</label>
+                            <label for="price" class="col-md-4 col-form-label text-right"><strong>Precio de venta</strong></label>
                             <div class="col-md-8">
                                 <input
                                     name="price" id="field-price" type="number" class="form-control"
                                     required min="1"
                                     v-model="form_values.price" v-on:change="updateDependents"
-                                >
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="cost" class="col-md-4 col-form-label text-right">Costo</label>
-                            <div class="col-md-8">
-                                <input
-                                    name="cost" id="field-cost" type="number" class="form-control"
-                                    required min="1"
-                                    title="" placeholder=""
-                                    v-model="form_values.cost"
                                 >
                             </div>
                         </div>
@@ -125,6 +123,18 @@
                         </div>
 
                         <div class="form-group row">
+                            <label for="cost" class="col-md-4 col-form-label text-right">Costo de compra</label>
+                            <div class="col-md-8">
+                                <input
+                                    name="cost" id="field-cost" type="number" class="form-control"
+                                    required min="1"
+                                    title="" placeholder=""
+                                    v-model="form_values.cost"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
                             <div class="offset-md-4 col-md-8">
                                 <button class="btn btn-success w120p" type="submit">Guardar</button>
                             </div>
@@ -146,6 +156,7 @@
 var form_values = <?= json_encode($row) ?>;
 form_values.status = '0' + '<?= $row->status ?>';
 form_values.cat_1 = '0' + '<?= $row->cat_1 ?>';
+form_values.integer_1 = '0' + '<?= $row->integer_1 ?>';
 
 // Vue App
 //-----------------------------------------------------------------------------
@@ -156,6 +167,7 @@ el: '#app_edit',
         row_id: '<?= $row->id ?>',
         options_status: <?= json_encode($options_status) ?>,
         options_cat_1: <?= json_encode($options_cat_1) ?>,
+        options_integer_1: {'01':'Sí','00':'No'},
     },
     methods: {
         sendForm: function() {

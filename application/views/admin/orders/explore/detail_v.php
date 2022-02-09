@@ -42,6 +42,12 @@
                         </td>
                     </tr>
                     <tr>
+                        <td>Notas</td>
+                        <td>
+                            {{ element.notes_admin }}
+                        </td>
+                    </tr>
+                    <tr>
                         <td>Actualizado</td>
                         <td>
                             {{ element.updated_at }} - {{ element.updated_at | ago  }}

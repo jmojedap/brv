@@ -1,5 +1,5 @@
 <div id="user_subscriptions_app">
-    <div class="center_box_750">
+    <div class="center_box_920">
         <div class="mb-2">
             <button class="btn btn-success w120p" data-toggle="modal" data-target="#modal_form">
                 <i class="fa fa-plus"></i> Nueva
@@ -7,11 +7,12 @@
         </div>
         <table class="table bg-white">
             <thead>
-                <th width="40px">ID</th>
+                <th width="40px" title="ID suscripción">ID</th>
                 <th>Desde</th>
                 <th>Hasta</th>
-                <th>Ref. Venta</th>
+                <th>ID venta</th>
                 <th></th>
+                <th width="300px">Notas</th>
                 <th>Creada</th>
                 <th width="40px"></th>
             </thead>
@@ -39,6 +40,7 @@
                     <td>
                         {{ subscription.amount | currency }}
                     </td>
+                    <td>{{ subscription.content }}</td>
                     <td>
                         <span v-bind:title="subscription.created_at"> {{ subscription.created_at | ago }}</span>
                     </td>

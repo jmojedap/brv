@@ -44,12 +44,17 @@ class Users extends CI_Controller{
         
         //Opciones de filtros de búsqueda
             $data['options_role'] = $this->Item_model->options('category_id = 58', 'Todos');
-            $data['options_commercial_plan'] = $this->Item_model->options('category_id = 189 AND item_group <= 2', 'Todos');
             
-        //Arrays con valores para contenido en lista
+            //Arrays con valores para contenido en lista
             $data['arr_roles'] = $this->Item_model->arr_cod('category_id = 58');
             $data['arr_document_types'] = $this->Item_model->arr_item('category_id = 53', 'cod_abr');
-            $data['arr_commercial_plans'] = $this->Item_model->arr_cod('category_id = 189');
+
+        //Variables sobre productos, planes de subscripción
+            $this->load->model('Subscription_model');
+            $this->load->model('Product_model');
+            $products_condition = $this->Subscription_model->subscription_product_categories('condition');
+            $data['options_commercial_plan'] = $this->Product_model->options($products_condition, 'code_name',  'Todos');
+            $data['arr_commercial_plans'] = $this->Subscription_model->subscription_products_array();
             
         //Cargar vista
             $this->App_model->view(TPL_ADMIN, $data);
@@ -139,6 +144,19 @@ class Users extends CI_Controller{
         
         $this->App_model->view(TPL_ADMIN, $data);
     }
+
+    /**
+     * JSON
+     * Información de un usuario específico
+     * 2022-01-05
+     */
+    function get_info($user_id)
+    {
+        $data['user'] = $this->User_model->get_info($user_id);
+
+        //Salida JSON
+        $this->output->set_content_type('application/json')->set_output(json_encode($data));
+    }
     
 // CRUD
 //-----------------------------------------------------------------------------
@@ -201,6 +219,7 @@ class Users extends CI_Controller{
     /**
      * Formulario para la edición de los datos de un user. Los datos que se
      * editan dependen de la $section elegida.
+     * 2021-01-05
      */
     function edit($user_id, $section = 'basic')
     {
@@ -212,7 +231,6 @@ class Users extends CI_Controller{
         $data['options_gender'] = $this->Item_model->options('category_id = 59 AND cod <= 2', 'Género');
         $data['options_city'] = $this->App_model->options_place('type_id = 4', 'cr', 'Ciudad');
         $data['options_document_type'] = $this->Item_model->options('category_id = 53', 'Tipo documento');
-        $data['options_commercial_plan'] = $this->Item_model->options('category_id = 189 AND item_group <= 2');
         
         $view_a = $this->views_folder . "edit/{$section}_v";
         if ( $section == 'cropping' )
@@ -221,6 +239,18 @@ class Users extends CI_Controller{
             $data['image_id'] = $data['row']->image_id;
             $data['url_image'] = $data['row']->url_image;
             $data['back_destination'] = "users/edit/{$user_id}/image";
+        }
+
+        if ( $section == 'details' )
+        {
+            $this->load->model('Product_model');
+            $data['options_commercial_plan'] = $this->Product_model->options('cat_1 IN (2110, 2115, 2150)', 'code_name', 'Ninguno');
+
+            //Opciones de usuario para asingar como partner
+            $condition = "role = 21 AND id <> {$user_id} AND partner_id = 0 AND LENGTH(last_name) > 0 
+                AND users.id NOT IN (SELECT partner_id FROM users WHERE partner_id > 0 AND users.id <> {$user_id})
+                ";
+            $data['options_partner_id'] = $this->App_model->options_user($condition, 'Ninguno', 'document_name');
         }
         
         //Array data espefícicas

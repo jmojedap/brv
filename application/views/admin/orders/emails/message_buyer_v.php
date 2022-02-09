@@ -26,7 +26,7 @@
     <table style="<?= $style->table ?>">
         <tbody>
             <tr>
-                <td style="<?= $style->td ?>" width="35%">Ref. venta</td>
+                <td style="<?= $style->td ?>" width="35%">Cód. venta</td>
                 <td style="<?= $style->td ?>"><?= $row_order->order_code ?></td>
             </tr>
             <tr>

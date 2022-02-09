@@ -1,4 +1,12 @@
 <div id="order_app">
+    <div class="mb-2" v-if="order.payed == 0">
+        <span class="text-muted">
+            Link de pago:
+        </span>
+        <a href="<?= URL_APP . "suscripciones/pago/{$row->order_code}" ?>" target="_blank">
+            <?= URL_APP . "suscripciones/pago/{$row->order_code}" ?>
+        </a>
+    </div>
     <div class="row mb-2">
         <div class="col-md-4">
             <div class="card mb-2">
